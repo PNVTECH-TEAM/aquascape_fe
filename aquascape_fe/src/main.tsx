@@ -10,7 +10,6 @@ import "./index.css";
 import 'antd/dist/reset.css';
 import store from './core/redux/store';
 
-
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
