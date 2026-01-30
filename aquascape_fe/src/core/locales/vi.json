@@ -15,5 +15,21 @@
       "TITLE": "Design, Care, and Purchase Seamlessly",
       "DESCRIPTION": "Add and care for virtual fish in your designed tank. Automatically compile material lists and connect to trusted online stores."
     }
+  },
+  "REGISTER": {
+    "REQUIREMENT": {
+      "FULL_NAME": "Full Name",
+      "EMAIL": "Email",
+      "PASSWORD": "Password",
+      "BUTTONREGISTER":"Register",
+      "CONTENTREGISTER":"Already have an account?",
+      "LOGIN":"Login"
+
+    },
+    "VALIDATION": {
+      "REQUIRED": "{{field}} là bắt buộc",
+      "INVALID": "{{field}} không hợp lệ",
+      "MIN_LENGTH": "{{field}} phải có ít nhất {{length}} ký tự"
+    }
   }
 }
