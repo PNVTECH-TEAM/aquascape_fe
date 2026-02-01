@@ -23,7 +23,6 @@ export default function OnboardingCard({
 }: OnboardingCardProps) {
   return (
     <div className="bg-white rounded-3xl overflow-hidden">
-      {/* Image */}
       <div className="px-6 pt-6">
         <Image
           src={image}
@@ -33,7 +32,6 @@ export default function OnboardingCard({
         />
       </div>
 
-      {/* Content */}
       <div className="p-6 text-center">
         <h2 className="text-base font-semibold text-gray-900 mb-2">
           {title}
@@ -43,7 +41,6 @@ export default function OnboardingCard({
           {description}
         </p>
 
-        {/* Dots */}
         <div className="flex justify-center items-center gap-3 mb-8">
           {Array.from({ length: total }).map((_, index) => (
             <button
@@ -58,7 +55,6 @@ export default function OnboardingCard({
           ))}
         </div>
 
-        {/* Button */}
         <button
           onClick={onNext}
           className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 rounded-full shadow-md active:scale-95 transition"
