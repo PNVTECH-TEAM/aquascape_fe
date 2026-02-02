@@ -4,7 +4,6 @@ import { EMAIL_REGEX_PATTERN } from '@app/core/constants/regex';
 import { useTranslation } from 'react-i18next';
 import * as yup from 'yup';
 
-
 export const useLoginSchema = () => {
   const { t } = useTranslation();
 

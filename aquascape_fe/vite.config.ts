@@ -30,6 +30,12 @@ export default async ({ mode }: any) => {
       host: true,
       strictPort: true,
       port: 5001,
+       proxy: {
+    "/api": {
+      target: "http://localhost:8082",
+      changeOrigin: true,
+    },
+  },
     },
     test: {
       globals: true,
