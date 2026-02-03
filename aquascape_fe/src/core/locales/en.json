@@ -31,5 +31,26 @@
       "MIN_LENGTH": "{{field}} must be at least {{length}} characters long",
       "PASSWORD_RULE": "Password must be at least 6 characters and include both letters and numbers"
     }
+  },
+  "OTP_VERIFY": {
+    "TITLE": "Verify Your Email",
+    "DESCRIPTION": {
+      "LINE_1": "We’ve sent an email to:",
+      "LINE_2": "Enter the verification code sent to your email address."
+    },
+    "INPUT": {
+      "PLACEHOLDER": "OTP"
+    },
+    "RESEND": {
+      "QUESTION": "Didn’t receive an email?",
+      "BUTTON": "Resend Email",
+      "BUTTON_COUNTDOWN": "Resend Email ({{time}}s)",
+      "SENDING": "Sending..."
+    },
+    "VERIFY": {
+      "BUTTON": "Verify OTP",
+      "VERIFYING": "Verifying..."
+    }
   }
+
 }
