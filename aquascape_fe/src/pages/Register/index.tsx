@@ -1,25 +1,24 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 import "./Register.scss";
 import { registerLogin } from "@app/assets/images";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSignUpSchema } from "./RegisterSchema";
-type RegisterFormValues = {
-  fullName: string;
-  email: string;
-  password: string;
-};
+import { useRegister } from "@app/core/hooks/useAuth";
+import type { RegisterPayload } from "@app/core/interface";
+import RegisterNavigate from "@app/navigate/RegisterNavigate";
 
 const RegisterForm = () => {
   const signUpSchema = useSignUpSchema();
+  const registerMutation = useRegister();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterFormValues>({
+  } = useForm<RegisterPayload>({
     resolver: yupResolver(signUpSchema),
     defaultValues: {
       fullName: "",
@@ -29,8 +28,12 @@ const RegisterForm = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
-  const onSubmit = (data: RegisterFormValues) => {
-    console.log("Register data:", data);
+  const onSubmit = (data: RegisterPayload) => {
+    registerMutation.mutate({
+      fullName: data.fullName,
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -123,17 +126,18 @@ const RegisterForm = () => {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700 transition"
+              disabled={registerMutation.isPending}
+              className="w-full rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700 transition disabled:opacity-50"
             >
-              {t("REGISTER.REQUIREMENT.BUTTONREGISTER")}
+              {registerMutation.isPending
+                ? "Registering..."
+                : t("REGISTER.REQUIREMENT.BUTTONREGISTER")}
             </button>
           </form>
 
           <p className="mt-1 text-center text-sm text-gray-500">
-            {t("REGISTER.REQUIREMENT.CONTENTREGISTER")}{" "}
-            <Link to="/login" className="text-blue-600 font-bold">
-              {t("REGISTER.REQUIREMENT.LOGIN")}
-            </Link>
+            {t("REGISTER.REQUIREMENT.CONTENTREGISTER")}
+            <RegisterNavigate />
           </p>
         </div>
       </div>

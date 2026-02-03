@@ -1,4 +1,4 @@
-import { EMAIL_REGEX_PATTERN } from "@app/core/constants/regex";
+import { EMAIL_REGEX_PATTERN, PASSWORD_REGEX } from "@app/core/constants/regex";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 
@@ -11,6 +11,10 @@ export const useSignUpSchema = () => {
         field: t("REGISTER.REQUIREMENT.FULL_NAME"),
       }) as string,
     ),
+    // username: yup
+    //   .string()
+    //   .required("Username is required")
+    //   .min(3, "Username must be at least 3 characters"),
 
     email: yup
       .string()
@@ -21,9 +25,9 @@ export const useSignUpSchema = () => {
       )
       .matches(
         EMAIL_REGEX_PATTERN,
-        t("REGISTER.REQUIREMENT.VALIDATION.INVALID", {
-          field: t("REGISTER.REQUIREMENT.EMAIL"),
-        }) as string,
+        t("REGISTER.VALIDATION.REQUIRED", {
+        field: t("REGISTER.REQUIREMENT.EMAIL"),
+      }) as string,
       ),
 
     password: yup
@@ -33,12 +37,9 @@ export const useSignUpSchema = () => {
           field: t("REGISTER.REQUIREMENT.PASSWORD"),
         }) as string,
       )
-      .min(
-        6,
-        t("REGISTER.VALIDATION.MIN_LENGTH", {
-          field: t("REGISTER.REQUIREMENT.PASSWORD"),
-          length: 6,
-        }) as string,
+      .matches(
+        PASSWORD_REGEX,
+        t("REGISTER.REQUIREMENT.PASSWORD_RULE") as string,
       ),
   });
 };
