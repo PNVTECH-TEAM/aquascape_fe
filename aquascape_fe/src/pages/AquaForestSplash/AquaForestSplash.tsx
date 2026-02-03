@@ -1,9 +1,10 @@
 import React from "react";
 import { Image, Typography } from "antd";
-import { logoAquarium } from "../../assets/images";
+
 import "./AquaForestSplash.scss";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { logoAquarium } from "@app/assets/images";
 
 const { Title } = Typography;
 
