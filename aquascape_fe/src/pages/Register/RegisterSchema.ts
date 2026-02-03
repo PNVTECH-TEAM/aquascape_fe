@@ -11,11 +11,6 @@ export const useSignUpSchema = () => {
         field: t("REGISTER.REQUIREMENT.FULL_NAME"),
       }) as string,
     ),
-    // username: yup
-    //   .string()
-    //   .required("Username is required")
-    //   .min(3, "Username must be at least 3 characters"),
-
     email: yup
       .string()
       .required(
@@ -26,8 +21,8 @@ export const useSignUpSchema = () => {
       .matches(
         EMAIL_REGEX_PATTERN,
         t("REGISTER.VALIDATION.REQUIRED", {
-        field: t("REGISTER.REQUIREMENT.EMAIL"),
-      }) as string,
+          field: t("REGISTER.REQUIREMENT.EMAIL"),
+        }) as string,
       ),
 
     password: yup

@@ -44,12 +44,12 @@
       "LOADING": "Loading..."
     },
     "VALIDATION": {
-      "INVALID": "{{field}} không hợp lệ",
-      "MIN_LENGTH": "{{field}} phải có ít nhất {{length}} ký tự"
+      "INVALID": "{{field}} is invalid",
+      "MIN_LENGTH": "{{field}} must be at least {{length}} characters long"
     }
   },
   "NOTIFICATION": {
-    "SUCCESS": "Đăng ký thành công",
-    "ERROR": "Đăng ký thất bại"
+    "SUCCESS": "Registration successful",
+    "ERROR": "Registration failed"
   }
 }
