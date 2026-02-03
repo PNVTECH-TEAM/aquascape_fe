@@ -7,10 +7,11 @@ import {
 } from "@app/assets/images";
 import OnboardingCard from "./OnboardingCard";
 import { useTranslation } from "react-i18next";
-
+import { useNavigate } from 'react-router-dom';
 export default function AquaIntro() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const slides = [
     {
@@ -29,7 +30,13 @@ export default function AquaIntro() {
       description: t("ONBOARDING.SLIDE_3.DESCRIPTION"),
     },
   ];
-
+ const handleNext = () => {
+    if (currentSlide === slides.length - 1) {
+      navigate("/register");
+    } else {
+      setCurrentSlide((prev) => prev + 1);
+    }
+  };
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -52,7 +59,7 @@ export default function AquaIntro() {
           description={slides[currentSlide].description}
           currentIndex={currentSlide}
           total={slides.length}
-          onNext={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+          onNext={handleNext}  
           onDotClick={setCurrentSlide}
           buttonText={
             currentSlide === slides.length - 1 ? "GET STARTED" : "LET'S GO"
