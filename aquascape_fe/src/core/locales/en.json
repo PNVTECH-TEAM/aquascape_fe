@@ -1,1 +1,55 @@
-{}
+{
+  "AQUAFORESTSPLASH": {
+    "TITLE": "AQUA FOREST"
+  },
+  "ONBOARDING": {
+    "SLIDE_1": {
+      "TITLE": "Design Your Dream Tank in 3D",
+      "DESCRIPTION": "Enjoy a simple drag-and-drop interface. Rotate, zoom, and arrange elements to perfect your aquarium layout before building."
+    },
+    "SLIDE_2": {
+      "TITLE": "Your Personal AI Aquascape Assistant",
+      "DESCRIPTION": "Analyze your layout and get smart suggestions on fish, plants, materials, and estimated costs tailored to your tank size and style."
+    },
+    "SLIDE_3": {
+      "TITLE": "Design, Care, and Purchase Seamlessly",
+      "DESCRIPTION": "Add and care for virtual fish in your designed tank. Automatically compile material lists and connect to trusted online stores."
+    }
+  },
+  "REGISTER": {
+    "REQUIREMENT": {
+      "FULL_NAME": "Full Name",
+      "EMAIL": "Email",
+      "PASSWORD": "Password",
+      "BUTTONREGISTER": "Register",
+      "CONTENTREGISTER": "Already have an account?",
+      "LOGIN": "Login"
+    },
+    "VALIDATION": {
+      "REQUIRED": "{{field}} is required",
+      "INVALID": "{{field}} is invalid",
+      "MIN_LENGTH": "{{field}} must be at least {{length}} characters long",
+      "PASSWORD_RULE": "Password must be at least 6 characters and include both letters and numbers"
+    }
+  },
+  "LOGIN": {
+    "REQUIREMENT": {
+      "TITLE": "Welcome back!",
+      "CONTENTTITLE": "Login to continue with Aqua Forest",
+      "EMAIL": "Email",
+      "PASSWORD": "Password",
+      "BUTTONLOGIN": "Login",
+      "CONTENTREGISTER": "Don’t have an account?",
+      "REGISTER": "Register",
+      "LOADING": "Loading..."
+    },
+    "VALIDATION": {
+      "INVALID": "{{field}} không hợp lệ",
+      "MIN_LENGTH": "{{field}} phải có ít nhất {{length}} ký tự"
+    }
+  },
+  "NOTIFICATION": {
+    "SUCCESS": "Đăng ký thành công",
+    "ERROR": "Đăng ký thất bại"
+  }
+}

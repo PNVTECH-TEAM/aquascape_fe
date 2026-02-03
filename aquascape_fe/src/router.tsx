@@ -1,13 +1,11 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { NotFound } from './pages';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { privateRoutes, publicRoutes } from './core/routes';
 
 const router = createBrowserRouter([
-  ...publicRoutes,
-  ...privateRoutes,
   {
-    path: '*',
-    element: <NotFound />,
+    path: '/',
+    element: <Outlet />,
+    children: [...publicRoutes, ...privateRoutes],
   },
 ]);
 

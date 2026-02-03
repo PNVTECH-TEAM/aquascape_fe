@@ -1,0 +1,15 @@
+#container-update-password,
+#container-forgot-password {
+  .ant-input {
+    background-color: #ffffff !important;
+    color: var(--primary-gray-color) !important;
+  }
+
+  .ant-input::placeholder {
+    color: var(--primary-gray-color) !important;
+  }
+
+  .ant-input-password input::placeholder {
+    color: var(--primary-gray-color) !important;
+  }
+}

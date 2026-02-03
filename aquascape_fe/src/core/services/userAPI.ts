@@ -1,47 +1,26 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_BASE_URL_API;
-console.log("API_URL =", API_URL);
+const API_BASE_URL = import.meta.env.VITE_BASE_URL_API;
 
-export interface LoginPayload {
+export const registerApi = (payload: {
+  fullName: string;
   email: string;
   password: string;
-}
+}) => {
+  return axios.post(`${API_BASE_URL}/auth/register`, payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
 
-export interface LoginResponse {
-  token: string;
-}
-
-export const userAPI = {
-  login: (data: LoginPayload) => {
-    console.log("LOGIN API DATA:", data);
-
-    return axios.post<LoginResponse>(`${API_URL}/auth/login`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  },
-
-  logout: (token: string) =>
-    axios.post(
-      `${API_URL}/auth/logout`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    ),
-
-  tokenStatus: (token: string) =>
-    axios.post(
-      `${API_URL}/auth/token-status`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    ),
+export const loginApi = (payload: {
+  email: string;
+  password: string;
+}) => {
+  return axios.post(`${API_BASE_URL}/auth/login`, payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 };

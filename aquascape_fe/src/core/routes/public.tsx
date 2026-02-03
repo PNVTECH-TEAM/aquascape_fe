@@ -1,11 +1,16 @@
-import { AuthLayout } from '@app/core/components/templates';
-import AquaForestSplash from '@app/pages/AquaForestSplash/AquaForestSplash';
+import AquaForestSplash from "@app/pages/AquaForestSplash/AquaForestSplash";
+import Register from "@app/pages/Register";
 import LoginForm from '@app/pages/Login';
 
 export const publicRoutes = [
   {
-    element: <AuthLayout />,
+    path: "",
+    element: <AquaForestSplash />,
     children: [{ index: true, element: <AquaForestSplash /> }],
+  },
+  {
+    path: "register",
+    element: <Register />,
   },
   {
     element: <LoginForm />,

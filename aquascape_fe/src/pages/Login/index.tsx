@@ -6,22 +6,19 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLoginSchema } from "./LoginSchema";
-import { useLogin } from "@app/core/hooks/userAuth";
-type LoginFormValues = {
-  email: string;
-  password: string;
-};
+import { useLogin } from "@app/core/hooks/useAuth";
+import type { LoginPayload } from "@app/core/interface";
 
 const LoginForm = () => {
   const loginSchema = useLoginSchema();
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
-const { mutate: login, isPending } = useLogin();
+  const { mutate: login, isPending } = useLogin();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
+  } = useForm<LoginPayload>({
     resolver: yupResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -29,8 +26,11 @@ const { mutate: login, isPending } = useLogin();
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    login(data);
+  const onSubmit = (data: LoginPayload) => {
+    login({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -55,7 +55,6 @@ const { mutate: login, isPending } = useLogin();
             </span>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email */}
             <div>
               <label className="block text-sm font-bold text-gray-900">
                 {t("LOGIN.REQUIREMENT.EMAIL")}
@@ -72,7 +71,6 @@ const { mutate: login, isPending } = useLogin();
               )}
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-bold text-gray-900">
                 {t("LOGIN.REQUIREMENT.PASSWORD")}
@@ -103,10 +101,12 @@ const { mutate: login, isPending } = useLogin();
 
             <button
               type="submit"
-               disabled={isPending}
-              className="w-full rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700"
+              disabled={isPending}
+              className="w-full rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700 disabled:opacity-60"
             >
-              {t("LOGIN.REQUIREMENT.BUTTONLOGIN")}
+              {isPending
+                ? t("LOGIN.REQUIREMENT.LOADING")
+                : t("LOGIN.REQUIREMENT.BUTTONLOGIN")}
             </button>
           </form>
 

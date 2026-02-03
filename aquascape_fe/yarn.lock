@@ -490,7 +490,11 @@
 
 "@hookform/resolvers@^5.2.2":
   version "5.2.2"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-5.2.2.tgz#5ac16cd89501ca31671e6e9f0f5c5d762a99aa12"
+=======
+  resolved "https://registry.npmjs.org/@hookform/resolvers/-/resolvers-5.2.2.tgz"
+>>>>>>> ca4d927a79165a89ecc93050883e57261d38f201
   integrity sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==
   dependencies:
     "@standard-schema/utils" "^0.3.0"
@@ -3091,7 +3095,11 @@ react-dom@^19.2.0:
 
 react-hook-form@^7.71.1:
   version "7.71.1"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.71.1.tgz#6a758958861682cf0eb22131eead684ba3618f66"
+=======
+  resolved "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.71.1.tgz"
+>>>>>>> ca4d927a79165a89ecc93050883e57261d38f201
   integrity sha512-9SUJKCGKo8HUSsCO+y0CtqkqI5nNuaDqTxyqPsZPqIwudpj4rCrAz/jZV+jn57bx5gtZKOh3neQu94DXMc+w5w==
 
 react-i18next@^16.5.3:
@@ -3103,6 +3111,7 @@ react-i18next@^16.5.3:
     html-parse-stringify "^3.0.1"
     use-sync-external-store "^1.6.0"
 
+<<<<<<< HEAD
 react-icon@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/react-icon/-/react-icon-1.0.0.tgz#6038598eb07fb3e64b3e7865d271f79f3559de0b"
@@ -3111,6 +3120,11 @@ react-icon@^1.0.0:
 react-icons@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.5.0.tgz#8aa25d3543ff84231685d3331164c00299cdfaf2"
+=======
+react-icons@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/react-icons/-/react-icons-5.5.0.tgz"
+>>>>>>> ca4d927a79165a89ecc93050883e57261d38f201
   integrity sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==
 
 react-is@^18.2.0:
