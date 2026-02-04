@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useResendOtp, useVerifyOtp } from "@app/core/hooks";
 
 const OTP_LENGTH = 6;
-const RESEND_TIME = 59;
+const RESEND_TIME = 180;
 
 export default function OTPVerification() {
   const navigate = useNavigate();
@@ -77,12 +77,17 @@ export default function OTPVerification() {
     setTimeLeft(RESEND_TIME);
     inputRefs.current[0]?.focus();
   };
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   if (!email) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 relative">
+      <div className="">
         <button
           onClick={() => navigate("/register")}
           className="absolute left-4 top-4 text-gray-500 hover:text-black"
@@ -153,7 +158,9 @@ export default function OTPVerification() {
             ? t("OTP_VERIFY.RESEND.SENDING")
             : canResend
               ? t("OTP_VERIFY.RESEND.BUTTON")
-              : t("OTP_VERIFY.RESEND.BUTTON_COUNTDOWN", { time: timeLeft })}
+              : t("OTP_VERIFY.RESEND.BUTTON_COUNTDOWN", {
+                  time: formatTime(timeLeft),
+                })}
         </button>
 
         <button

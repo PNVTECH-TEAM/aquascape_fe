@@ -1,16 +1,22 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-
-import { registerApi, resendOtpApi, verifyOtpApi } from "@app/core/services";
+import {
+  loginApi,
+  registerApi,
+  resendOtpApi,
+  verifyOtpApi,
+} from "@app/core/services";
 import {
   NotificationTypeEnum,
   openNotificationWithIcon,
 } from "@app/core/services/notification/notificationService";
-import type { RegisterPayload } from "@app/core/interface";
+import type { RegisterPayload, LoginPayload } from "@app/core/interface";
 import type { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 export const useRegister = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (payload: RegisterPayload) => {
@@ -18,18 +24,15 @@ export const useRegister = () => {
       return data;
     },
 
-    onSuccess: (
-      response: { message: string },
-      variables: RegisterPayload, // 👈 payload lúc gọi mutate
-    ) => {
+    onSuccess: (response: { message: string }, variables: RegisterPayload) => {
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-        response.message || "Đăng ký thành công",
+        response.message || t("NOTIFICATION.SUCCESS"),
       );
 
       navigate("/userVerify", {
         state: {
-          email: variables.email, // ✅ ĐÚNG
+          email: variables.email,
         },
       });
     },
@@ -37,16 +40,42 @@ export const useRegister = () => {
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
-        error.response?.data?.message ?? "Đăng ký thất bại",
+        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
       );
     },
   });
 };
 
-/* ================= VERIFY OTP ================= */
+export const useLogin = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (payload: LoginPayload) => {
+      const { data } = await loginApi(payload);
+      return data as string;
+    },
+    onSuccess: (token: string) => {
+      openNotificationWithIcon(
+        NotificationTypeEnum.SUCCESS,
+        t("NOTIFICATION.SUCCESS"),
+      );
+
+      localStorage.setItem("accessToken", token);
+      navigate("/");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      openNotificationWithIcon(
+        NotificationTypeEnum.ERROR,
+        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
+      );
+    },
+  });
+};
+
 export const useVerifyOtp = () => {
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (payload: { email: string; otp: string }) => {
       const { data } = await verifyOtpApi(payload);
@@ -55,20 +84,21 @@ export const useVerifyOtp = () => {
     onSuccess: (response: { message: string }) => {
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-        response.message || "Xác thực OTP thành công",
+        response.message || t("OTP_VERIFY.VERIFY.SUCCESS"),
       );
       navigate("/login");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
-        error.response?.data?.message ?? "OTP không hợp lệ",
+        error.response?.data?.message || t("OTP_VERIFY.VERIFY.INVALID"),
       );
     },
   });
 };
 
 export const useResendOtp = () => {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (payload: { email: string }) => {
       const { data } = await resendOtpApi(payload);
@@ -77,13 +107,13 @@ export const useResendOtp = () => {
     onSuccess: (response: { message: string }) => {
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-        response.message || "Đã gửi lại mã OTP",
+        response.message || t("OTP_VERIFY.VERIFY.RESEND_SUCCESS"),
       );
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
-        error.response?.data?.message ?? "Không thể gửi lại OTP",
+        error.response?.data?.message ?? t("OTP_VERIFY.VERIFY.RESEND_FAILED"),
       );
     },
   });
