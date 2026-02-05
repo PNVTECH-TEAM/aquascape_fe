@@ -1,3 +1,4 @@
+
 import { default as react } from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
@@ -35,13 +36,6 @@ export default async ({ mode }: any) => {
         },
       },
     },
-    test: {
-      globals: true,
-      environment: "jsdom",
-      coverage: {
-        reporter: ["text", "html"],
-        exclude: ["node_modules/"],
-      },
-    },
+
   });
 };

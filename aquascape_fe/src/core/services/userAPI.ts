@@ -31,3 +31,8 @@ export const registerApi = (payload: {
     },
   });
 };
+
+
+export const refreshTokenApi = () => {
+  return axios.post(`${API_BASE_URL}/auth/refresh-token`);
+};

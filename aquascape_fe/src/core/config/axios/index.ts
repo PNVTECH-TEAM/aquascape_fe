@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig } from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 
 import { getStorageData, removeStorageData, setStorageData } from '../storage';
 import { ACCESS_TOKEN, API_URL, REFRESH_TOKEN, USER_PROFILE } from '@app/core/constants';
