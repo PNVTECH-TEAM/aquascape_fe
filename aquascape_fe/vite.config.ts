@@ -3,12 +3,11 @@ import path from "path";
 import { defineConfig, loadEnv } from "vite";
 
 export default async ({ mode }: any) => {
-  const pluginRewriteAll = (await import("vite-plugin-rewrite-all")).default;
 
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
   return defineConfig({
-    plugins: [pluginRewriteAll(), react()],
+    plugins: [react()],
     resolve: {
       alias: { "@app": path.resolve("./src") },
     },
