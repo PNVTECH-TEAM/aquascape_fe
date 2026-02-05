@@ -6,6 +6,9 @@ on:
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./aquascape_fe
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -13,7 +16,7 @@ jobs:
       - name: Set up NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ secrets.node_version }}
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -28,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: production-files
-          path: dist
+          path: aquascape_fe/dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -38,10 +41,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-files
-          path: dist
+          path: aquascape_fe/dist
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -49,5 +52,5 @@ jobs:
 
       - name: Deploy to AWS S3
         run:  | 
-          aws s3 sync dist s3://aquascape-pnvtech --delete
+          aws s3 sync aquascape_fe/dist s3://aquascape-pnvtech --delete
           echo "🚀 Deployed to: http://aquascape-pnvtech.s3-website.eu-north-1.amazonaws.com"
