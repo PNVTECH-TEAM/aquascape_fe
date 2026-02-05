@@ -1,4 +1,3 @@
-/// <reference types="vitest" />
 import { default as react } from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
