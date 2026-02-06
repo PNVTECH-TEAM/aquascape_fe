@@ -1,11 +1,10 @@
 /// <reference types="vitest" />
 import { default as react } from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig, loadEnv } from "vite";
-
-export default async ({ mode }: any) => {
+import { defineConfig } from "vitest/config";
+import { loadEnv } from "vite";
+export default async ({ mode }: { mode: string }) => {
   const pluginRewriteAll = (await import("vite-plugin-rewrite-all")).default;
-
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
   return defineConfig({
@@ -31,8 +30,8 @@ export default async ({ mode }: any) => {
       strictPort: true,
       port: 5001,
       proxy: {
-        '/api': {
-          target: 'http://localhost:8082',
+        "/api": {
+          target: "http://localhost:8082",
           changeOrigin: true,
         },
       },
