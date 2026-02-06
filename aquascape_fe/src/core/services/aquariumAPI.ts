@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL_API;
-
 // Mock data for aquarium configurations
 export interface AquariumConfig {
     id: string;
@@ -71,7 +69,7 @@ export const updateAquariumConfig = async (id: string, updates: Partial<Aquarium
     };
 };
 
-export const deleteAquariumConfig = async (id: string): Promise<boolean> => {
+export const deleteAquariumConfig = async (_id: string): Promise<boolean> => {
     try {
         // In a real API, this would be a DELETE request
         // For mock purposes, we'll simulate deleting the config

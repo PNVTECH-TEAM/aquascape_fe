@@ -4,6 +4,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Water } from "three/examples/jsm/objects/Water";
 import type { TankSize, TankInfo } from "@app/core/interface";
 
+
+
 interface UseTankSetupReturn {
     containerRef: React.RefObject<HTMLDivElement | null>;
     controlsRef: React.RefObject<OrbitControls | null>;
@@ -87,12 +89,14 @@ export const useTankSetup = (
         controls.rotateSpeed = 0.2;
         controls.panSpeed = 0.5;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (controls as any).touches = {
             ONE: THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN
         };
 
         controls.enableZoom = true;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (controls as any).mouseButtons = {
             LEFT: THREE.MOUSE.ROTATE,
             MIDDLE: THREE.MOUSE.DOLLY,
