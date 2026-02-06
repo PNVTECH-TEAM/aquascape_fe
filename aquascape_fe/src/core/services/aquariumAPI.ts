@@ -1,24 +1,6 @@
 import axios from "axios";
+import type { AquariumConfig, TankPreset } from "@app/core/interface/aquarium.interface";
 
-// Mock data for aquarium configurations
-export interface AquariumConfig {
-    id: string;
-    name: string;
-    size: {
-        width: number;
-        height: number;
-        depth: number;
-    };
-    tankInfo: {
-        volume: number;
-        thickness: number;
-        glassWeight: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
-
-// API functions using axios to fetch from mock-data.json
 export const getAquariumConfigs = async (): Promise<AquariumConfig[]> => {
     try {
         const response = await axios.get('/mock-data.json');
@@ -30,7 +12,6 @@ export const getAquariumConfigs = async (): Promise<AquariumConfig[]> => {
 };
 
 export const getAquariumConfig = async (id: string): Promise<AquariumConfig | null> => {
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300));
 
     const configs = await getAquariumConfigs();
@@ -39,8 +20,6 @@ export const getAquariumConfig = async (id: string): Promise<AquariumConfig | nu
 
 export const createAquariumConfig = async (config: Omit<AquariumConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<AquariumConfig> => {
     try {
-        // In a real API, this would be a POST request
-        // For mock purposes, we'll simulate creating a new config
         const newConfig: AquariumConfig = {
             ...config,
             id: Date.now().toString(),
@@ -56,7 +35,6 @@ export const createAquariumConfig = async (config: Omit<AquariumConfig, 'id' | '
 };
 
 export const updateAquariumConfig = async (id: string, updates: Partial<AquariumConfig>): Promise<AquariumConfig | null> => {
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 400));
 
     const existingConfig = await getAquariumConfig(id);
@@ -69,28 +47,14 @@ export const updateAquariumConfig = async (id: string, updates: Partial<Aquarium
     };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const deleteAquariumConfig = async (_id: string): Promise<boolean> => {
     try {
-        // In a real API, this would be a DELETE request
-        // For mock purposes, we'll simulate deleting the config
         return true;
     } catch (error) {
         console.error('Error deleting aquarium config:', error);
         throw error;
     }
 };
-
-// Tank size presets API
-export interface TankPreset {
-    id: string;
-    name: string;
-    size: {
-        width: number;
-        height: number;
-        depth: number;
-    };
-}
 
 export const getTankPresets = async (): Promise<TankPreset[]> => {
     try {

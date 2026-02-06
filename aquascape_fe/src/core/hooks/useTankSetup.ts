@@ -50,7 +50,6 @@ export const useTankSetup = (
 
     const tankInfo: TankInfo = calculateTankInfo(size.width, size.height, size.depth);
 
-    /* ================= THREE INIT ================= */
     useEffect((): (() => void) => {
         const scene = new THREE.Scene();
 
@@ -89,14 +88,12 @@ export const useTankSetup = (
         controls.rotateSpeed = 0.2;
         controls.panSpeed = 0.5;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (controls as any).touches = {
             ONE: THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN
         };
 
         controls.enableZoom = true;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (controls as any).mouseButtons = {
             LEFT: THREE.MOUSE.ROTATE,
             MIDDLE: THREE.MOUSE.DOLLY,
@@ -120,7 +117,6 @@ export const useTankSetup = (
         mainLight.shadow.camera.bottom = -30;
         scene.add(mainLight);
 
-        /* ========== CREATE TANK ========== */
         const createTank = (width: number, height: number, depth: number): void => {
             if (tankRef.current) scene.remove(tankRef.current);
 
@@ -153,42 +149,36 @@ export const useTankSetup = (
                 return pane;
             };
 
-            // Mặt trước
             group.add(createGlassPane(
                 innerWidth, innerHeight, GLASS_THICKNESS,
                 new THREE.Vector3(0, height / 2, depth / 2 - GLASS_THICKNESS / 2),
                 new THREE.Euler(0, 0, 0)
             ));
 
-            // Mặt sau
             group.add(createGlassPane(
                 innerWidth, innerHeight, GLASS_THICKNESS,
                 new THREE.Vector3(0, height / 2, -depth / 2 + GLASS_THICKNESS / 2),
                 new THREE.Euler(0, 0, 0)
             ));
 
-            // Mặt trái
             group.add(createGlassPane(
                 GLASS_THICKNESS, innerHeight, innerDepth,
                 new THREE.Vector3(-width / 2 + GLASS_THICKNESS / 2, height / 2, 0),
                 new THREE.Euler(0, 0, 0)
             ));
 
-            // Mặt phải
             group.add(createGlassPane(
                 GLASS_THICKNESS, innerHeight, innerDepth,
                 new THREE.Vector3(width / 2 - GLASS_THICKNESS / 2, height / 2, 0),
                 new THREE.Euler(0, 0, 0)
             ));
 
-            // Mặt dưới
             group.add(createGlassPane(
                 innerWidth, GLASS_THICKNESS, innerDepth,
                 new THREE.Vector3(0, GLASS_THICKNESS / 2, 0),
                 new THREE.Euler(0, 0, 0)
             ));
 
-            /* Water */
             const waterGeometry = new THREE.PlaneGeometry(innerWidth, innerDepth);
             const waterNormals = new THREE.TextureLoader().load(
                 "https://threejs.org/examples/textures/waternormals.jpg"
@@ -216,7 +206,6 @@ export const useTankSetup = (
             waterRef.current = water;
             group.add(water);
 
-            // Khối nước
             const waterDepthGeometry = new THREE.BoxGeometry(
                 innerWidth - 0.1,
                 waterHeight - GLASS_THICKNESS,
@@ -237,7 +226,6 @@ export const useTankSetup = (
             waterDepth.position.set(0, waterHeight / 2, 0);
             group.add(waterDepth);
 
-            /* Sand */
             const sand = new THREE.Mesh(
                 new THREE.PlaneGeometry(innerWidth, innerDepth),
                 new THREE.MeshStandardMaterial({
@@ -254,7 +242,6 @@ export const useTankSetup = (
             scene.add(group);
             tankRef.current = group;
 
-            // Tự động đặt camera
             const tankDiagonal = Math.sqrt(width * width + height * height + depth * depth);
             const optimalDistance = tankDiagonal * 0.8;
             const camDistance = THREE.MathUtils.clamp(optimalDistance, 20, 100);
@@ -263,7 +250,6 @@ export const useTankSetup = (
             controls.target.set(0, height / 3, 0);
             controls.update();
 
-            // Ẩn loading
             setTimeout(() => {
                 setLoading(false);
                 onLoadingComplete();
@@ -296,7 +282,6 @@ export const useTankSetup = (
         };
     }, [size, onLoadingComplete]);
 
-    /* ================= XỬ LÝ ÁP DỤNG KÍCH THƯỚC ================= */
     const handleApplySize = (customSize: TankSize): void => {
         const clampedWidth = THREE.MathUtils.clamp(customSize.width, 20, 200);
         const clampedHeight = THREE.MathUtils.clamp(customSize.height, 20, 100);
@@ -309,7 +294,6 @@ export const useTankSetup = (
         });
     };
 
-    /* ================= XỬ LÝ RESET VIEW ================= */
     const handleResetView = (): void => {
         if (!controlsRef.current) return;
 

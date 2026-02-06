@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import type { TankSize } from "@app/core/interface";
+import type { TankSize, TankPreset } from "@app/core/interface";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
-import { getTankPresets, type TankPreset } from "@app/core/services/aquariumAPI";
+import { getTankPresets } from "@app/core/services/aquariumAPI";
 import "./Aquarium3D.scss";
 
 export default function Aquarium3D() {
@@ -45,20 +45,8 @@ export default function Aquarium3D() {
             <div ref={containerRef} className="canvas-container" />
 
             <div className="control-buttons">
-                <button
-                    className="control-btn"
-                    onClick={() => setPanelOpen(true)}
-                    title={t("AQUARIUM3D.SETTINGS")}
-                >
-                    ⚙️
-                </button>
-                <button
-                    className="control-btn"
-                    onClick={handleResetView}
-                    title={t("AQUARIUM3D.RESET_VIEW")}
-                >
-                    ↺
-                </button>
+                <button className="control-btn" onClick={() => setPanelOpen(true)} title={t("AQUARIUM3D.SETTINGS")}>⚙️</button>
+                <button className="control-btn" onClick={handleResetView} title={t("AQUARIUM3D.RESET_VIEW")}>↺</button>
             </div>
 
             <div className={`control-panel ${panelOpen ? "active" : ""}`}>
@@ -98,13 +86,7 @@ export default function Aquarium3D() {
                     <div style={{ marginTop: "15px" }}>
                         <div className="section-title">{t("AQUARIUM3D.CUSTOM_SIZE")}</div>
                         <div className="custom-size">
-                            <input
-                                type="number"
-                                className="custom-input"
-                                id="widthInput"
-                                placeholder={t("AQUARIUM3D.WIDTH")}
-                                min="20"
-                                max="200"
+                            <input type="number" className="custom-input" id="widthInput" placeholder={t("AQUARIUM3D.WIDTH")} min="20" max="200"
                                 value={customSize.width}
                                 onChange={(e) => setCustomSize({
                                     ...customSize,
@@ -112,13 +94,7 @@ export default function Aquarium3D() {
                                 })}
                                 step="1"
                             />
-                            <input
-                                type="number"
-                                className="custom-input"
-                                id="heightInput"
-                                placeholder={t("AQUARIUM3D.HEIGHT")}
-                                min="20"
-                                max="100"
+                            <input type="number" className="custom-input" id="heightInput" placeholder={t("AQUARIUM3D.HEIGHT")} min="20" max="100"
                                 value={customSize.height}
                                 onChange={(e) => setCustomSize({
                                     ...customSize,
@@ -126,13 +102,7 @@ export default function Aquarium3D() {
                                 })}
                                 step="1"
                             />
-                            <input
-                                type="number"
-                                className="custom-input"
-                                id="depthInput"
-                                placeholder={t("AQUARIUM3D.DEPTH")}
-                                min="20"
-                                max="100"
+                            <input type="number" className="custom-input" id="depthInput" placeholder={t("AQUARIUM3D.DEPTH")} min="20" max="100"
                                 value={customSize.depth}
                                 onChange={(e) => setCustomSize({
                                     ...customSize,
