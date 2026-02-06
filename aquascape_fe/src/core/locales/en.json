@@ -31,5 +31,30 @@
       "MIN_LENGTH": "{{field}} must be at least {{length}} characters long",
       "PASSWORD_RULE": "Password must be at least 6 characters and include both letters and numbers"
     }
+  },
+  "AQUARIUM3D": {
+    "TITLE": "🐠 AQUARIUM 3D",
+    "TANK_SIZE": "📏 TANK SIZE",
+    "SMALL": "Small",
+    "MEDIUM": "Medium",
+    "LARGE": "Large",
+    "EXTRA": "Extra",
+    "CUBE": "Cube",
+    "WIDE": "Wide",
+    "CUSTOM_SIZE": "⚙️ CUSTOM SIZE (cm)",
+    "WIDTH": "Width",
+    "HEIGHT": "Height",
+    "DEPTH": "Depth",
+    "WIDE_LABEL": "WIDE (cm)",
+    "HEIGHT_LABEL": "HEIGHT (cm)",
+    "DEPTH_LABEL": "DEPTH (cm)",
+    "VOLUME": "VOLUME (L)",
+    "GLASS_THICKNESS": "THICKNESS (mm)",
+    "APPLY_SIZE": "🎯 APPLY SIZE",
+    "TANK_DIMENSION": "TANK SIZE",
+    "WATER_VOLUME": "WATER VOLUME",
+    "GLASS_WEIGHT": "GLASS WEIGHT",
+    "SETTINGS": "Settings",
+    "RESET_VIEW": "Reset View"
   }
 }
