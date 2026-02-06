@@ -6,23 +6,26 @@ export const useSignUpSchema = () => {
   const { t } = useTranslation();
 
   return yup.object({
-    fullName: yup.string().required(
-      t("REGISTER.VALIDATION.REQUIRED", {
-        field: t("REGISTER.REQUIREMENT.FULL_NAME"),
-      }) as string,
-    ),
+    fullName: yup
+      .string()
+      .required(
+        t("REGISTER.VALIDATION.REQUIRED", {
+          field: t("REGISTER.REQUIREMENT.FULL_NAME"),
+        }) as string
+      ),
+
     email: yup
       .string()
       .required(
         t("REGISTER.VALIDATION.REQUIRED", {
           field: t("REGISTER.REQUIREMENT.EMAIL"),
-        }) as string,
+        }) as string
       )
       .matches(
         EMAIL_REGEX_PATTERN,
-        t("REGISTER.VALIDATION.REQUIRED", {
+        t("REGISTER.VALIDATION.INVALID", {
           field: t("REGISTER.REQUIREMENT.EMAIL"),
-        }) as string,
+        }) as string
       ),
 
     password: yup
@@ -30,11 +33,11 @@ export const useSignUpSchema = () => {
       .required(
         t("REGISTER.VALIDATION.REQUIRED", {
           field: t("REGISTER.REQUIREMENT.PASSWORD"),
-        }) as string,
+        }) as string
       )
       .matches(
         PASSWORD_REGEX,
-        t("REGISTER.REQUIREMENT.PASSWORD_RULE") as string,
+        t("REGISTER.VALIDATION.PASSWORD_RULE") as string
       ),
   });
 };

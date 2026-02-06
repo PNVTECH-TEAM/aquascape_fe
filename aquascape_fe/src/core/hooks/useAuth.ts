@@ -24,10 +24,29 @@ export const useRegister = () => {
       return data;
     },
 
-    onSuccess: (response: { message: string }, variables: RegisterPayload) => {
+    onSuccess: (
+      response: { code: number; message: string },
+      variables: RegisterPayload,
+    ) => {
+      if (response.code === 1001) {
+        openNotificationWithIcon(
+          NotificationTypeEnum.ERROR,
+          t("REGISTER.EMAIL_EXISTS"),
+        );
+        return;
+      }
+
+      if (response.code !== 200) {
+        openNotificationWithIcon(
+          NotificationTypeEnum.ERROR,
+          response.message || t("NOTIFICATION.ERROR"),
+        );
+        return;
+      }
+
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-        response.message || t("NOTIFICATION.SUCCESS"),
+        t("REGISTER.SUCCESS"),
       );
 
       navigate("/userVerify", {
@@ -37,6 +56,30 @@ export const useRegister = () => {
       });
     },
 
+    onError: (error: AxiosError<{ message?: string }>) => {
+      openNotificationWithIcon(
+        NotificationTypeEnum.ERROR,
+        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
+      );
+    },
+  });
+};
+
+export const useVerifyOtp = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: async (payload: { email: string; otp: string }) => {
+      const { data } = await verifyOtpApi(payload);
+      return data;
+    },
+    onSuccess: (response: { message: string }) => {
+      openNotificationWithIcon(
+        NotificationTypeEnum.SUCCESS,
+        response.message || t("OTP_VERIFY.VERIFY.SUCCESS"),
+      );
+      navigate("/login");
+    },
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
@@ -63,30 +106,6 @@ export const useLogin = () => {
 
       localStorage.setItem("accessToken", token);
       navigate("/");
-    },
-    onError: (error: AxiosError<{ message?: string }>) => {
-      openNotificationWithIcon(
-        NotificationTypeEnum.ERROR,
-        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
-      );
-    },
-  });
-};
-
-export const useVerifyOtp = () => {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  return useMutation({
-    mutationFn: async (payload: { email: string; otp: string }) => {
-      const { data } = await verifyOtpApi(payload);
-      return data;
-    },
-    onSuccess: (response: { message: string }) => {
-      openNotificationWithIcon(
-        NotificationTypeEnum.SUCCESS,
-        response.message || t("OTP_VERIFY.VERIFY.SUCCESS"),
-      );
-      navigate("/login");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(

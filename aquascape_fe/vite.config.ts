@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { default as react } from "@vitejs/plugin-react";
 import path from "path";
-import { loadEnv, defineConfig } from "vite";
+import { loadEnv,defineConfig } from "vite";
 export default async ({ mode }: { mode: string }) => {
   const pluginRewriteAll = (await import("vite-plugin-rewrite-all")).default;
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
