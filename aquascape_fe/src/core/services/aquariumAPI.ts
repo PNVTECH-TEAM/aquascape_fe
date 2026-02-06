@@ -69,6 +69,7 @@ export const updateAquariumConfig = async (id: string, updates: Partial<Aquarium
     };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const deleteAquariumConfig = async (_id: string): Promise<boolean> => {
     try {
         // In a real API, this would be a DELETE request
