@@ -22,7 +22,7 @@
       "EMAIL": "Email",
       "PASSWORD": "Password",
       "BUTTONREGISTER": "Register",
-      "CONTENTREGISTER": "Already have an account?",
+      "CONTENTREGISTER": "Already have an account? ",
       "LOGIN": "Login"
     },
     "VALIDATION": {
@@ -30,7 +30,29 @@
       "INVALID": "{{field}} is invalid",
       "MIN_LENGTH": "{{field}} must be at least {{length}} characters long",
       "PASSWORD_RULE": "Password must be at least 6 characters and include both letters and numbers"
+    },
+    "SUCCESS": "Account created successfully",
+    "EMAIL_EXISTS": "An account with this email already exists"
+  },
+  "LOGIN": {
+    "REQUIREMENT": {
+      "TITLE": "Welcome back!",
+      "CONTENTTITLE": "Login to continue with Aqua Forest",
+      "EMAIL": "Email",
+      "PASSWORD": "Password",
+      "BUTTONLOGIN": "Login",
+      "CONTENTREGISTER": "Don’t have an account?",
+      "REGISTER": "Register",
+      "LOADING": "Loading..."
+    },
+    "VALIDATION": {
+      "INVALID": "{{field}} is invalid",
+      "MIN_LENGTH": "{{field}} must be at least {{length}} characters long"
     }
+  },
+  "NOTIFICATION": {
+    "SUCCESS": "Registration successful",
+    "ERROR": "Registration failed: you already have an account"
   },
   "LOGIN": {
     "REQUIREMENT": {
@@ -51,5 +73,29 @@
   "NOTIFICATION": {
     "SUCCESS": "Registration successful",
     "ERROR": "Registration failed"
+  },
+  "OTP_VERIFY": {
+    "TITLE": "Verify Your Email",
+    "DESCRIPTION": {
+      "LINE_1": "We’ve sent an email to:",
+      "LINE_2": "Enter the verification code sent to your email address."
+    },
+    "INPUT": {
+      "PLACEHOLDER": "OTP"
+    },
+    "RESEND": {
+      "QUESTION": "Didn’t receive an email?",
+      "BUTTON": "Resend Email",
+      "BUTTON_COUNTDOWN": "Resend Email ({{time}}s)",
+      "SENDING": "Sending..."
+    },
+    "VERIFY": {
+      "BUTTON": "Verify OTP",
+      "VERIFYING": "Verifying...",
+      "SUCCESS": "OTP verification successful",
+      "INVALID": "Invalid OTP",
+      "RESEND_SUCCESS": "OTP has been resent",
+      "RESEND_FAILED": "Unable to resend OTP"
+    }
   }
 }

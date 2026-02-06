@@ -14,10 +14,23 @@ export const registerApi = (payload: {
   });
 };
 
-export const loginApi = (payload: {
-  email: string;
-  password: string;
-}) => {
+export const verifyOtpApi = (payload: { email: string; otp: string }) => {
+  return axios.post(`${API_BASE_URL}/auth/verify-otp`, payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+export const resendOtpApi = (payload: { email: string }) => {
+  return axios.get(`${API_BASE_URL}/auth/resend-token`, {
+    params: {
+      email: payload.email,
+    },
+  });
+};
+
+export const loginApi = (payload: { email: string; password: string }) => {
   return axios.post(`${API_BASE_URL}/auth/login`, payload, {
     headers: {
       "Content-Type": "application/json",
