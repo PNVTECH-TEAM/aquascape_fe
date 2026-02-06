@@ -64,31 +64,24 @@
   "rocks": [
     {
       "id": 1,
-      "name": "River Stones",
-      "price": 80000,
-      "description": "Smooth natural river stones commonly used as substrate or decorative elements in aquariums.",
-      "image": "images/Rocks/RiverStones.jpg"
-    },
-    {
-      "id": 2,
       "name": "Natural Rock Formation",
       "price": 60000,
       "description": "A solid decorative rock used to create structure and hiding areas inside the aquarium.",
-      "image": "images/Rocks/Rock1.jpg"
+      "image": "images/Rocks/Rock1.png"
     },
     {
-        "id": 3,
+        "id": 2,
         "name": "Layered Stone Rock",
         "price": 60000,
         "description": "A layered stone structure ideal for creating depth and natural terraces in aquascape designs.",
-        "image": "images/Rocks/Rock2.jpg"
+        "image": "images/Rocks/Rock2.png"
     },
     {
-        "id": 4,
+        "id": 3,
         "name": "Cave Style Rock",
         "price": 60000,
         "description": "A cave-shaped decorative rock that provides hiding and resting spaces for aquarium fish.",
-        "image": "images/Rocks/Rock3.jpg"
+        "image": "images/Rocks/Rock3.png"
     }
   ],
 
