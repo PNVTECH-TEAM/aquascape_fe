@@ -1,0 +1,124 @@
+{
+    "aquariumConfigs": [
+        {
+            "id": "1",
+            "name": "Small Tank",
+            "size": {
+                "width": 60,
+                "height": 30,
+                "depth": 30
+            },
+            "tankInfo": {
+                "volume": 54,
+                "thickness": 6,
+                "glassWeight": "12.5"
+            },
+            "createdAt": "2024-01-01T00:00:00Z",
+            "updatedAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "2",
+            "name": "Medium Tank",
+            "size": {
+                "width": 90,
+                "height": 45,
+                "depth": 45
+            },
+            "tankInfo": {
+                "volume": 182,
+                "thickness": 8,
+                "glassWeight": "25.2"
+            },
+            "createdAt": "2024-01-02T00:00:00Z",
+            "updatedAt": "2024-01-02T00:00:00Z"
+        },
+        {
+            "id": "3",
+            "name": "Large Tank",
+            "size": {
+                "width": 120,
+                "height": 60,
+                "depth": 60
+            },
+            "tankInfo": {
+                "volume": 432,
+                "thickness": 10,
+                "glassWeight": "45.8"
+            },
+            "createdAt": "2024-01-03T00:00:00Z",
+            "updatedAt": "2024-01-03T00:00:00Z"
+        },
+        {
+            "id": "4",
+            "name": "Cube Tank",
+            "size": {
+                "width": 60,
+                "height": 60,
+                "depth": 60
+            },
+            "tankInfo": {
+                "volume": 216,
+                "thickness": 8,
+                "glassWeight": "28.8"
+            },
+            "createdAt": "2024-01-04T00:00:00Z",
+            "updatedAt": "2024-01-04T00:00:00Z"
+        }
+    ],
+    "tankPresets": [
+        {
+            "id": "small",
+            "name": "Small",
+            "size": {
+                "width": 60,
+                "height": 30,
+                "depth": 30
+            }
+        },
+        {
+            "id": "medium",
+            "name": "Medium",
+            "size": {
+                "width": 90,
+                "height": 45,
+                "depth": 45
+            }
+        },
+        {
+            "id": "large",
+            "name": "Large",
+            "size": {
+                "width": 120,
+                "height": 60,
+                "depth": 60
+            }
+        },
+        {
+            "id": "extra",
+            "name": "Extra Large",
+            "size": {
+                "width": 150,
+                "height": 60,
+                "depth": 60
+            }
+        },
+        {
+            "id": "cube",
+            "name": "Cube",
+            "size": {
+                "width": 60,
+                "height": 60,
+                "depth": 60
+            }
+        },
+        {
+            "id": "wide",
+            "name": "Wide",
+            "size": {
+                "width": 120,
+                "height": 45,
+                "depth": 30
+            }
+        }
+    ]
+}
