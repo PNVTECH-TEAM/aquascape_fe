@@ -1,16 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { registerApi } from "@app/core/services";
+import { registerApi, loginApi } from "@app/core/services";
 import {
   NotificationTypeEnum,
   openNotificationWithIcon,
 } from "@app/core/services/notification/notificationService";
-import type { RegisterPayload } from "@app/core/interface";
+import type { RegisterPayload, LoginPayload } from "@app/core/interface";
 import type { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 export const useRegister = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (payload: RegisterPayload) => {
@@ -20,14 +22,41 @@ export const useRegister = () => {
     onSuccess: (response: { message: string }) => {
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-        response.message || "Đăng ký thành công",
+        response.message || t("NOTIFICATION.SUCCESS"),
       );
       navigate("/login");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
-        error.response?.data?.message ?? "Đăng ký thất bại",
+        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
+      );
+    },
+  });
+};
+
+export const useLogin = () => {
+  const navigate = useNavigate();
+   const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (payload: LoginPayload) => {
+      const { data } = await loginApi(payload);
+      return data as string;
+    },
+    onSuccess: (token: string) => {
+      openNotificationWithIcon(
+        NotificationTypeEnum.SUCCESS,
+         t("NOTIFICATION.SUCCESS"),
+      );
+
+      localStorage.setItem("accessToken", token);
+      navigate("/");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      openNotificationWithIcon(
+        NotificationTypeEnum.ERROR,
+        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
       );
     },
   });

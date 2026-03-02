@@ -15,7 +15,6 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Chỉ hiển thị trên thiết bị cầm tay nằm ngang */
 @media (max-width: 1024px) and (orientation: portrait) {
     body::before {
         content: "📱 Vui lòng xoay ngang điện thoại để trải nghiệm ứng dụng";
