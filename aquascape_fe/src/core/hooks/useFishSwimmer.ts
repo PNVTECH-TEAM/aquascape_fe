@@ -11,24 +11,37 @@ interface SwimState {
 }
 
 export class FishSwimmer {
-    private fishGroup: THREE.Group;
+    public fishGroup: THREE.Group;
     private bounds: TankBounds;
     private targetPosition: THREE.Vector3;
     private state: SwimState;
-    private shaderMaterial: any = null;
-    private originalMaterial: THREE.Material | null = null;
+    private targetRotation: THREE.Matrix4;
+    private targetQuaternion: THREE.Quaternion;
+    private obstacles: THREE.Object3D[] = [];
+    private raycaster: THREE.Raycaster;
+    private nextObstacleCheck = 0;
 
-    constructor(fishModel: THREE.Group, bounds: TankBounds, fishSize: number = 1.0) {
+    constructor(
+        fishModel: THREE.Group,
+        bounds: TankBounds,
+        fishSize: number = 1.0,
+        obstacles: THREE.Object3D[] = []
+    ) {
         this.fishGroup = fishModel;
         this.bounds = bounds;
         this.targetPosition = new THREE.Vector3();
+        this.targetRotation = new THREE.Matrix4();
+        this.targetQuaternion = new THREE.Quaternion();
+        this.obstacles = obstacles;
+        this.raycaster = new THREE.Raycaster();
+        this.raycaster.far = 20; // Don't detect obstacles that are too far
 
         this.state = {
             isTurning: false,
             turnStartTime: 0,
             turnDuration: 1.5,
-            currentSpeed: 15,
-            targetSpeed: 15,
+            currentSpeed: 5,
+            targetSpeed: 5,
             isPaused: false
         };
 
@@ -36,15 +49,27 @@ export class FishSwimmer {
         this.initializePosition();
         this.pickSideToSideTarget();
     }
+
+    public setObstacles(obstacles: THREE.Object3D[]): void {
+        this.obstacles = obstacles;
+    }
+
     private setupFish(fishSize: number): void {
         this.fishGroup.scale.set(fishSize, fishSize, fishSize);
 
+        let triangles = 0;
         this.fishGroup.traverse((child: any) => {
             if (child.isMesh) {
-                child.rotation.y = Math.PI;
-
-                child.castShadow = true;
+                // --- OPTIMIZATION: Disable shadows ---
+                child.castShadow = false;
                 child.receiveShadow = false;
+
+                // Log polycount
+                triangles += child.geometry.index
+                    ? child.geometry.index.count / 3
+                    : child.geometry.attributes.position.count / 3;
+
+                child.rotation.y = Math.PI;
 
                 if (child.material) {
                     const mat = child.material as THREE.MeshStandardMaterial;
@@ -60,29 +85,11 @@ export class FishSwimmer {
                         mat.emissive = new THREE.Color(0x444444);
                     }
 
-                    // @ts-ignore
-                    mat.onBeforeCompile = (shader) => {
-                        shader.uniforms.uTime = { value: 0 };
-                        shader.vertexShader = `uniform float uTime;\n` + shader.vertexShader;
-                        shader.vertexShader = shader.vertexShader.replace(
-                            '#include <begin_vertex>',
-                            `
-                            #include <begin_vertex>
-                            float frequency = 0.8;
-                            float amplitude = 0.3;
-                            float speed = 8.0;
-                            float wave = sin(position.x * frequency + uTime * speed);
-                            float tailMask = smoothstep(1.0, -3.0, position.x);
-                            transformed.y += wave * amplitude * tailMask;
-                            transformed.y += sin(uTime * 0.5) * 0.1;
-                            `
-                        );
-                        this.shaderMaterial = shader;
-                    };
                     mat.needsUpdate = true;
                 }
             }
         });
+        console.log(`🐟 Fish model triangles: ${Math.round(triangles)}`);
     }
 
     private initializePosition(): void {
@@ -101,11 +108,36 @@ export class FishSwimmer {
         this.targetPosition.set(targetX, randomY, randomZ);
     }
 
+    private checkForObstacles(elapsed: number): void {
+        const direction = new THREE.Vector3();
+        this.fishGroup.getWorldDirection(direction);
+
+        this.raycaster.set(this.fishGroup.position, direction);
+
+        // Filter out the fish itself from the list of obstacles
+        const checkableObstacles = this.obstacles.filter(obj => obj.uuid !== this.fishGroup.uuid);
+
+        if (checkableObstacles.length === 0) return;
+
+        const intersections = this.raycaster.intersectObjects(checkableObstacles, true);
+
+        if (intersections.length > 0 && intersections[0].distance < 15) {
+            if (!this.state.isTurning) {
+                this.state.isTurning = true;
+                this.state.turnStartTime = elapsed;
+                // Simple avoidance: pick a new target
+                this.pickSideToSideTarget();
+            }
+        }
+    }
+
     public update(delta: number, elapsed: number): void {
         if (!this.fishGroup || this.state.isPaused) return;
 
-        if (this.shaderMaterial) {
-            this.shaderMaterial.uniforms.uTime.value = elapsed;
+        // --- OPTIMIZATION: Throttle raycasting ---
+        if (elapsed > this.nextObstacleCheck) {
+            this.checkForObstacles(elapsed);
+            this.nextObstacleCheck = elapsed + 0.2; // Check 5 times per second
         }
 
         const distToTarget = this.fishGroup.position.distanceTo(this.targetPosition);
@@ -115,24 +147,19 @@ export class FishSwimmer {
             this.pickSideToSideTarget();
         }
 
+        this.targetRotation.lookAt(this.targetPosition, this.fishGroup.position, this.fishGroup.up);
+        this.targetQuaternion.setFromRotationMatrix(this.targetRotation);
+
         if (this.state.isTurning) {
             const turnProgress = (elapsed - this.state.turnStartTime) / this.state.turnDuration;
             if (turnProgress >= 1) {
                 this.state.isTurning = false;
             } else {
-                const targetRotation = new THREE.Matrix4();
-                targetRotation.lookAt(this.targetPosition, this.fishGroup.position, new THREE.Vector3(0, 1, 0));
-                const targetQuaternion = new THREE.Quaternion();
-                targetQuaternion.setFromRotationMatrix(targetRotation);
-                this.fishGroup.quaternion.slerp(targetQuaternion, 3.0 * delta);
+                this.fishGroup.quaternion.slerp(this.targetQuaternion, 3.0 * delta);
                 this.fishGroup.translateZ(this.state.currentSpeed * 0.5 * delta);
             }
         } else {
-            const targetRotation = new THREE.Matrix4();
-            targetRotation.lookAt(this.targetPosition, this.fishGroup.position, new THREE.Vector3(0, 1, 0));
-            const targetQuaternion = new THREE.Quaternion();
-            targetQuaternion.setFromRotationMatrix(targetRotation);
-            this.fishGroup.quaternion.slerp(targetQuaternion, 2.0 * delta);
+            this.fishGroup.quaternion.slerp(this.targetQuaternion, 2.0 * delta);
             this.fishGroup.translateZ(this.state.currentSpeed * delta);
         }
 
@@ -142,28 +169,18 @@ export class FishSwimmer {
         pos.z = THREE.MathUtils.clamp(pos.z, this.bounds.minZ, this.bounds.maxZ);
     }
 
-    public getFishGroup(): THREE.Group {
-        return this.fishGroup;
-    }
-
-    public getPosition(): THREE.Vector3 {
-        return this.fishGroup.position.clone();
-    }
-
-    public getBounds(): TankBounds {
-        return { ...this.bounds };
-    }
 
     public setPaused(paused: boolean): void {
         this.state.isPaused = paused;
     }
 
+    public isPaused(): boolean {
+        return this.state.isPaused;
+    }
+
     public dispose(): void {
         this.fishGroup.traverse((child: any) => {
             if (child.isMesh) {
-                if (this.originalMaterial) {
-                    child.material = this.originalMaterial;
-                }
                 if (child.geometry) child.geometry.dispose();
                 if (child.material) {
                     if (Array.isArray(child.material)) {

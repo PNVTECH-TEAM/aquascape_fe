@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
 import { getTankPresets } from "@app/core/services/aquariumAPI";
 import "./Aquarium3D.scss";
+import FishAquarium3D from "./FishAquarium3D/FishAquarium3D";
 
 export default function Aquarium3D() {
     const { t } = useTranslation();
@@ -27,13 +28,19 @@ export default function Aquarium3D() {
 
         fetchPresets();
     }, []);
+
+    // 🔒 Memoize callback để không recreate mỗi render
+    const onLoadingComplete = useCallback(() => {
+        // Scene loaded successfully
+    }, []);
+
     const {
         containerRef,
         tankInfo,
         loading,
         handleApplySize,
         handleResetView
-    } = useTankSetup(size, setSize, () => { });
+    } = useTankSetup(size, setSize, onLoadingComplete);
 
     return (
         <>
@@ -126,6 +133,7 @@ export default function Aquarium3D() {
                             <div className="dimension-label">{t("AQUARIUM3D.DEPTH_LABEL")}</div>
                         </div>
                     </div>
+
                 </div>
 
                 <div className="section">
@@ -143,11 +151,15 @@ export default function Aquarium3D() {
                             <div className="dimension-label">{t("AQUARIUM3D.GLASS_THICKNESS")}</div>
                         </div>
                     </div>
+
+                </div>
+
+                <div className="section">
+                    <FishAquarium3D />
                 </div>
 
                 <button className="apply-btn" onClick={() => handleApplySize(customSize)}>{t("AQUARIUM3D.APPLY_SIZE")}</button>
             </div>
-
             <div className="tank-info">
                 <div className="info-item">
                     <div className="info-value">

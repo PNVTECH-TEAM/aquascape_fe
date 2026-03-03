@@ -7,6 +7,7 @@ import { Water } from "three/examples/jsm/objects/Water";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import type { TankSize, TankInfo } from "@app/core/interface";
 import { FishSwimmer } from "./useFishSwimmer";
+import { Fish2DSwimmer } from "./useFish2DSwimmer";
 
 interface UseTankSetupReturn {
     containerRef: React.RefObject<HTMLDivElement | null>;
@@ -20,12 +21,32 @@ interface UseTankSetupReturn {
 
 interface TankItem {
     id: string;
-    type: 'fish' | 'decoration';
+    type: 'fish' | 'decoration' | 'image';
     object: THREE.Object3D;
+    isFish?: boolean;  // 🐠 Đánh dấu nếu là cá (có khả năng bơi)
 }
 
 const WATER_LEVEL = 0.9;
 const GLASS_THICKNESS = 0.8;
+
+// 🐠 Detect nếu URL là cá (dựa trên path hoặc tên file)
+const isFishUrl = (url: string): boolean => {
+    const lowerUrl = url.toLowerCase();
+    return lowerUrl.includes('fish') || lowerUrl.includes('goldfish');
+};
+
+// ====== Draggable assets ======
+// these are the hard‑coded 3D decorations that used to be added automatically;
+// the UI can import and render them as drag sources just like the 2D images.
+export const available3DModels: Array<{
+    name: string;
+    url: string;
+}> = [
+        { name: 'Natural Rock', url: '/models/rock.glb' },
+        { name: 'Goldfish', url: '/models/goldfish.glb' },
+        // add more default models here if desired
+    ];
+
 
 export const calculateTankInfo = (w: number, h: number, d: number): TankInfo => {
     const volumeLiters = (w * h * d * WATER_LEVEL) / 1000;
@@ -74,8 +95,9 @@ export const useTankSetup = (
     const itemsRef = useRef<TankItem[]>([]);
     const selectedItemRef = useRef<TankItem | null>(null);
 
-    // Fish swimmer instance
+    // Fish swimmer instances
     const fishSwimmerRef = useRef<FishSwimmer | null>(null);
+    const fish2DSwimmersRef = useRef<Map<string, Fish2DSwimmer>>(new Map());
     const draggableObjectsRef = useRef<THREE.Object3D[]>([]);
     const pointerDownHandlerRef = useRef<((event: PointerEvent) => void) | null>(null);
     const addItemRef = useRef<((url: string) => void) | null>(null);
@@ -90,12 +112,12 @@ export const useTankSetup = (
         const innerDepth = depth - GLASS_THICKNESS * 2;
 
         return {
-            minX: -innerWidth / 2 + 5,
-            maxX: innerWidth / 2 - 5,
+            minX: -innerWidth / 2,
+            maxX: innerWidth / 2,
             minY: GLASS_THICKNESS,
-            maxY: height * WATER_LEVEL - GLASS_THICKNESS - 5,
-            minZ: -innerDepth / 2 + 5,
-            maxZ: innerDepth / 2 - 5,
+            maxY: height * WATER_LEVEL - GLASS_THICKNESS,
+            minZ: -innerDepth / 2,
+            maxZ: innerDepth / 2,
             center: new THREE.Vector3(0, height * WATER_LEVEL / 2, 0),
             innerWidth,
             innerHeight,
@@ -118,6 +140,7 @@ export const useTankSetup = (
             transmission: 1,
             thickness: GLASS_THICKNESS,
             transparent: true,
+            depthWrite: false,
             side: THREE.FrontSide,
             ior: 1.52,
             envMapIntensity: 1,
@@ -191,7 +214,7 @@ export const useTankSetup = (
             waterColor: 0x001e0f,
             distortionScale: 3.7,
             size: 1.2,
-            alpha: 0.9,
+            alpha: 0.5,
         });
 
         water.rotation.x = -Math.PI / 2;
@@ -209,6 +232,8 @@ export const useTankSetup = (
             })
         );
 
+        sand.name = "sandFloor";
+
         sand.rotation.x = -Math.PI / 2;
         sand.position.set(0, GLASS_THICKNESS + 0.1, 0);
         sand.receiveShadow = true;
@@ -223,44 +248,9 @@ export const useTankSetup = (
         bounds: TankBounds,
         fishSize: number
     ) => {
-        const loader = new GLTFLoader();
-
-        loader.load('/models/goldfish.glb', (gltf: any) => {
-            const fishModel = gltf.scene;
-
-            fishModel.traverse((child: any) => {
-                if (child.isMesh) {
-                    child.frustumCulled = false;
-                }
-            });
-
-            fishSwimmerRef.current = new FishSwimmer(
-                fishModel,
-                bounds,
-                fishSize
-            );
-
-            scene.add(fishSwimmerRef.current.getFishGroup());
-
-            const fishObject = fishSwimmerRef.current.getFishGroup();
-
-            itemsRef.current.push({
-                id: 'fish-1',
-                type: 'fish',
-                object: fishObject
-            });
-
-            draggableObjectsRef.current = itemsRef.current.map(i => i.object);
-
-            setLoading(false);
-            onLoadingComplete();
-
-            // 🎯 Thêm rock mặc định sau khi cá load xong
-            addItemRef.current?.('/models/rock.glb');
-
-        }, undefined, (err: any) => {
-            console.error("Failed to load fish model:", err);
-        });
+        // Per user request, the tank starts empty. Fish are added via drag & drop.
+        setLoading(false);
+        onLoadingComplete();
     };
 
     // Setup camera and controls
@@ -272,6 +262,7 @@ export const useTankSetup = (
     };
 
     useEffect((): (() => void) => {
+        const clock = new THREE.Clock();
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({
@@ -279,6 +270,7 @@ export const useTankSetup = (
             alpha: true,
             powerPreference: "high-performance",
         });
+        const box = new THREE.Box3();
 
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -297,13 +289,22 @@ export const useTankSetup = (
         controls.enableDamping = false;
         controlsRef.current = controls;
 
+        controls.addEventListener('change', () => {
+            const imageItems = itemsRef.current.filter(i => i.type === 'image');
+            imageItems.forEach(item => {
+                item.object.rotation.y = Math.atan2(
+                    (camera.position.x - item.object.position.x),
+                    (camera.position.z - item.object.position.z)
+                );
+            });
+        });
+
         const transformControl = new TransformControls(camera, renderer.domElement);
         transformControlRef.current = transformControl;
 
         transformControl.setMode('translate');
 
-        scene.add(transformControl);
-
+        // TransformControls helper is what gets added to scene, not the control itself
         const helper = (transformControl as any).getHelper();
         scene.add(helper);
 
@@ -341,11 +342,27 @@ export const useTankSetup = (
 
                     scene.remove(selectedItemRef.current.object);
 
+                    const fish2D = fish2DSwimmersRef.current.get(selectedItemRef.current.id);
+                    if (fish2D) {
+                        fish2D.dispose();
+                        fish2DSwimmersRef.current.delete(selectedItemRef.current.id);
+                    }
+
+                    // If the deleted item is the main 3D fish, clear the ref
+                    if (fishSwimmerRef.current && selectedItemRef.current.object.uuid === fishSwimmerRef.current.fishGroup.uuid) {
+                        fishSwimmerRef.current.dispose();
+                        fishSwimmerRef.current = null;
+                    }
+
                     itemsRef.current = itemsRef.current.filter(
                         i => i.id !== selectedItemRef.current?.id
                     );
 
                     draggableObjectsRef.current = itemsRef.current.map(i => i.object);
+
+                    if (fishSwimmerRef.current) {
+                        fishSwimmerRef.current.setObstacles(draggableObjectsRef.current);
+                    }
 
                     transformControl.detach();
                     selectedItemRef.current = null;
@@ -369,51 +386,165 @@ export const useTankSetup = (
         waterRef.current = water;
         scene.add(tankGroup);
 
-        const addItemToTank = (url: string) => {
-            const loader = new GLTFLoader();
+        // primary addItem helper with extension detection and optional drop position
+        const addItemToTank = (item: any, pos?: THREE.Vector3) => {
+            let url: string | undefined;
 
-            loader.load(url, (gltf: any) => {
-                const model = gltf.scene;
+            if (typeof item === 'string') {
+                url = item;
+            } else if (item?.url) { // prioritize .url for 3D models
+                url = item.url;
+            } else if (item?.image) {
+                url = item.image;
+            }
 
-                model.traverse((child: any) => {
-                    if (child.isMesh) {
-                        child.geometry.computeBoundingBox();
+            if (!url || !url.trim()) {
+                console.warn('❌ No valid URL found in dropped item:', item);
+                return;
+            }
+
+            const extension = url.split('/').pop()?.split('.').pop()?.toLowerCase() || '';
+
+            // ================= 3D MODEL =================
+            if (extension === 'glb' || extension === 'gltf') {
+                const loader = new GLTFLoader();
+
+                loader.load(url, (gltf: any) => {
+                    const model = gltf.scene;
+
+                    model.traverse((child: any) => {
+                        if (child.isMesh) {
+                            child.geometry.computeBoundingBox();
+                        }
+                    });
+
+                    const box = new THREE.Box3().setFromObject(model);
+                    const sizeBox = new THREE.Vector3();
+                    box.getSize(sizeBox);
+
+                    const scaleFactor = size.width / sizeBox.x / 3;
+                    model.scale.multiplyScalar(scaleFactor);
+
+                    const newBox = new THREE.Box3().setFromObject(model);
+                    const newSize = new THREE.Vector3();
+                    newBox.getSize(newSize);
+
+                    if (pos) {
+                        model.position.x = THREE.MathUtils.clamp(
+                            pos.x,
+                            bounds.minX + newSize.x / 2,
+                            bounds.maxX - newSize.x / 2
+                        );
+                        model.position.z = THREE.MathUtils.clamp(
+                            pos.z,
+                            bounds.minZ + newSize.z / 2,
+                            bounds.maxZ - newSize.z / 2
+                        );
+                    } else {
+                        model.position.set(0, 0, 0);
+                    }
+
+                    model.position.y = GLASS_THICKNESS + newSize.y / 2;
+
+                    scene.add(model);
+
+                    const newItem: TankItem = {
+                        id: crypto.randomUUID(),
+                        type: 'decoration',
+                        object: model,
+                        isFish: isFishUrl(url)
+                    };
+                    itemsRef.current.push(newItem);
+                    draggableObjectsRef.current.push(model);
+
+                    if (fishSwimmerRef.current) {
+                        fishSwimmerRef.current.setObstacles(draggableObjectsRef.current);
+                    }
+
+                    if (newItem.isFish) {
+                        // The first 3D fish gets the full 3D swimming logic
+                        if (!fishSwimmerRef.current) {
+                            const fish3D = new FishSwimmer(model, bounds, fishSize, draggableObjectsRef.current);
+                            fishSwimmerRef.current = fish3D;
+                        } else {
+                            // Subsequent fish get the 2D plane swimming logic
+                            const fish2D = new Fish2DSwimmer(model, bounds);
+                            fish2DSwimmersRef.current.set(newItem.id, fish2D);
+                        }
                     }
                 });
 
-                const box = new THREE.Box3().setFromObject(model);
-                const center = new THREE.Vector3();
-                box.getCenter(center);
+            } else if (['png', 'jpg', 'jpeg', 'webp'].includes(extension)) {
+                const loader = new THREE.TextureLoader();
 
-                model.position.sub(center);
-                const sizeBox = new THREE.Vector3();
-                box.getSize(sizeBox);
+                loader.load(
+                    url,
+                    (texture) => {
+                        const material = new THREE.MeshBasicMaterial({
+                            map: texture,
+                            transparent: true,
+                            side: THREE.DoubleSide,
+                        });
 
-                const scaleX = bounds.innerWidth / sizeBox.x;
-                const scaleY = bounds.innerHeight / sizeBox.y;
-                const scaleZ = bounds.innerDepth / sizeBox.z;
+                        const scaleFactor = size.width / 300;
+                        const planeWidth = 30 * scaleFactor;
+                        const planeHeight = 25 * scaleFactor;
 
-                const maxScale = Math.min(scaleX, scaleY, scaleZ) * 0.6;
-                model.scale.multiplyScalar(maxScale);
+                        const mesh = new THREE.Mesh(
+                            new THREE.PlaneGeometry(planeWidth, planeHeight),
+                            material
+                        );
+                        mesh.userData.is2DImage = true;
+                        mesh.userData.planeWidth = planeWidth;
+                        mesh.userData.planeHeight = planeHeight;
 
-                const newBox = new THREE.Box3().setFromObject(model);
-                const newSize = new THREE.Vector3();
-                newBox.getSize(newSize);
+                        let initialX = pos?.x || 0;
+                        let initialZ = pos?.z || 0;
+                        initialX = THREE.MathUtils.clamp(
+                            initialX,
+                            bounds.minX + planeWidth / 2,
+                            bounds.maxX - planeWidth / 2
+                        );
+                        initialZ = THREE.MathUtils.clamp(
+                            initialZ,
+                            bounds.minZ,
+                            bounds.maxZ
+                        );
 
-                model.position.y = GLASS_THICKNESS + newSize.y / 2;
+                        mesh.position.set(
+                            initialX,
+                            GLASS_THICKNESS + planeHeight / 2 + 1,
+                            initialZ
+                        );
 
-                scene.add(model);
+                        scene.add(mesh);
 
-                const newItem: TankItem = {
-                    id: crypto.randomUUID(),
-                    type: 'decoration',
-                    object: model
-                };
+                        const newItem: TankItem = {
+                            id: crypto.randomUUID(),
+                            type: 'image',
+                            object: mesh,
+                            isFish: isFishUrl(url)
+                        };
+                        itemsRef.current.push(newItem);
+                        draggableObjectsRef.current.push(mesh);
 
-                itemsRef.current.push(newItem);
+                        if (fishSwimmerRef.current) {
+                            fishSwimmerRef.current.setObstacles(draggableObjectsRef.current);
+                        }
 
-                draggableObjectsRef.current = itemsRef.current.map(i => i.object);
-            });
+                        if (newItem.isFish) {
+                            const fish2D = new Fish2DSwimmer(mesh, bounds);
+                            fish2DSwimmersRef.current.set(newItem.id, fish2D);
+                        }
+                    },
+                    undefined,
+                    (error) => {
+                        console.error('❌ Texture load failed:', url, error);
+                    }
+                );
+            } else {
+                console.warn("Unsupported file type:", url);
+            }
         };
 
         addItemRef.current = addItemToTank;
@@ -425,43 +556,97 @@ export const useTankSetup = (
             const obj = transformControl.object;
             if (!obj) return;
 
-            // Clamp scale trước
-            const maxScale = 70;
+            const selectedItem = selectedItemRef.current;
+            if (!selectedItem) return;
+
+            // Clamp scale limits for everything
+            const maxScale = 40;
             obj.scale.x = THREE.MathUtils.clamp(obj.scale.x, 0.3, maxScale);
             obj.scale.y = THREE.MathUtils.clamp(obj.scale.y, 0.3, maxScale);
             obj.scale.z = THREE.MathUtils.clamp(obj.scale.z, 0.3, maxScale);
 
-            // Tính bounding box thật
-            const box = new THREE.Box3().setFromObject(obj);
-            const sizeBox = new THREE.Vector3();
-            box.getSize(sizeBox);
+            // 🖼️ Image-specific handling
+            if (selectedItem.type === 'image' && obj.userData.is2DImage) {
+                // maintain aspect ratio
+                obj.scale.y = obj.scale.x;
 
-            obj.position.x = THREE.MathUtils.clamp(
-                obj.position.x,
-                bounds.minX + sizeBox.x / 2,
-                bounds.maxX - sizeBox.x / 2
-            );
+                // calculate plane dimensions in world units from userData
+                const mesh = obj as THREE.Mesh;
+                const planeWidth = mesh.userData.planeWidth * obj.scale.x;
+                const planeHeight = mesh.userData.planeHeight * obj.scale.y;
 
-            obj.position.y = THREE.MathUtils.clamp(
-                obj.position.y,
-                GLASS_THICKNESS + sizeBox.y / 2,
-                bounds.maxY - sizeBox.y / 2
-            );
+                obj.position.x = THREE.MathUtils.clamp(
+                    obj.position.x,
+                    bounds.minX + planeWidth / 2,
+                    bounds.maxX - planeWidth / 2
+                );
 
-            obj.position.z = THREE.MathUtils.clamp(
-                obj.position.z,
-                bounds.minZ + sizeBox.z / 2,
-                bounds.maxZ - sizeBox.z / 2
-            );
+                obj.position.y = THREE.MathUtils.clamp(
+                    obj.position.y,
+                    GLASS_THICKNESS + planeHeight / 2,
+                    bounds.maxY - planeHeight / 2
+                );
+
+                // no 3D depth clamping – plane should just stay between front/back walls
+                obj.position.z = THREE.MathUtils.clamp(
+                    obj.position.z,
+                    bounds.minZ,
+                    bounds.maxZ
+                );
+
+                return;
+            }
+
+            // 🪨 3D object normal handling
+            box.setFromObject(obj);
+
+            if (box.min.x < bounds.minX) obj.position.x += bounds.minX - box.min.x;
+            if (box.max.x > bounds.maxX) obj.position.x -= box.max.x - bounds.maxX;
+
+            if (box.min.y < GLASS_THICKNESS) obj.position.y += GLASS_THICKNESS - box.min.y;
+            if (box.max.y > bounds.maxY) obj.position.y -= box.max.y - bounds.maxY;
+
+            if (box.min.z < bounds.minZ) obj.position.z += bounds.minZ - box.min.z;
+            if (box.max.z > bounds.maxZ) obj.position.z -= box.max.z - bounds.maxZ;
         });
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
+        // drag & drop support
+        const handleDragOver = (e: DragEvent) => {
+            e.preventDefault();
+        };
+
+        const handleDrop = (e: DragEvent) => {
+            e.preventDefault();
+            if (!containerRef.current) return;
+
+            const rect = containerRef.current.getBoundingClientRect();
+
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            const sand = tankRef.current?.getObjectByName("sandFloor");
+            if (!sand) return;
+
+            const intersects = raycaster.intersectObject(sand);
+            if (!intersects.length) return;
+
+            const point = intersects[0].point;
+
+            const data = e.dataTransfer?.getData("item");
+            if (!data) return;
+
+            const item = JSON.parse(data);
+            addItemToTank(item, point);
+        };
+
         const onPointerDown = (event: PointerEvent) => {
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
             raycaster.setFromCamera(mouse, camera);
 
             const intersects = raycaster.intersectObjects(
@@ -470,34 +655,83 @@ export const useTankSetup = (
             );
 
             if (intersects.length > 0) {
-                let root = intersects[0].object;
-
-                while (root.parent && !draggableObjectsRef.current.includes(root)) {
-                    root = root.parent;
+                let clickedObject: THREE.Object3D | null = intersects[0].object;
+                console.log("Attached:", clickedObject);
+                // 🔎 Tìm root object đã add vào itemsRef
+                while (
+                    clickedObject &&
+                    !itemsRef.current.some(i => i.object === clickedObject)
+                ) {
+                    clickedObject = clickedObject.parent;
                 }
 
-                const foundItem = itemsRef.current.find(i => i.object === root);
+                if (!clickedObject) return;
+
+                const foundItem = itemsRef.current.find(
+                    i => i.object === clickedObject
+                );
+                if (foundItem) {
+                    selectedItemRef.current = foundItem;
+
+                    controls.enabled = false;
+
+                    transformControl.attach(clickedObject);
+                    transformControl.setMode("translate");
+                }
+
                 if (!foundItem) return;
 
                 selectedItemRef.current = foundItem;
 
-                transformControl.attach(root);
+                transformControl.attach(clickedObject);
+                transformControl.setMode("translate");
 
-                if (foundItem.type === 'fish' && fishSwimmerRef.current) {
-                    fishSwimmerRef.current.setPaused(true);
+                if (foundItem.isFish) {
+                    if (foundItem.type === "fish" && fishSwimmerRef.current) {
+                        fishSwimmerRef.current.setPaused(true);
+                    }
+                    const fish2D = fish2DSwimmersRef.current.get(foundItem.id);
+                    if (fish2D) fish2D.setPaused(true);
                 }
             } else {
                 if (!transformControl.dragging) {
-                    if (selectedItemRef.current?.type === 'fish' && fishSwimmerRef.current) {
-                        fishSwimmerRef.current.setPaused(false);
+                    if (selectedItemRef.current?.isFish) {
+                        if (selectedItemRef.current.type === 'fish' && fishSwimmerRef.current) {
+                            fishSwimmerRef.current.setPaused(false);
+                        }
+                        const fish2D = fish2DSwimmersRef.current.get(selectedItemRef.current.id);
+                        if (fish2D) {
+                            fish2D.setPaused(false);
+                        }
                     }
+
                     transformControl.detach();
                     selectedItemRef.current = null;
                 }
             }
         };
 
+        const onPointerUp = () => {
+            controls.enabled = true;
+            if (selectedItemRef.current?.isFish) {
+                if (selectedItemRef.current.type === 'fish' && fishSwimmerRef.current) {
+                    fishSwimmerRef.current.setPaused(false);
+                }
+                const fish2D = fish2DSwimmersRef.current.get(selectedItemRef.current.id);
+                if (fish2D) {
+                    fish2D.setPaused(false);
+                }
+            }
+        };
+
+        let lastPointerMove = 0;
         const onPointerMove = (event: PointerEvent) => {
+            const now = clock.getElapsedTime();
+            if (now - lastPointerMove < 1 / 60) {
+                return;
+            }
+            lastPointerMove = now;
+
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -517,10 +751,15 @@ export const useTankSetup = (
         };
 
         renderer.domElement.addEventListener('pointerdown', onPointerDown);
+
         pointerDownHandlerRef.current = onPointerDown;
         window.addEventListener('pointermove', onPointerMove);
 
-        const clock = new THREE.Clock();
+        if (containerRef.current) {
+            containerRef.current.addEventListener('dragover', handleDragOver);
+            containerRef.current.addEventListener('drop', handleDrop);
+        }
+
         const animate = (): void => {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
@@ -529,9 +768,17 @@ export const useTankSetup = (
             if (waterRef.current) {
                 waterRef.current.material.uniforms.time.value += delta * 0.5;
             }
-            if (fishSwimmerRef.current) {
+
+            // Update swimmers only if they are not paused
+            if (fishSwimmerRef.current && !fishSwimmerRef.current.isPaused()) {
                 fishSwimmerRef.current.update(delta, elapsed);
             }
+
+            fish2DSwimmersRef.current.forEach((swimmer) => {
+                if (!swimmer.isPaused()) {
+                    swimmer.update(delta, elapsed);
+                }
+            });
 
             controls.update();
             renderer.render(scene, camera);
@@ -549,8 +796,13 @@ export const useTankSetup = (
             window.removeEventListener("resize", onResize);
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('keydown', onKeyDown);
+            renderer.domElement.removeEventListener('pointerup', onPointerUp);
             if (pointerDownHandlerRef.current) {
                 renderer.domElement.removeEventListener('pointerdown', pointerDownHandlerRef.current);
+            }
+            if (containerRef.current) {
+                containerRef.current.removeEventListener('dragover', handleDragOver);
+                containerRef.current.removeEventListener('drop', handleDrop);
             }
             transformControl.dispose();
             renderer.dispose();
@@ -561,6 +813,15 @@ export const useTankSetup = (
             }
         };
     }, [size, onLoadingComplete, fishSize]);
+
+    useEffect(() => {
+        return () => {
+            fish2DSwimmersRef.current.forEach((swimmer) => {
+                swimmer.dispose();
+            });
+            fish2DSwimmersRef.current.clear();
+        };
+    }, []);
 
     const handleApplySize = (customSize: TankSize): void => {
         const clampedWidth = THREE.MathUtils.clamp(customSize.width, 20, 200);

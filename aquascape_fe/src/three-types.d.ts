@@ -28,6 +28,7 @@ declare module 'three/examples/jsm/controls/OrbitControls' {
         update(): boolean;
         reset(): void;
         dispose(): void;
+        addEventListener(type: string, listener: (event: any) => void): void;
     }
 }
 
