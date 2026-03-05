@@ -1,124 +1,326 @@
 {
-    "aquariumConfigs": [
+  "aquariumConfigs": [
+    {
+      "id": "1",
+      "name": "Small Tank",
+      "size": {
+        "width": 60,
+        "height": 30,
+        "depth": 30
+      },
+      "tankInfo": {
+        "volume": 54,
+        "thickness": 6,
+        "glassWeight": "12.5"
+      },
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "name": "Medium Tank",
+      "size": {
+        "width": 90,
+        "height": 45,
+        "depth": 45
+      },
+      "tankInfo": {
+        "volume": 182,
+        "thickness": 8,
+        "glassWeight": "25.2"
+      },
+      "createdAt": "2024-01-02T00:00:00Z",
+      "updatedAt": "2024-01-02T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "name": "Large Tank",
+      "size": {
+        "width": 120,
+        "height": 60,
+        "depth": 60
+      },
+      "tankInfo": {
+        "volume": 432,
+        "thickness": 10,
+        "glassWeight": "45.8"
+      },
+      "createdAt": "2024-01-03T00:00:00Z",
+      "updatedAt": "2024-01-03T00:00:00Z"
+    },
+    {
+      "id": "4",
+      "name": "Cube Tank",
+      "size": {
+        "width": 60,
+        "height": 60,
+        "depth": 60
+      },
+      "tankInfo": {
+        "volume": 216,
+        "thickness": 8,
+        "glassWeight": "28.8"
+      },
+      "createdAt": "2024-01-04T00:00:00Z",
+      "updatedAt": "2024-01-04T00:00:00Z"
+    }
+  ],
+  "tankPresets": [
+    {
+      "id": "small",
+      "name": "Small",
+      "size": {
+        "width": 60,
+        "height": 30,
+        "depth": 30
+      }
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "size": {
+        "width": 90,
+        "height": 45,
+        "depth": 45
+      }
+    },
+    {
+      "id": "large",
+      "name": "Large",
+      "size": {
+        "width": 120,
+        "height": 60,
+        "depth": 60
+      }
+    },
+    {
+      "id": "extra",
+      "name": "Extra Large",
+      "size": {
+        "width": 150,
+        "height": 60,
+        "depth": 60
+      }
+    },
+    {
+      "id": "cube",
+      "name": "Cube",
+      "size": {
+        "width": 60,
+        "height": 60,
+        "depth": 60
+      }
+    },
+    {
+      "id": "wide",
+      "name": "Wide",
+      "size": {
+        "width": 120,
+        "height": 45,
+        "depth": 30
+      }
+    }
+  ],
+  "aquariumCatalog": [
+    {
+      "id": "3d-rock",
+      "name": "Natural Rock",
+      "imageKey": "rock3",
+      "url": "/models/rock.glb",
+      "category": "rocks",
+      "type": "decoration"
+    },
+    {
+      "id": "3d-rock2",
+      "name": "Natural Rock2",
+      "imageKey": "rock4",
+      "url": "/models/rockglb2.glb",
+      "category": "rocks",
+      "type": "decoration"
+    },
+    {
+      "id": "buddhaglb",
+      "name": "Natural buddhaglb",
+      "imageKey": "buddhaglb",
+      "url": "/models/buddhaglb.glb",
+      "category": "rocks",
+      "type": "decoration"
+    },
+    {
+      "id": "3d-goldfish",
+      "name": "Goldfish",
+      "imageKey": "orangeCometGoldfish",
+      "url": "/models/goldfish.glb",
+      "category": "fish",
+      "type": "fish"
+    },
+    {
+      "id": "3d-bettafish",
+      "name": "bettafish",
+      "imageKey": "orangeCometbettafish-3d",
+      "url": "/models/bettafish-3d.glb",
+      "category": "fish",
+      "type": "fish"
+    },
+    {
+      "id": "3d-plant",
+      "name": "plant",
+      "imageKey": "orangeCometplant",
+      "url": "/models/plant1.glb",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "3d-plant-mon",
+      "name": "plant mon",
+      "imageKey": "orangeCometplant",
+      "url": "/models/plantmonglb.glb",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "3d-plant-co",
+      "name": "plant co",
+      "imageKey": "orangeCometplant",
+      "url": "/models/plantcoglb.glb",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "3d-plant-coral",
+      "name": "plant red coral",
+      "imageKey": "orangeCometplant",
+      "url": "/models/redcoral.glb",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "rock1",
+      "name": "Rock 1",
+      "imageKey": "rock1",
+      "category": "rocks",
+      "type": "rock"
+    },
+    {
+      "id": "rock2",
+      "name": "Rock 2",
+      "imageKey": "rock2",
+      "category": "rocks",
+      "type": "rock"
+    },
+    {
+      "id": "rock3",
+      "name": "Rock 3",
+      "imageKey": "rock3",
+      "category": "rocks",
+      "type": "rock"
+    },
+    {
+      "id": "fish1",
+      "name": "Betta Fish",
+      "imageKey": "bettaFishBlue",
+      "category": "fish",
+      "type": "fish"
+    },
+    {
+      "id": "fish2",
+      "name": "Comet",
+      "imageKey": "orangeCometGoldfish",
+      "category": "fish",
+      "type": "fish"
+    },
+    {
+      "id": "fish3",
+      "name": "Panda Moor",
+      "imageKey": "pandaMoorGoldfish",
+      "category": "fish",
+      "type": "fish"
+    },
+    {
+      "id": "fish4",
+      "name": "Red Cap",
+      "imageKey": "redCapOrandaGoldfish",
+      "category": "fish",
+      "type": "fish"
+    },
+    {
+      "id": "plant1",
+      "name": "Parrot Feather",
+      "imageKey": "artificialParrotFeatherPlant",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "plant2",
+      "name": "Seaweed",
+      "imageKey": "greenSeaweedPlant",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "plant3",
+      "name": "Purple Coral",
+      "imageKey": "purpleCoralAquariumPlant",
+      "category": "plants",
+      "type": "plant"
+    },
+    {
+      "id": "plant4",
+      "name": "Roman Ruins",
+      "imageKey": "romanRuinsDoubleFeature",
+      "category": "plants",
+      "type": "plant"
+    }
+  ],
+  "tanks": [
+    {
+      "id": "tank-demo-1",
+      "name": "Demo Tank",
+      "size": {
+        "width": 90,
+        "height": 45,
+        "depth": 45
+      },
+      "latestLayoutVersion": 1,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "tankLayouts": [
+    {
+      "id": "layout-demo-1",
+      "tankId": "tank-demo-1",
+      "version": 1,
+      "size": {
+        "width": 90,
+        "height": 45,
+        "depth": 45
+      },
+      "items": [
         {
-            "id": "1",
-            "name": "Small Tank",
-            "size": {
-                "width": 60,
-                "height": 30,
-                "depth": 30
+          "instanceId": "instance-demo-rock-1",
+          "catalogItemId": "3d-rock",
+          "transform": {
+            "position": {
+              "x": -8,
+              "y": 1.2,
+              "z": -4
             },
-            "tankInfo": {
-                "volume": 54,
-                "thickness": 6,
-                "glassWeight": "12.5"
+            "rotation": {
+              "x": 0,
+              "y": 0.6,
+              "z": 0
             },
-            "createdAt": "2024-01-01T00:00:00Z",
-            "updatedAt": "2024-01-01T00:00:00Z"
-        },
-        {
-            "id": "2",
-            "name": "Medium Tank",
-            "size": {
-                "width": 90,
-                "height": 45,
-                "depth": 45
-            },
-            "tankInfo": {
-                "volume": 182,
-                "thickness": 8,
-                "glassWeight": "25.2"
-            },
-            "createdAt": "2024-01-02T00:00:00Z",
-            "updatedAt": "2024-01-02T00:00:00Z"
-        },
-        {
-            "id": "3",
-            "name": "Large Tank",
-            "size": {
-                "width": 120,
-                "height": 60,
-                "depth": 60
-            },
-            "tankInfo": {
-                "volume": 432,
-                "thickness": 10,
-                "glassWeight": "45.8"
-            },
-            "createdAt": "2024-01-03T00:00:00Z",
-            "updatedAt": "2024-01-03T00:00:00Z"
-        },
-        {
-            "id": "4",
-            "name": "Cube Tank",
-            "size": {
-                "width": 60,
-                "height": 60,
-                "depth": 60
-            },
-            "tankInfo": {
-                "volume": 216,
-                "thickness": 8,
-                "glassWeight": "28.8"
-            },
-            "createdAt": "2024-01-04T00:00:00Z",
-            "updatedAt": "2024-01-04T00:00:00Z"
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          }
         }
-    ],
-    "tankPresets": [
-        {
-            "id": "small",
-            "name": "Small",
-            "size": {
-                "width": 60,
-                "height": 30,
-                "depth": 30
-            }
-        },
-        {
-            "id": "medium",
-            "name": "Medium",
-            "size": {
-                "width": 90,
-                "height": 45,
-                "depth": 45
-            }
-        },
-        {
-            "id": "large",
-            "name": "Large",
-            "size": {
-                "width": 120,
-                "height": 60,
-                "depth": 60
-            }
-        },
-        {
-            "id": "extra",
-            "name": "Extra Large",
-            "size": {
-                "width": 150,
-                "height": 60,
-                "depth": 60
-            }
-        },
-        {
-            "id": "cube",
-            "name": "Cube",
-            "size": {
-                "width": 60,
-                "height": 60,
-                "depth": 60
-            }
-        },
-        {
-            "id": "wide",
-            "name": "Wide",
-            "size": {
-                "width": 120,
-                "height": 45,
-                "depth": 30
-            }
-        }
-    ]
+      ],
+      "savedAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
 }

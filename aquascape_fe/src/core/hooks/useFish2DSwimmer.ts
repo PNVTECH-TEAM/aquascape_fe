@@ -6,37 +6,51 @@ interface Fish2DSwimState {
     targetSpeed: number;
     isPaused: boolean;
     nextSpeedChange: number;
+    speedMultiplier: number;
 }
 
 export class Fish2DSwimmer {
-    private fishPlane: THREE.Mesh;
+    private fishPlane: THREE.Object3D;
     private bounds: TankBounds;
     private targetPosition: THREE.Vector3;
     private swimDirection: THREE.Vector3 = new THREE.Vector3(1, 0, 0);
+    private desiredDirection: THREE.Vector3 = new THREE.Vector3();
     private state: Fish2DSwimState;
-    private size: THREE.Vector3;
-    private turnSpeed = 1.5; // độ mượt khi xoay
-    private margin = 12;     // khoảng cách an toàn khỏi kính
+    private turnSpeed = 1.5;
+    private margin = 3;
+    private readonly stepInterval = 1 / 30;
+    private accumulatedDelta = 0;
+    private forcedTargetUntil = 0;
+    private obstacles: THREE.Object3D[] = [];
+    private raycaster = new THREE.Raycaster();
+    private nextObstacleCheck = 0;
+    private readonly avoidDistance = 12;
+    private readonly obstacleProbe = new THREE.Vector3();
+    private readonly obstacleClosestPoint = new THREE.Vector3();
+    private readonly obstacleBox = new THREE.Box3();
 
-    constructor(planeMesh: THREE.Mesh, bounds: TankBounds) {
+    constructor(planeMesh: THREE.Object3D, bounds: TankBounds, obstacles: THREE.Object3D[] = []) {
         this.fishPlane = planeMesh;
         this.bounds = bounds;
         this.targetPosition = new THREE.Vector3();
-        this.size = new THREE.Vector3();
-
-        new THREE.Box3().setFromObject(this.fishPlane).getSize(this.size);
+        this.obstacles = obstacles;
+        this.raycaster.far = this.avoidDistance;
 
         this.state = {
             currentSpeed: 6,
             targetSpeed: 6,
             isPaused: false,
-            nextSpeedChange: 0
+            nextSpeedChange: 0,
+            speedMultiplier: 1.5
         };
 
         this.pickNewTarget();
     }
 
-    // 🎯 Chọn target nằm trong vùng an toàn
+    public setObstacles(obstacles: THREE.Object3D[]): void {
+        this.obstacles = obstacles;
+    }
+
     private pickNewTarget(): void {
         this.targetPosition.set(
             THREE.MathUtils.randFloat(
@@ -44,8 +58,8 @@ export class Fish2DSwimmer {
                 this.bounds.maxX - this.margin
             ),
             THREE.MathUtils.randFloat(
-                this.bounds.minY + 10,
-                this.bounds.maxY - 10
+                this.bounds.minY + this.margin,
+                this.bounds.maxY - this.margin
             ),
             THREE.MathUtils.randFloat(
                 this.bounds.minZ + this.margin,
@@ -56,40 +70,47 @@ export class Fish2DSwimmer {
 
     public update(delta: number, elapsed: number): void {
         if (this.state.isPaused) return;
+        const hasForcedTarget = (performance.now() / 1000) < this.forcedTargetUntil;
+        this.accumulatedDelta += delta;
+        if (this.accumulatedDelta < this.stepInterval) {
+            return;
+        }
+        const stepDelta = Math.min(this.accumulatedDelta, 0.05);
+        this.accumulatedDelta = 0;
 
         const currentPos = this.fishPlane.position;
 
-        const desiredDirection = new THREE.Vector3()
+        this.desiredDirection
             .subVectors(this.targetPosition, currentPos)
             .normalize();
 
         const distance = currentPos.distanceTo(this.targetPosition);
 
-        // 🎯 Gần target → chọn target mới
-        if (distance < 5) {
+        if (!hasForcedTarget && distance < 5) {
             this.pickNewTarget();
         }
 
-        // 🌊 Smooth turning bằng lerp direction
-        this.swimDirection.lerp(desiredDirection, delta * this.turnSpeed);
+        if (!hasForcedTarget && elapsed > this.nextObstacleCheck) {
+            this.avoidObstacles();
+            this.nextObstacleCheck = elapsed + 0.08;
+        }
+
+        this.swimDirection.lerp(this.desiredDirection, stepDelta * this.turnSpeed);
         this.swimDirection.normalize();
 
-        // 🐟 Di chuyển
         this.fishPlane.position.addScaledVector(
             this.swimDirection,
-            this.state.currentSpeed * delta
+            this.state.currentSpeed * this.state.speedMultiplier * stepDelta
         );
 
-        // 🎯 Tốc độ thay đổi chậm, không random mỗi frame
         if (elapsed > this.state.nextSpeedChange) {
             this.state.targetSpeed = THREE.MathUtils.randFloat(4, 8);
             this.state.nextSpeedChange = elapsed + THREE.MathUtils.randFloat(2, 4);
         }
 
         this.state.currentSpeed +=
-            (this.state.targetSpeed - this.state.currentSpeed) * delta;
+            (this.state.targetSpeed - this.state.currentSpeed) * stepDelta;
 
-        // 🚧 Clamp trong vùng an toàn
         this.fishPlane.position.x = THREE.MathUtils.clamp(
             this.fishPlane.position.x,
             this.bounds.minX + this.margin,
@@ -98,8 +119,8 @@ export class Fish2DSwimmer {
 
         this.fishPlane.position.y = THREE.MathUtils.clamp(
             this.fishPlane.position.y,
-            this.bounds.minY + 10,
-            this.bounds.maxY - 10
+            hasForcedTarget ? this.bounds.minY + 3 : this.bounds.minY + this.margin,
+            hasForcedTarget ? this.bounds.maxY - 1.5 : this.bounds.maxY - this.margin
         );
 
         this.fishPlane.position.z = THREE.MathUtils.clamp(
@@ -108,7 +129,6 @@ export class Fish2DSwimmer {
             this.bounds.maxZ - this.margin
         );
 
-        // 🐟 Chỉ xoay theo Y-axis (không nghiêng)
         const angleY = Math.atan2(
             this.swimDirection.x,
             this.swimDirection.z
@@ -117,12 +137,78 @@ export class Fish2DSwimmer {
         this.fishPlane.rotation.set(0, angleY, 0);
     }
 
+    private avoidObstacles(): void {
+        if (this.obstacles.length === 0) return;
+
+        const fishPos = this.fishPlane.position;
+        const forward = new THREE.Vector3()
+            .subVectors(this.targetPosition, fishPos)
+            .normalize();
+
+        if (forward.lengthSq() < 0.0001) return;
+
+        const checkableObstacles = this.obstacles.filter((entry) => entry.uuid !== this.fishPlane.uuid);
+        if (checkableObstacles.length === 0) return;
+
+        this.raycaster.set(fishPos, forward);
+        const intersections = this.raycaster.intersectObjects(checkableObstacles, true);
+        if (intersections.length > 0 && intersections[0].distance < this.avoidDistance) {
+            const side = Math.random() > 0.5 ? 1 : -1;
+            const lateral = new THREE.Vector3(-forward.z, 0, forward.x).normalize();
+            const evasive = fishPos.clone()
+                .add(lateral.multiplyScalar(side * 8))
+                .add(new THREE.Vector3(0, THREE.MathUtils.randFloat(-3, 4), 0));
+            this.targetPosition.set(
+                THREE.MathUtils.clamp(evasive.x, this.bounds.minX + this.margin, this.bounds.maxX - this.margin),
+                THREE.MathUtils.clamp(evasive.y, this.bounds.minY + this.margin, this.bounds.maxY - this.margin),
+                THREE.MathUtils.clamp(evasive.z, this.bounds.minZ + this.margin, this.bounds.maxZ - this.margin)
+            );
+            return;
+        }
+
+        this.obstacleProbe.set(0, 0, 0);
+        checkableObstacles.forEach((obstacle) => {
+            this.obstacleBox.setFromObject(obstacle);
+            this.obstacleClosestPoint.set(
+                THREE.MathUtils.clamp(fishPos.x, this.obstacleBox.min.x, this.obstacleBox.max.x),
+                THREE.MathUtils.clamp(fishPos.y, this.obstacleBox.min.y, this.obstacleBox.max.y),
+                THREE.MathUtils.clamp(fishPos.z, this.obstacleBox.min.z, this.obstacleBox.max.z)
+            );
+            const away = fishPos.clone().sub(this.obstacleClosestPoint);
+            const distanceToObstacle = away.length();
+            if (distanceToObstacle > 0.001 && distanceToObstacle < this.avoidDistance) {
+                const weight = 1 - (distanceToObstacle / this.avoidDistance);
+                this.obstacleProbe.add(away.normalize().multiplyScalar(weight));
+            }
+        });
+
+        if (this.obstacleProbe.lengthSq() > 0.001) {
+            this.targetPosition.add(this.obstacleProbe.normalize().multiplyScalar(6));
+            this.targetPosition.x = THREE.MathUtils.clamp(this.targetPosition.x, this.bounds.minX + this.margin, this.bounds.maxX - this.margin);
+            this.targetPosition.y = THREE.MathUtils.clamp(this.targetPosition.y, this.bounds.minY + this.margin, this.bounds.maxY - this.margin);
+            this.targetPosition.z = THREE.MathUtils.clamp(this.targetPosition.z, this.bounds.minZ + this.margin, this.bounds.maxZ - this.margin);
+        }
+    }
+
     public setPaused(paused: boolean): void {
         this.state.isPaused = paused;
     }
 
     public isPaused(): boolean {
         return this.state.isPaused;
+    }
+
+    public setSpeedMultiplier(multiplier: number): void {
+        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 3);
+    }
+
+    public steerTowards(target: THREE.Vector3, holdSeconds: number = 0.8): void {
+        this.targetPosition.set(
+            THREE.MathUtils.clamp(target.x, this.bounds.minX + this.margin, this.bounds.maxX - this.margin),
+            THREE.MathUtils.clamp(target.y, this.bounds.minY + 3, this.bounds.maxY - 1.5),
+            THREE.MathUtils.clamp(target.z, this.bounds.minZ + this.margin, this.bounds.maxZ - this.margin)
+        );
+        this.forcedTargetUntil = (performance.now() / 1000) + Math.max(0.2, holdSeconds);
     }
 
     public dispose(): void { }

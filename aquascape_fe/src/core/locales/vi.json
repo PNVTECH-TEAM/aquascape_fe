@@ -1,27 +1,68 @@
 {
-    "AQUARIUM3D": {
-        "TITLE": "🐠 BỂ CÁ 3D",
-        "TANK_SIZE": "📏 KÍCH THƯỚC BỂ",
-        "SMALL": "Nhỏ",
-        "MEDIUM": "Vừa",
-        "LARGE": "Lớn",
-        "EXTRA": "Đại",
-        "CUBE": "Vuông",
-        "WIDE": "Rộng",
-        "CUSTOM_SIZE": "⚙️ TUỲ CHỈNH KÍCH THƯỚC (cm)",
-        "WIDTH": "Rộng",
-        "HEIGHT": "Cao",
-        "DEPTH": "Sâu",
-        "WIDE_LABEL": "RỘNG (cm)",
-        "HEIGHT_LABEL": "CAO (cm)",
-        "DEPTH_LABEL": "SÂU (cm)",
-        "VOLUME": "THỂ TÍCH (L)",
-        "GLASS_THICKNESS": "ĐỘ DÀY (mm)",
-        "APPLY_SIZE": "🎯 ÁP DỤNG KÍCH THƯỚC",
-        "TANK_DIMENSION": "KÍCH THƯỚC",
-        "WATER_VOLUME": "THỂ TÍCH NƯỚC",
-        "GLASS_WEIGHT": "TRỌNG LƯỢNG KÍNH",
-        "SETTINGS": "Cài đặt",
-        "RESET_VIEW": "Đặt lại góc nhìn"
-    }
+  "AQUARIUM3D": {
+    "TITLE": "🐠 BỂ CÁ 3D",
+    "TANK_SIZE": "📏 KÍCH THƯỚC BỂ",
+    "SMALL": "Nhỏ",
+    "MEDIUM": "Vừa",
+    "LARGE": "Lớn",
+    "EXTRA": "Đại",
+    "CUBE": "Vuông",
+    "WIDE": "Rộng",
+    "CUSTOM_SIZE": "⚙️ TÙY CHỈNH KÍCH THƯỚC (cm)",
+    "WIDTH": "Rộng",
+    "HEIGHT": "Cao",
+    "DEPTH": "Sâu",
+    "WIDE_LABEL": "RỘNG (cm)",
+    "HEIGHT_LABEL": "CAO (cm)",
+    "DEPTH_LABEL": "SÂU (cm)",
+    "VOLUME": "THỂ TÍCH (L)",
+    "GLASS_THICKNESS": "ĐỘ DÀY (mm)",
+    "APPLY_SIZE": "🎯 ÁP DỤNG KÍCH THƯỚC",
+    "TANK_DIMENSION": "KÍCH THƯỚC",
+    "WATER_VOLUME": "THỂ TÍCH NƯỚC",
+    "GLASS_WEIGHT": "TRỌNG LƯỢNG KÍNH",
+    "SETTINGS": "Cài đặt",
+    "RESET_VIEW": "Đặt lại góc nhìn",
+    "SAVE_LAYOUT": "Lưu thiết kế",
+    "SAVE_SHORT": "Lưu",
+    "SAVING_SHORT": "Đang lưu",
+    "SAVING_LAYOUT": "Đang lưu bố cục bể cá...",
+    "SAVE_SUCCESS": "Đã lưu bố cục thành công.",
+    "SAVE_ERROR": "Không thể lưu bố cục. Vui lòng thử lại.",
+    "GAME_START_HINT": "Bắt đầu bằng cách kéo vật phẩm vào bể.",
+    "ITEM_EARNED": "+{{points}} điểm",
+    "QUEST_BONUS": "Hoàn thành nhiệm vụ! +{{points}} điểm thưởng",
+    "NEED_FISH_BEFORE_FEED": "Bạn cần thêm cá trước khi cho ăn.",
+    "FEED_SUCCESS": "Cho ăn thành công! +{{points}} điểm",
+    "QUEST_DEFINITIONS": [
+      {
+        "id": "add-fish",
+        "title": "Thêm 3 cá",
+        "metric": "fish",
+        "target": 3,
+        "reward": 100
+      },
+      {
+        "id": "add-plants",
+        "title": "Thêm 4 cây",
+        "metric": "plants",
+        "target": 4,
+        "reward": 90
+      },
+      {
+        "id": "add-rocks",
+        "title": "Trang trí 3 đá",
+        "metric": "rocks",
+        "target": 3,
+        "reward": 80
+      },
+      {
+        "id": "feed-fish",
+        "title": "Cho cá ăn 3 lần",
+        "metric": "feeds",
+        "target": 3,
+        "reward": 110
+      }
+    ]
+  }
 }

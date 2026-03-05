@@ -91,6 +91,47 @@
     "WATER_VOLUME": "WATER VOLUME",
     "GLASS_WEIGHT": "GLASS WEIGHT",
     "SETTINGS": "Settings",
-    "RESET_VIEW": "Reset View"
+    "RESET_VIEW": "Reset View",
+    "SAVE_LAYOUT": "Save Layout",
+    "SAVE_SHORT": "Save",
+    "SAVING_SHORT": "Saving",
+    "SAVING_LAYOUT": "Saving your aquarium layout...",
+    "SAVE_SUCCESS": "Layout saved successfully.",
+    "SAVE_ERROR": "Could not save layout. Please try again.",
+    "GAME_START_HINT": "Start by dragging items into the tank.",
+    "ITEM_EARNED": "+{{points}} points",
+    "QUEST_BONUS": "Quest Completed! +{{points}} bonus points",
+    "NEED_FISH_BEFORE_FEED": "You need to add fish before feeding.",
+    "FEED_SUCCESS": "Feeding successful! +{{points}} points",
+    "QUEST_DEFINITIONS": [
+      {
+        "id": "add-fish",
+        "title": "Add 3 Fish",
+        "metric": "fish",
+        "target": 3,
+        "reward": 100
+      },
+      {
+        "id": "add-plants",
+        "title": "Add 4 Plants",
+        "metric": "plants",
+        "target": 4,
+        "reward": 90
+      },
+      {
+        "id": "add-rocks",
+        "title": "Decorate with 3 Rocks",
+        "metric": "rocks",
+        "target": 3,
+        "reward": 80
+      },
+      {
+        "id": "feed-fish",
+        "title": "Feed Fish 3 Times",
+        "metric": "feeds",
+        "target": 3,
+        "reward": 110
+      }
+    ]
   }
 }
