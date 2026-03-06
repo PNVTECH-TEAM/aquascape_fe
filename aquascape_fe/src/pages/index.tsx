@@ -1,3 +1,6 @@
-export { default as AquaForestSplash } from './AquaForestSplash/AquaForestSplash';
-export { default as NotFound } from './NotFound/NotFound';
-export { default as AquaIntro } from './Onboarding/AquaIntro';
+export { default as NotFound } from '@app/pages/NotFound';
+export { default as AquaForestSplash } from '@app/pages/AquaForestSplash/AquaForestSplash';
+export { default as AquaIntro } from '@app/pages/Onboarding/AquaIntro';
+export { default as LoginForm } from '@app/pages/Login';
+export { default as RegisterForm } from '@app/pages/Register';
+export { default as HomePage } from '@app/pages/HomePage';

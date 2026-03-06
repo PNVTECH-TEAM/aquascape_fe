@@ -19,12 +19,12 @@ const AquaForestSplash: React.FC = () => {
           <Image src={logoAquarium} preview={false} width={160} />
 
           <Title
-            level={3}
-            className="!m-0 font-semibold cursor-pointer"
-            onClick={() => navigate("/aquaIntro")}
-          >
-            {t("AQUAFORESTSPLASH.TITLE")}
-          </Title>
+  level={3}
+  className="!m-0 font-semibold cursor-pointer !text-[#2AA8FF]"
+  onClick={() => navigate("/aquaIntro")}
+>
+  {t("AQUAFORESTSPLASH.TITLE")}
+</Title>
         </div>
       </div>
     </div>

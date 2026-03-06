@@ -6,11 +6,14 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar } from "antd";
+import { useTranslation } from "react-i18next";
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
-    <header className="w-full p-5 bg-gradient-to-b from-blue-600 to-sky-400 ">
-      {/* Top info */}
+    <header className="fixed top-0 left-0 w-full z-50 p-5 bg-gradient-to-b from-blue-600 to-sky-400">
+      
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-start gap-3">
           <Avatar
@@ -21,7 +24,9 @@ const Header: React.FC = () => {
 
           <div className="text-white leading-tight">
             <p className="font-semibold text-lg mb-0">Hanh Hio</p>
-            <p className="text-sm opacity-90 mt-0">Ho Chi Minh City</p>
+            <p className="text-sm opacity-90 mt-0">
+              {t("HEADER.LOCATION")}
+            </p>
           </div>
         </div>
 
@@ -30,13 +35,12 @@ const Header: React.FC = () => {
         </button>
       </div>
 
-      {/* Search box */}
       <div className="bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow">
         <SearchOutlined className="text-xl text-gray-400" />
 
         <input
           type="text"
-          placeholder="Search..."
+          placeholder={t("HEADER.SEARCH_PLACEHOLDER")}
           className="flex-1 outline-none text-gray-700 placeholder-gray-400"
         />
 

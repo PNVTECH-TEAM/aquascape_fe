@@ -17,6 +17,7 @@
     }
   },
   "REGISTER": {
+    "SUCCESS": "Account created successfully",
     "REQUIREMENT": {
       "FULL_NAME": "Full Name",
       "EMAIL": "Email",
@@ -29,12 +30,14 @@
       "REQUIRED": "{{field}} is required",
       "INVALID": "{{field}} is invalid",
       "MIN_LENGTH": "{{field}} must be at least {{length}} characters long",
-      "PASSWORD_RULE": "Password must be at least 6 characters and include both letters and numbers"
+      "PASSWORD_RULE": "Password must be at least 6 characters and include both letters and numbers",
+       "NAME_INVALID": "Full name cannot contain numbers or special characters. Please enter letters only"
     },
     "SUCCESS": "Account created successfully",
     "EMAIL_EXISTS": "An account with this email already exists"
   },
   "LOGIN": {
+    "ACCOUNT_NOT_FOUND": "Account not found",
     "REQUIREMENT": {
       "TITLE": "Welcome back!",
       "CONTENTTITLE": "Login to continue with Aqua Forest",
@@ -46,56 +49,35 @@
       "LOADING": "Loading..."
     },
     "VALIDATION": {
+      "REQUIRED": "{{field}} is required",
       "INVALID": "{{field}} is invalid",
       "MIN_LENGTH": "{{field}} must be at least {{length}} characters long"
     }
   },
   "NOTIFICATION": {
-    "SUCCESS": "Registration successful",
-    "ERROR": "Registration failed: you already have an account"
+    "REGISTER_SUCCESS": "Registration successful",
+    "REGISTER_FAILED": "Registration failed",
+    "LOGIN_SUCCESS": "Login successful",
+    "LOGIN_FAILED": "Login failed",
+    "ERROR": "Something went wrong"
   },
-  "LOGIN": {
-    "REQUIREMENT": {
-      "TITLE": "Welcome back!",
-      "CONTENTTITLE": "Login to continue with Aqua Forest",
-      "EMAIL": "Email",
-      "PASSWORD": "Password",
-      "BUTTONLOGIN": "Login",
-      "CONTENTREGISTER": "Don’t have an account?",
-      "REGISTER": "Register",
-      "LOADING": "Loading..."
+  "FOOTER": {
+    "TITLE": "Aqua Forest",
+    "DESCRIPTION": "Design your dream aquarium in 3D. Create, explore, and manage your underwater world — where creativity comes to life",
+    "FEATURES": {
+      "TITLE": "Features",
+      "DESIGN": "3D Aquarium Design",
+      "SUGGESTION": "Smart Fish Suggestion",
+      "CARE": "Interactive Fish Care",
+      "SHOP": "Online Shop"
     },
-    "VALIDATION": {
-      "INVALID": "{{field}} is invalid",
-      "MIN_LENGTH": "{{field}} must be at least {{length}} characters long"
-    }
+    "CONTACT": {
+      "TITLE": "Contact"
+    },
+    "COPYRIGHT": "© 2026 Aqua Forest. All rights reserved."
   },
-  "NOTIFICATION": {
-    "SUCCESS": "Registration successful",
-    "ERROR": "Registration failed"
-  },
-  "OTP_VERIFY": {
-    "TITLE": "Verify Your Email",
-    "DESCRIPTION": {
-      "LINE_1": "We’ve sent an email to:",
-      "LINE_2": "Enter the verification code sent to your email address."
-    },
-    "INPUT": {
-      "PLACEHOLDER": "OTP"
-    },
-    "RESEND": {
-      "QUESTION": "Didn’t receive an email?",
-      "BUTTON": "Resend Email",
-      "BUTTON_COUNTDOWN": "Resend Email ({{time}}s)",
-      "SENDING": "Sending..."
-    },
-    "VERIFY": {
-      "BUTTON": "Verify OTP",
-      "VERIFYING": "Verifying...",
-      "SUCCESS": "OTP verification successful",
-      "INVALID": "Invalid OTP",
-      "RESEND_SUCCESS": "OTP has been resent",
-      "RESEND_FAILED": "Unable to resend OTP"
-    }
+  "HEADER": {
+    "LOCATION": "Ho Chi Minh City",
+    "SEARCH_PLACEHOLDER": "Search..."
   }
 }
