@@ -3,9 +3,8 @@ import {
   BellOutlined,
   SearchOutlined,
   FilterOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import { Avatar } from "antd";
+import { avatar } from "@app/assets/images";
 import { useTranslation } from "react-i18next";
 
 const Header: React.FC = () => {
@@ -14,12 +13,12 @@ const Header: React.FC = () => {
   return (
     <header className="fixed top-0 left-0 w-full z-50 p-5 bg-gradient-to-b from-blue-600 to-sky-400">
       
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-5 mt-5">
         <div className="flex items-start gap-3">
-          <Avatar
-            size={48}
-            icon={<UserOutlined />}
-            className="border-2 border-white bg-gray-200"
+          <img
+            src={avatar}
+            alt="avatar"
+            className="w-12 h-12 rounded-full border-2 border-white object-cover"
           />
 
           <div className="text-white leading-tight">
