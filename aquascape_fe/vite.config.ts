@@ -30,17 +30,9 @@ export default async ({ mode }: { mode: string }) => {
       port: 5001,
       proxy: {
         "/api": {
-          target: "http://localhost:8082",
+          target: "http://localhost:8080",
           changeOrigin: true,
         },
-      },
-    },
-    test: {
-      globals: true,
-      environment: "jsdom",
-      coverage: {
-        reporter: ["text", "html"],
-        exclude: ["node_modules/"],
       },
     },
   });

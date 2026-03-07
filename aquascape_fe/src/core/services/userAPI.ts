@@ -13,11 +13,7 @@ export const registerApi = (payload: {
     },
   });
 };
-
-export const loginApi = (payload: {
-  email: string;
-  password: string;
-}) => {
+export const loginApi = (payload: { email: string; password: string }) => {
   return axios.post(`${API_BASE_URL}/auth/login`, payload, {
     headers: {
       "Content-Type": "application/json",
