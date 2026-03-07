@@ -1,8 +1,8 @@
-import AquaIntro from "@app/pages/Onboarding/AquaIntro";
+import { HomePage } from "@app/pages";
 
 export const privateRoutes = [
   {
-    path: 'aquaIntro',   
-    element: <AquaIntro />,
+    path: "homePage",
+    element: <HomePage />,
   },
 ];

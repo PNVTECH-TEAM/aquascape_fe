@@ -1,7 +1,8 @@
-import AquaForestSplash from "@app/pages/AquaForestSplash/AquaForestSplash";
-import Register from "@app/pages/Register";
-import LoginForm from '@app/pages/Login';
-
+import { 
+  AquaIntro, 
+  LoginForm, 
+  RegisterForm, AquaForestSplash
+} from "@app/pages";
 export const publicRoutes = [
   {
     path: "",
@@ -9,12 +10,16 @@ export const publicRoutes = [
     children: [{ index: true, element: <AquaForestSplash /> }],
   },
   {
+    path: 'aquaIntro',   
+    element: <AquaIntro />,
+  },
+  {
     path: "register",
-    element: <Register />,
+    element: <RegisterForm />,
   },
   {
     element: <LoginForm />,
     path: 'login',
-  }
+  },
 ];
 
