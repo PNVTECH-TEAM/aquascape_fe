@@ -69,7 +69,7 @@ const RegisterForm = () => {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-4 flex-1"
+            className="space-y-4 flex-1 flex flex-col"
           >
             <div>
               <label className="block text-sm font-bold text-gray-900">
@@ -139,7 +139,7 @@ const RegisterForm = () => {
             <button
               type="submit"
               disabled={registerMutation.isPending}
-              className="w-full rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700 transition disabled:opacity-50"
+              className="w-full h-10 rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700 transition disabled:opacity-50 mt-4"
             >
               {registerMutation.isPending
                 ? "Registering..."
@@ -147,7 +147,7 @@ const RegisterForm = () => {
             </button>
           </form>
 
-          <p className="mt-auto text-center text-sm text-gray-500 pb-4">
+          <p className="mt-auto mb-10 text-center text-sm text-gray-500 pb-4">
             {t("REGISTER.REQUIREMENT.CONTENTREGISTER")}
             <RegisterNavigate />
           </p>
