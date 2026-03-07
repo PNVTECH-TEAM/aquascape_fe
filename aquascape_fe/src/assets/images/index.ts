@@ -1,6 +1,9 @@
-export { default as logoAquarium } from "./logoAquarium.png";
-export { default as onboardingTank } from "./onboardingTank.png";
-export { default as aiAssistant } from "./aiAssistant.png";
-export { default as aquascapeCareAI } from "./aquascapeCareAI.png";
-export { default as registerLogin } from "./registerLogin.png";
-export { default as avatar } from './avatar.png';
+export { default as logoAquarium } from "@app/assets/images/logoAquarium.png";
+export { default as onboardingTank } from "@app/assets/images/onboardingTank.png";
+export { default as aiAssistant } from "@app/assets/images/aiAssistant.png";
+export { default as aquascapeCareAI } from "@app/assets/images/aquascapeCareAI.png";
+export { default as registerLogin } from "@app/assets/images/registerLogin.png";
+export { default as avatar } from "@app/assets/images/avatar.png";
+export { default as profileInfo } from "@app/assets/images/profileInfo.png";
+export { default as design3D1 } from "@app/assets/images/design3D1.png";
+export { default as design3D2 } from "@app/assets/images/design3D2.png";
