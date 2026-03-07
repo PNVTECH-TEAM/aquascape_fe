@@ -1,11 +1,14 @@
-* {
+.aquarium3d-page,
+.aquarium3d-page * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     touch-action: manipulation;
 }
 
-body {
+.aquarium3d-page {
+    position: fixed;
+    inset: 0;
     font-family: 'Segoe UI', Roboto, sans-serif;
     background: #000;
     color: #fff;
@@ -16,8 +19,8 @@ body {
 }
 
 @media (max-width: 1024px) and (orientation: portrait) {
-    body::before {
-        content: "📱 Vui lòng xoay ngang điện thoại để trải nghiệm ứng dụng";
+    .aquarium3d-page::before {
+        content: "Please rotate your phone to landscape for Aquarium 3D.";
         position: fixed;
         inset: 0;
         background: #0c2461;
@@ -830,3 +833,7 @@ body {
         font-size: 10px;
     }
 }
+
+
+
+

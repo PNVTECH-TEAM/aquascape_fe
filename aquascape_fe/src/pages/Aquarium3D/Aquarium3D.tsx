@@ -110,7 +110,7 @@ export default function Aquarium3D() {
     };
 
     return (
-        <>
+        <div className="aquarium3d-page">
             <div className={`loading ${loading ? "" : "hidden"}`}>
                 <div className="spinner"></div>
             </div>
@@ -327,6 +327,6 @@ export default function Aquarium3D() {
                     <div className="info-label">{t("AQUARIUM3D.GLASS_WEIGHT")}</div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
