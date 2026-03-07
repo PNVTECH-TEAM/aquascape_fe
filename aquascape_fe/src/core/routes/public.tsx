@@ -1,8 +1,6 @@
-import AquaForestSplash from "@app/pages/AquaForestSplash/AquaForestSplash";
+import { AquaForestSplash, AquaIntro, LoginForm, RegisterForm } from "@app/pages";
 import Aquarium3D from "@app/pages/Aquarium3D/Aquarium3D";
 import FishDoctorDiagnosis from "@app/pages/FishDoctorDiagnosis/FishDoctorDiagnosis";
-import Register from "@app/pages/Register";
-import LoginForm from '@app/pages/Login';
 
 export const publicRoutes = [
   {
@@ -11,8 +9,12 @@ export const publicRoutes = [
     children: [{ index: true, element: <AquaForestSplash /> }],
   },
   {
+    path: "aquaIntro",
+    element: <AquaIntro />,
+  },
+  {
     path: "register",
-    element: <Register />,
+    element: <RegisterForm />,
   },
   {
     path: "Aquarium3D",
@@ -23,8 +25,8 @@ export const publicRoutes = [
     element: <FishDoctorDiagnosis />,
   },
   {
-    path: 'login',
+    path: "login",
     element: <LoginForm />,
-  }
+  },
 ];
 

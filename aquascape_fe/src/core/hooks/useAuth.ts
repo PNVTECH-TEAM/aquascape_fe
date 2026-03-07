@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-
-import { registerApi, loginApi } from "@app/core/services";
+import { loginApi, registerApi } from "@app/core/services";
 import {
   NotificationTypeEnum,
   openNotificationWithIcon,
@@ -9,7 +8,6 @@ import {
 import type { RegisterPayload, LoginPayload } from "@app/core/interface";
 import type { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
-
 export const useRegister = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -19,13 +17,30 @@ export const useRegister = () => {
       const { data } = await registerApi(payload);
       return data;
     },
-    onSuccess: (response: { message: string }) => {
+    onSuccess: (
+      response: { code?: number; message?: string },
+      variables: RegisterPayload,
+    ) => {
+      const message = response?.message?.toLowerCase() || "";
+
+      if (message.includes("exist")) {
+        openNotificationWithIcon(
+          NotificationTypeEnum.ERROR,
+          t("REGISTER.EMAIL_EXISTS"),
+        );
+        return;
+      }
+
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-        response.message || t("NOTIFICATION.SUCCESS"),
+        t("REGISTER.SUCCESS"),
       );
-      navigate("/login");
+
+      navigate("/login", {
+        state: { email: variables.email },
+      });
     },
+
     onError: (error: AxiosError<{ message?: string }>) => {
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
@@ -34,10 +49,9 @@ export const useRegister = () => {
     },
   });
 };
-
 export const useLogin = () => {
   const navigate = useNavigate();
-   const { t } = useTranslation();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (payload: LoginPayload) => {
@@ -47,16 +61,26 @@ export const useLogin = () => {
     onSuccess: (token: string) => {
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
-         t("NOTIFICATION.SUCCESS"),
+        t("NOTIFICATION.LOGIN_SUCCESS"),
       );
 
       localStorage.setItem("accessToken", token);
-      navigate("/");
+      navigate("/homePage");
     },
-    onError: (error: AxiosError<{ message?: string }>) => {
+    onError: (error: AxiosError<{ code?: number; message?: string }>) => {
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === 1001) {
+        openNotificationWithIcon(
+          NotificationTypeEnum.ERROR,
+          t("LOGIN.ACCOUNT_NOT_FOUND"),
+        );
+        return;
+      }
+
       openNotificationWithIcon(
         NotificationTypeEnum.ERROR,
-        error.response?.data?.message ?? t("NOTIFICATION.ERROR"),
+        t("NOTIFICATION.LOGIN_FAILED"),
       );
     },
   });
