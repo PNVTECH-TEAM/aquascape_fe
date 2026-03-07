@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
-import { getTankPresets } from "@app/core/services/aquariumAPI";
+import { getAquariumCatalog, getLatestTankLayout, getTankPresets, getTanks } from "@app/core/services/aquariumAPI";
 import { useGameMechanics } from "./hooks/useTankStatistics";
 import { useLayoutSave } from "./hooks/useLayoutSave";
 import "./Aquarium3D.scss";
@@ -18,6 +18,7 @@ export default function Aquarium3D() {
     const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
     const [presets, setPresets] = useState<TankPreset[]>([]);
     const [presetsLoading, setPresetsLoading] = useState<boolean>(true);
+    const hasRestoredLayoutRef = useRef<boolean>(false);
 
     const game = useGameMechanics();
 
@@ -50,9 +51,50 @@ export default function Aquarium3D() {
         loading,
         handleApplySize,
         handleResetView,
+        addItem,
         triggerFishRush,
         getLayoutSnapshot,
     } = useTankSetup(size, setSize, onLoadingComplete, 8, game.onTankItemAdded);
+
+    useEffect(() => {
+        if (loading || hasRestoredLayoutRef.current) return;
+
+        hasRestoredLayoutRef.current = true;
+
+        const restoreLatestLayout = async () => {
+            try {
+                const [tanks, catalog] = await Promise.all([getTanks(), getAquariumCatalog()]);
+                if (tanks.length === 0) return;
+
+                const latestTank = tanks[0];
+                const latestLayout = await getLatestTankLayout(latestTank.id);
+                if (!latestLayout || latestLayout.items.length === 0) return;
+
+                const catalogById = new Map(catalog.map((item) => [item.id, item]));
+
+                latestLayout.items.forEach((savedItem) => {
+                    const catalogItem = catalogById.get(savedItem.catalogItemId);
+                    if (!catalogItem) return;
+
+                    addItem(
+                        {
+                            id: catalogItem.id,
+                            name: catalogItem.name,
+                            category: catalogItem.category,
+                            type: catalogItem.type,
+                            url: catalogItem.url,
+                            image: catalogItem.imageKey,
+                        },
+                        savedItem.transform.position
+                    );
+                });
+            } catch (error) {
+                console.error("Error restoring latest layout:", error);
+            }
+        };
+
+        restoreLatestLayout();
+    }, [addItem, loading]);
 
     const { savingLayout, handleSaveLayout } = useLayoutSave({
         size,

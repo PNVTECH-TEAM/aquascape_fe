@@ -13,7 +13,7 @@ interface SwimState {
 }
 
 export class FishSwimmer {
-    public fishGroup: THREE.Group;
+    public fishGroup: THREE.Object3D;
     private bounds: TankBounds;
     private targetPosition: THREE.Vector3;
     private state: SwimState;
@@ -30,7 +30,7 @@ export class FishSwimmer {
     private readonly obstacleBox = new THREE.Box3();
 
     constructor(
-        fishModel: THREE.Group,
+        fishModel: THREE.Object3D,
         bounds: TankBounds,
         fishSize: number = 1.0,
         obstacles: THREE.Object3D[] = []

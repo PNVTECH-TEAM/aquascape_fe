@@ -7,7 +7,18 @@ import { getAquariumCatalog } from "@app/core/services/aquariumAPI";
 
 const getImageFromKey = (imageKey?: string): string | undefined => {
   if (!imageKey) return undefined;
+  if (/^https?:\/\//i.test(imageKey) || imageKey.startsWith("/")) return imageKey;
   return (aquariumImages as Record<string, string>)[imageKey];
+};
+
+const normalizeCategory = (value?: string): string => {
+  const key = String(value ?? "").trim().toLowerCase();
+  if (key.includes("fish")) return "Fish";
+  if (key.includes("plant")) return "Plants";
+  if (key.includes("rock")) return "Rocks";
+  if (key.includes("hardscape")) return "Hardscape";
+  if (!key) return "Other";
+  return key.charAt(0).toUpperCase() + key.slice(1);
 };
 
 const mapCatalogItemToPlant = (item: AquariumCatalogItem): Plant => {
@@ -16,7 +27,7 @@ const mapCatalogItemToPlant = (item: AquariumCatalogItem): Plant => {
     name: item.name,
     image: getImageFromKey(item.imageKey),
     url: item.url,
-    category: item.category,
+    category: normalizeCategory(item.category),
     type: item.type,
   };
 };

@@ -1,6 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AddedItemEvent } from "../types";
+import {
+    getAquariumAdviceFromAI,
+    isAquariumAdviceRateLimitError,
+    isGeminiConfigured,
+} from "@app/core/services/geminiAquariumAdvisor";
 
 export interface TankStatistics {
     fish: number;
@@ -15,9 +20,12 @@ const classifyItem = (item: AddedItemEvent): "fish" | "plants" | "rocks" | "othe
 
     const category = (item.category ?? "").toLowerCase();
     const sourceType = (item.sourceType ?? "").toLowerCase();
+    const sourceName = (item.sourceName ?? "").toLowerCase();
 
     if (category === "plants" || sourceType === "plant") return "plants";
     if (category === "rocks" || sourceType === "rock") return "rocks";
+    if (sourceName.includes("plant") || sourceName.includes("coral")) return "plants";
+    if (sourceName.includes("rock") || sourceName.includes("stone")) return "rocks";
     return "other";
 };
 
@@ -32,23 +40,27 @@ export const useGameMechanics = () => {
         totalItems: 0,
     });
 
+    const [addedItems, setAddedItems] = useState<AddedItemEvent[]>([]);
     const [statusText, setStatusText] = useState<string>(
         t("AQUARIUM3D.GAME_START_HINT")
     );
+    const [suggestion, setSuggestion] = useState<string>("AI is analyzing your aquarium...");
+    const [reminder, setReminder] = useState<string>("AI reminder will appear here.");
+    const lastRequestedKeyRef = useRef<string>("");
+    const inFlightRef = useRef<boolean>(false);
 
     const onTankItemAdded = useCallback((item: AddedItemEvent) => {
         const kind = classifyItem(item);
+        setAddedItems((prev) => [...prev, item]);
 
         setStats((prev) => {
             const next = { ...prev };
 
             if (kind === "fish") {
                 next.fish += 1;
-            }
-            else if (kind === "plants") {
+            } else if (kind === "plants") {
                 next.plants += 1;
-            }
-            else if (kind === "rocks") {
+            } else if (kind === "rocks") {
                 next.rocks += 1;
             }
 
@@ -57,21 +69,21 @@ export const useGameMechanics = () => {
         });
 
         if (kind === "fish") {
-            setStatusText("Fish added to tank.");
+            setStatusText(`Fish added: ${item.sourceName ?? "Unknown fish"}.`);
             return;
         }
 
         if (kind === "plants") {
-            setStatusText("Plant added to tank.");
+            setStatusText(`Plant added: ${item.sourceName ?? "Unknown plant"}.`);
             return;
         }
 
         if (kind === "rocks") {
-            setStatusText("Rock added to tank.");
+            setStatusText(`Rock added: ${item.sourceName ?? "Unknown rock"}.`);
             return;
         }
 
-        setStatusText("Item added.");
+        setStatusText(`Item added: ${item.sourceName ?? "Unknown item"}.`);
     }, []);
 
     const handleFeedFish = useCallback((): boolean => {
@@ -88,37 +100,80 @@ export const useGameMechanics = () => {
         return true;
     }, [stats.fish, t]);
 
-    const suggestion = useMemo(() => {
-        if (stats.fish === 0) {
-            return "You should add fish to bring life to the tank.";
+    const advicePayload = useMemo(() => {
+        return {
+            fish: stats.fish,
+            plants: stats.plants,
+            rocks: stats.rocks,
+            feeds: stats.feeds,
+            totalItems: stats.totalItems,
+            itemNames: addedItems.map(
+                (item) => item.sourceName || item.category || item.sourceType || item.type
+            ),
+        };
+    }, [addedItems, stats.feeds, stats.fish, stats.plants, stats.rocks, stats.totalItems]);
+
+    const adviceRequestKey = useMemo(() => {
+        const names = Array.from(
+            new Set(advicePayload.itemNames.map((name) => name.trim()).filter(Boolean))
+        ).sort();
+
+        return JSON.stringify({
+            fish: advicePayload.fish,
+            plants: advicePayload.plants,
+            rocks: advicePayload.rocks,
+            feeds: advicePayload.feeds,
+            totalItems: advicePayload.totalItems,
+            names,
+        });
+    }, [advicePayload]);
+
+    useEffect(() => {
+        if (stats.totalItems === 0) {
+            setSuggestion("Add items to the tank, then AI will analyze compatibility.");
+            setReminder("No reminder yet.");
+            lastRequestedKeyRef.current = "";
+            return;
         }
 
-        if (stats.plants < stats.fish) {
-            return "Consider adding more plants for a natural ecosystem.";
+        if (!isGeminiConfigured()) {
+            setSuggestion("Gemini API key is missing.");
+            setReminder("Set VITE_GEMINI_API_KEY to enable AI reminder.");
+            return;
         }
 
-        if (stats.rocks < Math.ceil(stats.plants / 2)) {
-            return "Adding rocks can improve the layout depth.";
+        if (adviceRequestKey === lastRequestedKeyRef.current) {
+            return;
         }
 
-        return "Your aquarium is well balanced.";
-    }, [stats.fish, stats.plants, stats.rocks]);
+        const timer = setTimeout(async () => {
+            if (inFlightRef.current) return;
+            if (adviceRequestKey === lastRequestedKeyRef.current) return;
 
-    const reminder = useMemo(() => {
-        if (stats.fish > 0 && stats.feeds === 0) {
-            return "Reminder: Feed your fish.";
-        }
+            inFlightRef.current = true;
+            try {
+                const advice = await getAquariumAdviceFromAI(advicePayload);
 
-        if (stats.totalItems >= 8 && stats.plants === 0) {
-            return "Reminder: Add some plants for better balance.";
-        }
+                setSuggestion(advice.suggestion || "AI did not return a suggestion.");
+                setReminder(advice.reminder || "AI did not return a reminder.");
+                lastRequestedKeyRef.current = adviceRequestKey;
+            } catch (error) {
+                if (isAquariumAdviceRateLimitError(error)) {
+                    setSuggestion("Gemini dang qua tai do goi qua nhanh.");
+                    setReminder(`Vui long thu lai sau ${error.retryAfterSeconds}s.`);
+                    return;
+                }
 
-        if (stats.totalItems >= 12 && stats.rocks === 0) {
-            return "Reminder: Add rocks to create hiding spots.";
-        }
+                console.error("Failed to fetch AI aquarium advice:", error);
+                setSuggestion("Unable to get suggestion from AI.");
+                setReminder("Unable to get reminder from AI.");
+            } finally {
+                inFlightRef.current = false;
+            }
+        }, 1200);
 
-        return "No urgent reminder.";
-    }, [stats.feeds, stats.fish, stats.plants, stats.rocks, stats.totalItems]);
+        return () => clearTimeout(timer);
+    }, [advicePayload, adviceRequestKey, stats.totalItems]);
 
     return {
         stats,
