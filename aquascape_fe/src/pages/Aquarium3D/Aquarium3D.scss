@@ -5,7 +5,7 @@
     touch-action: manipulation;
 }
 
-body {
+.aquarium3d-page {
     font-family: 'Segoe UI', Roboto, sans-serif;
     background: #000;
     color: #fff;
@@ -16,7 +16,7 @@ body {
 }
 
 @media (max-width: 1024px) and (orientation: portrait) {
-    body::before {
+    .aquarium3d-page::before {
         content: "📱 Vui lòng xoay ngang điện thoại để trải nghiệm ứng dụng";
         position: fixed;
         inset: 0;
@@ -32,12 +32,14 @@ body {
         line-height: 1.5;
     }
 
-    .explorer-panel {
-        width: 78vw;
-    }
+    .aquarium3d-page {
+        .explorer-panel {
+            width: 78vw;
+        }
 
-    .explorer-toggle.active {
-        left: 78vw;
+        .explorer-toggle.active {
+            left: 78vw;
+        }
     }
 }
 

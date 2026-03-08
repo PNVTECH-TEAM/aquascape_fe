@@ -7,7 +7,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="px-6 py-10">
 
-      <section className="text-center mb-16">
+      <section className="text-center mb-16 mt-20">
         <h1 className="text-4xl font-bold mb-4 text-blue-600">
           Aqua Forest
         </h1>
@@ -31,7 +31,8 @@ const HomePage: React.FC = () => {
       <section className="grid md:grid-cols-3 gap-6">
         <Card
           hoverable
-          className="rounded-2xl shadow-md"
+          className="rounded-2xl shadow-md cursor-pointer"
+          onClick={() => navigate("/aquarium3d")}
         >
           <h3 className="text-lg font-semibold mb-2">
             3D Aquarium Design
