@@ -7,3 +7,10 @@ export interface LoginPayload {
   email: string;
   password: string;
 }
+
+export interface DesignItem {
+  id: number;
+  title: string;
+  status: string;
+  image: string;
+}

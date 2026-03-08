@@ -79,5 +79,16 @@
   "HEADER": {
     "LOCATION": "Ho Chi Minh City",
     "SEARCH_PLACEHOLDER": "Search..."
-  }
+  },
+  "PROFILE": {
+  "TITLE": "My Designs",
+  "CREATE_NEW": "Create New",
+  "STATUS": {
+    "COMPLETED": "Completed",
+    "DRAFT": "Draft"
+  },
+  "SIGN_OUT": "Sign Out",
+  "EDIT_NAME": "Edit name",
+  "EDIT_EMAIL": "Edit email"
+}
 }

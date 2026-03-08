@@ -6,9 +6,11 @@ import {
 } from "@ant-design/icons";
 import { avatar } from "@app/assets/images";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 p-5 bg-gradient-to-b from-blue-600 to-sky-400">
@@ -17,6 +19,7 @@ const Header: React.FC = () => {
         <div className="flex items-start gap-3">
           <img
             src={avatar}
+             onClick={() => navigate("/profile")}
             alt="avatar"
             className="w-12 h-12 rounded-full border-2 border-white object-cover"
           />
