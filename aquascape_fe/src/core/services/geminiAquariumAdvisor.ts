@@ -24,9 +24,26 @@ export class AquariumAdviceRateLimitError extends Error {
     }
 }
 
-const BACKEND_URL =
+const normalizeAquariumAdviceApiUrl = (rawUrl?: string): string => {
+    const fallback = "/api/v1/aquarium/advice";
+    if (!rawUrl?.trim()) return fallback;
+
+    const normalized = rawUrl.trim().replace(/\/+$/, "");
+    if (normalized.endsWith("/api/v1/aquarium/advice")) return normalized;
+
+    // Support when shared env var is set to diagnosis endpoint.
+    if (normalized.endsWith("/api/v1/diagnose")) {
+        return normalized.replace(/\/api\/v1\/diagnose$/, "/api/v1/aquarium/advice");
+    }
+
+    return `${normalized}/api/v1/aquarium/advice`;
+};
+
+const BACKEND_URL = normalizeAquariumAdviceApiUrl(
+    import.meta.env.VITE_AQUARIUM_ADVICE_API_URL ||
     import.meta.env.VITE_AQUARIUM_AI_API_URL ||
-    `${import.meta.env.VITE_BACKEND_URL}`;
+    import.meta.env.VITE_BACKEND_URL
+);
 
 let rateLimitUntilMs = 0;
 const adviceCache = new Map<string, AquariumAdviceResponse>();
