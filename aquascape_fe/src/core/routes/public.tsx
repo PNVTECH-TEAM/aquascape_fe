@@ -17,7 +17,7 @@ export const publicRoutes = [
     element: <RegisterForm />,
   },
   {
-    path: "Aquarium3D",
+    path: "aquarium3d",
     element: <Aquarium3D />,
   },
   {

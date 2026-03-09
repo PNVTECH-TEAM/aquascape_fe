@@ -46,8 +46,26 @@ export const useGameMechanics = () => {
     );
     const [suggestion, setSuggestion] = useState<string>("AI is analyzing your aquarium...");
     const [reminder, setReminder] = useState<string>("AI reminder will appear here.");
+    const currentTankKeyRef = useRef<string>("");
     const lastRequestedKeyRef = useRef<string>("");
     const inFlightRef = useRef<boolean>(false);
+
+    const resetForTank = useCallback((tankKey: string) => {
+        if (!tankKey || currentTankKeyRef.current === tankKey) return;
+        currentTankKeyRef.current = tankKey;
+        lastRequestedKeyRef.current = "";
+        setAddedItems([]);
+        setStats({
+            fish: 0,
+            plants: 0,
+            rocks: 0,
+            feeds: 0,
+            totalItems: 0,
+        });
+        setStatusText(t("AQUARIUM3D.GAME_START_HINT"));
+        setSuggestion("Add items to the tank, then AI will analyze compatibility.");
+        setReminder("No reminder yet.");
+    }, [t]);
 
     const onTankItemAdded = useCallback((item: AddedItemEvent) => {
         const kind = classifyItem(item);
@@ -181,6 +199,7 @@ export const useGameMechanics = () => {
         reminder,
         statusText,
         setStatusText,
+        resetForTank,
         onTankItemAdded,
         handleFeedFish,
     };

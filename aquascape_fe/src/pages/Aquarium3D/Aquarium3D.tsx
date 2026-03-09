@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
 import { getAquariumCatalog, getLatestTankLayout, getTankPresets, getTanks } from "@app/core/services/aquariumAPI";
+import * as aquariumImages from "@app/assets/images";
 import { useGameMechanics } from "./hooks/useTankStatistics";
 import { useLayoutSave } from "./hooks/useLayoutSave";
 import "./Aquarium3D.scss";
@@ -18,9 +19,15 @@ export default function Aquarium3D() {
     const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
     const [presets, setPresets] = useState<TankPreset[]>([]);
     const [presetsLoading, setPresetsLoading] = useState<boolean>(true);
-    const hasRestoredLayoutRef = useRef<boolean>(false);
+    const restoredSizeKeyRef = useRef<string>("");
+    const sizeKey = `${size.width}x${size.height}x${size.depth}`;
+    const tankNameKey = `My Tank ${sizeKey}`;
 
     const game = useGameMechanics();
+
+    useEffect(() => {
+        game.resetForTank(sizeKey);
+    }, [game.resetForTank, sizeKey]);
 
     useEffect(() => {
         const fetchPresets = async () => {
@@ -57,20 +64,27 @@ export default function Aquarium3D() {
     } = useTankSetup(size, setSize, onLoadingComplete, 8, game.onTankItemAdded);
 
     useEffect(() => {
-        if (loading || hasRestoredLayoutRef.current) return;
-
-        hasRestoredLayoutRef.current = true;
+        if (loading || restoredSizeKeyRef.current === sizeKey) return;
+        restoredSizeKeyRef.current = sizeKey;
 
         const restoreLatestLayout = async () => {
             try {
                 const [tanks, catalog] = await Promise.all([getTanks(), getAquariumCatalog()]);
-                if (tanks.length === 0) return;
+                const isSameSize = (a: TankSize, b: TankSize) =>
+                    a.width === b.width && a.height === b.height && a.depth === b.depth;
+                const selectedTankByName = tanks.find((tank) => tank.name === tankNameKey);
+                const selectedTank = selectedTankByName ?? tanks.find((tank) => isSameSize(tank.size, size));
 
-                const latestTank = tanks[0];
-                const latestLayout = await getLatestTankLayout(latestTank.id);
+                if (!selectedTank) return;
+                const latestLayout = await getLatestTankLayout(selectedTank.id);
                 if (!latestLayout || latestLayout.items.length === 0) return;
 
                 const catalogById = new Map(catalog.map((item) => [item.id, item]));
+                const getImageFromKey = (imageKey?: string): string | undefined => {
+                    if (!imageKey) return undefined;
+                    if (/^https?:\/\//i.test(imageKey) || imageKey.startsWith("/")) return imageKey;
+                    return (aquariumImages as Record<string, string>)[imageKey];
+                };
 
                 latestLayout.items.forEach((savedItem) => {
                     const catalogItem = catalogById.get(savedItem.catalogItemId);
@@ -83,9 +97,10 @@ export default function Aquarium3D() {
                             category: catalogItem.category,
                             type: catalogItem.type,
                             url: catalogItem.url,
-                            image: catalogItem.imageKey,
+                            image: getImageFromKey(catalogItem.imageKey),
                         },
-                        savedItem.transform.position
+                        savedItem.transform.position,
+                        savedItem.transform
                     );
                 });
             } catch (error) {
@@ -94,7 +109,7 @@ export default function Aquarium3D() {
         };
 
         restoreLatestLayout();
-    }, [addItem, loading]);
+    }, [addItem, loading, size, sizeKey, tankNameKey]);
 
     const { savingLayout, handleSaveLayout } = useLayoutSave({
         size,

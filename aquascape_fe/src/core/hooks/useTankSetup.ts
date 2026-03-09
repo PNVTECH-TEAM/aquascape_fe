@@ -7,7 +7,7 @@ import { Water } from "three/examples/jsm/objects/Water";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 // @ts-ignore
 import { clone as cloneSkinnedObject } from "three/examples/jsm/utils/SkeletonUtils";
-import type { TankSize, TankInfo, TankLayoutItem } from "@app/core/interface";
+import type { TankSize, TankInfo, TankItemTransform, TankLayoutItem } from "@app/core/interface";
 import { calculateTankInfo } from "@app/core/utils/calculateTankInfo";
 import { FishSwimmer } from "./useFishSwimmer";
 import { Fish2DSwimmer } from "./useFish2DSwimmer";
@@ -57,7 +57,7 @@ export const useTankSetup = (
     const obstacleObjectsRef = useRef<THREE.Object3D[]>([]);
     const modelTemplateCacheRef = useRef<Map<string, THREE.Object3D>>(new Map());
     const pointerDownHandlerRef = useRef<((event: PointerEvent) => void) | null>(null);
-    const addItemRef = useRef<((item: unknown, pos?: THREE.Vector3) => void) | null>(null);
+    const addItemRef = useRef<((item: unknown, pos?: THREE.Vector3, transform?: TankItemTransform) => void) | null>(null);
     const feedingStartedAtRef = useRef<number>(0);
     const feedingUntilRef = useRef<number>(0);
     const feedingSpawnPendingRef = useRef<boolean>(false);
@@ -278,10 +278,28 @@ export const useTankSetup = (
         waterRef.current = water;
         scene.add(tankGroup);
 
+        itemsRef.current = [];
+        draggableObjectsRef.current = [];
+        obstacleObjectsRef.current = [];
+        selectedItemRef.current = null;
+        fish2DSwimmersRef.current.forEach((swimmer) => swimmer.dispose());
+        fish2DSwimmersRef.current.clear();
+        if (fishSwimmerRef.current) {
+            fishSwimmerRef.current.dispose();
+            fishSwimmerRef.current = null;
+        }
+
         const gltfLoader = new GLTFLoader();
 
+        const applySavedTransform = (obj: THREE.Object3D, transform?: TankItemTransform) => {
+            if (!transform) return;
+            obj.position.set(transform.position.x, transform.position.y, transform.position.z);
+            obj.rotation.set(transform.rotation.x, transform.rotation.y, transform.rotation.z);
+            obj.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
+        };
+
         // primary addItem helper with extension detection and optional drop position
-        const addItemToTank = (item: any, pos?: THREE.Vector3) => {
+        const addItemToTank = (item: any, pos?: THREE.Vector3, transform?: TankItemTransform) => {
             let url: string | undefined;
 
             if (typeof item === 'string') {
@@ -342,6 +360,7 @@ export const useTankSetup = (
                         : GLASS_THICKNESS + newSize.y / 2;
                 }
 
+                applySavedTransform(model, transform);
                 scene.add(model);
 
                 registerTankItem(
@@ -451,6 +470,7 @@ export const useTankSetup = (
                         );
 
                         mesh.position.set(initialX, initialY, initialZ);
+                        applySavedTransform(mesh, transform);
 
                         scene.add(mesh);
 
@@ -791,6 +811,13 @@ export const useTankSetup = (
                 fishSwimmerRef.current.dispose();
                 fishSwimmerRef.current = null;
             }
+            fish2DSwimmersRef.current.forEach((swimmer) => swimmer.dispose());
+            fish2DSwimmersRef.current.clear();
+            itemsRef.current = [];
+            draggableObjectsRef.current = [];
+            obstacleObjectsRef.current = [];
+            selectedItemRef.current = null;
+            addItemRef.current = null;
         };
     }, [size, onLoadingComplete, fishSize, onItemAdded]);
 
@@ -854,12 +881,13 @@ export const useTankSetup = (
         loading,
         handleApplySize,
         handleResetView,
-        addItem: (item: unknown, position) =>
+        addItem: (item: unknown, position, transform) =>
             addItemRef.current?.(
                 item,
                 position
                     ? new THREE.Vector3(position.x, position.y, position.z)
-                    : undefined
+                    : undefined,
+                transform
             ),
         triggerFishRush,
         getLayoutSnapshot

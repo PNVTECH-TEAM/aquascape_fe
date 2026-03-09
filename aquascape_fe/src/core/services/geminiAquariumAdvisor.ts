@@ -24,25 +24,30 @@ export class AquariumAdviceRateLimitError extends Error {
     }
 }
 
-const normalizeAquariumAdviceApiUrl = (rawUrl?: string): string => {
-    const fallback = "/api/v1/aquarium/advice";
-    if (!rawUrl?.trim()) return fallback;
+const DEFAULT_ADVICE_PATH = "/api/v1/aquarium/advice";
 
-    const normalized = rawUrl.trim().replace(/\/+$/, "");
-    if (normalized.endsWith("/api/v1/aquarium/advice")) return normalized;
+const toAbsoluteAdviceUrl = (rawUrl?: string): string => {
+    const trimmed = String(rawUrl ?? "").trim();
+    if (!trimmed) return DEFAULT_ADVICE_PATH;
 
-    // Support when shared env var is set to diagnosis endpoint.
-    if (normalized.endsWith("/api/v1/diagnose")) {
-        return normalized.replace(/\/api\/v1\/diagnose$/, "/api/v1/aquarium/advice");
+    const normalized = trimmed.replace(/\/+$/, "");
+
+    if (/\/api\/v\d+\/aquarium\/advice$/i.test(normalized)) {
+        return normalized;
     }
 
-    return `${normalized}/api/v1/aquarium/advice`;
+    if (/^https?:\/\//i.test(normalized)) {
+        return `${normalized}${DEFAULT_ADVICE_PATH}`;
+    }
+
+    return normalized.startsWith("/")
+        ? normalized
+        : `/${normalized}`;
 };
 
-const BACKEND_URL = normalizeAquariumAdviceApiUrl(
+const ADVICE_API_URL = toAbsoluteAdviceUrl(
     import.meta.env.VITE_AQUARIUM_ADVICE_API_URL ||
-    import.meta.env.VITE_AQUARIUM_AI_API_URL ||
-    import.meta.env.VITE_BACKEND_URL
+    import.meta.env.VITE_AQUARIUM_AI_API_URL
 );
 
 let rateLimitUntilMs = 0;
@@ -80,7 +85,7 @@ export const getAquariumAdviceFromAI = async (
 
     try {
         const response = await axios.post(
-            BACKEND_URL,
+            ADVICE_API_URL,
             payload,
             {
                 headers: { "Content-Type": "application/json" },

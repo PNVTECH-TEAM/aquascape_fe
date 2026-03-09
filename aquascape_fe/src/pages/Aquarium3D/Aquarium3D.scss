@@ -7,8 +7,6 @@
 }
 
 .aquarium3d-page {
-    position: fixed;
-    inset: 0;
     font-family: 'Segoe UI', Roboto, sans-serif;
     background: #000;
     color: #fff;
@@ -20,7 +18,7 @@
 
 @media (max-width: 1024px) and (orientation: portrait) {
     .aquarium3d-page::before {
-        content: "Please rotate your phone to landscape for Aquarium 3D.";
+        content: "📱 Vui lòng xoay ngang điện thoại để trải nghiệm ứng dụng";
         position: fixed;
         inset: 0;
         background: #0c2461;
@@ -35,12 +33,14 @@
         line-height: 1.5;
     }
 
-    .explorer-panel {
-        width: 78vw;
-    }
+    .aquarium3d-page {
+        .explorer-panel {
+            width: 78vw;
+        }
 
-    .explorer-toggle.active {
-        left: 78vw;
+        .explorer-toggle.active {
+            left: 78vw;
+        }
     }
 }
 
@@ -833,7 +833,3 @@
         font-size: 10px;
     }
 }
-
-
-
-
