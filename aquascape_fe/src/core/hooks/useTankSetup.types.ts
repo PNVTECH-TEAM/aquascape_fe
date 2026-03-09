@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 import type * as THREE from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import type { TankInfo, TankLayoutItem, TankSize, Vector3Data } from "@app/core/interface";
+import type { TankInfo, TankItemTransform, TankLayoutItem, TankSize, Vector3Data } from "@app/core/interface";
 
 export interface UseTankSetupReturn {
     containerRef: RefObject<HTMLDivElement | null>;
@@ -10,7 +10,7 @@ export interface UseTankSetupReturn {
     loading: boolean;
     handleApplySize: (customSize: TankSize) => void;
     handleResetView: () => void;
-    addItem: (item: unknown, position?: Vector3Data) => void;
+    addItem: (item: unknown, position?: Vector3Data, transform?: TankItemTransform) => void;
     triggerFishRush: (durationSeconds?: number) => void;
     getLayoutSnapshot: () => TankLayoutItem[];
 }

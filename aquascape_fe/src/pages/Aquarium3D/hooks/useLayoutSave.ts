@@ -17,24 +17,40 @@ export const useLayoutSave = ({
     const { t } = useTranslation();
     const [savingLayout, setSavingLayout] = useState<boolean>(false);
     const [activeTankId, setActiveTankId] = useState<string>("");
+    const sizeKey = `${size.width}x${size.height}x${size.depth}`;
+    const tankNameKey = `My Tank ${sizeKey}`;
+    const isSameSize = (a: TankSize, b: TankSize) =>
+        a.width === b.width && a.height === b.height && a.depth === b.depth;
 
     const ensureActiveTankId = useCallback(async (): Promise<string> => {
-        if (activeTankId) return activeTankId;
+        if (activeTankId) {
+            const existingTanks = await getTanks();
+            const currentTank = existingTanks.find((tank) => tank.id === activeTankId);
+            if (currentTank && (currentTank.name === tankNameKey || isSameSize(currentTank.size, size))) {
+                return activeTankId;
+            }
+        }
 
         const existingTanks = await getTanks();
-        if (existingTanks.length > 0) {
-            const latestTankId = existingTanks[0].id;
-            setActiveTankId(latestTankId);
-            return latestTankId;
+        const matchedTankByName = existingTanks.find((tank) => tank.name === tankNameKey);
+        if (matchedTankByName) {
+            setActiveTankId(matchedTankByName.id);
+            return matchedTankByName.id;
+        }
+
+        const matchedTank = existingTanks.find((tank) => isSameSize(tank.size, size));
+        if (matchedTank) {
+            setActiveTankId(matchedTank.id);
+            return matchedTank.id;
         }
 
         const createdTank = await createTank({
-            name: `My Tank ${new Date().toISOString().slice(0, 10)}`,
+            name: tankNameKey,
             size,
         });
         setActiveTankId(createdTank.id);
         return createdTank.id;
-    }, [activeTankId, size]);
+    }, [activeTankId, size, sizeKey, tankNameKey]);
 
     const handleSaveLayout = useCallback(async () => {
         if (savingLayout) return;

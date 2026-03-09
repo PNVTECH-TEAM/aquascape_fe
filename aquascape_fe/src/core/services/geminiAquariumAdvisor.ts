@@ -24,9 +24,31 @@ export class AquariumAdviceRateLimitError extends Error {
     }
 }
 
-const BACKEND_URL =
-    import.meta.env.VITE_AQUARIUM_AI_API_URL ||
-    `${import.meta.env.VITE_BACKEND_URL}`;
+const DEFAULT_ADVICE_PATH = "/api/v1/aquarium/advice";
+
+const toAbsoluteAdviceUrl = (rawUrl?: string): string => {
+    const trimmed = String(rawUrl ?? "").trim();
+    if (!trimmed) return DEFAULT_ADVICE_PATH;
+
+    const normalized = trimmed.replace(/\/+$/, "");
+
+    if (/\/api\/v\d+\/aquarium\/advice$/i.test(normalized)) {
+        return normalized;
+    }
+
+    if (/^https?:\/\//i.test(normalized)) {
+        return `${normalized}${DEFAULT_ADVICE_PATH}`;
+    }
+
+    return normalized.startsWith("/")
+        ? normalized
+        : `/${normalized}`;
+};
+
+const ADVICE_API_URL = toAbsoluteAdviceUrl(
+    import.meta.env.VITE_AQUARIUM_ADVICE_API_URL ||
+    import.meta.env.VITE_AQUARIUM_AI_API_URL
+);
 
 let rateLimitUntilMs = 0;
 const adviceCache = new Map<string, AquariumAdviceResponse>();
@@ -63,7 +85,7 @@ export const getAquariumAdviceFromAI = async (
 
     try {
         const response = await axios.post(
-            BACKEND_URL,
+            ADVICE_API_URL,
             payload,
             {
                 headers: { "Content-Type": "application/json" },

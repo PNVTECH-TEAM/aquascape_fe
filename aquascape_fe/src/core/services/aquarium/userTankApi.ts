@@ -6,14 +6,14 @@ import type {
     UpdateTankPayload,
     UpsertTankLayoutPayload,
 } from "@app/core/interface/aquarium.interface";
-import { DEFAULT_USER_ID, USER_TANKS_API_BASE } from "./config";
+import { getCurrentAquariumUserId, USER_TANKS_API_BASE } from "./config";
 import { mapUserTankToAquariumTank, mapUserTankToLayout } from "./mappers";
 import type { ListEnvelope, SaveUserTankRequest, UserTankDto } from "./types";
 import { clone, createId, unwrapList } from "./utils";
 
 const fetchUserTanks = async (): Promise<UserTankDto[]> => {
     const response = await axios.get<ListEnvelope<UserTankDto>>(USER_TANKS_API_BASE, {
-        params: { userId: DEFAULT_USER_ID },
+        params: { userId: getCurrentAquariumUserId() },
     });
     return unwrapList(response.data);
 };
@@ -39,7 +39,7 @@ export const createTank = async (payload: CreateTankPayload): Promise<AquariumTa
     };
 
     const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
-        params: { userId: DEFAULT_USER_ID },
+        params: { userId: getCurrentAquariumUserId() },
     });
 
     return clone(mapUserTankToAquariumTank(response.data, payload.size));
@@ -55,7 +55,7 @@ export const updateTank = async (
     };
 
     const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
-        params: { userId: DEFAULT_USER_ID },
+        params: { userId: getCurrentAquariumUserId() },
     });
 
     return clone(mapUserTankToAquariumTank(response.data, updates.size));
@@ -63,7 +63,7 @@ export const updateTank = async (
 
 export const deleteTank = async (tankId: string): Promise<boolean> => {
     await axios.delete(`${USER_TANKS_API_BASE}/${tankId}`, {
-        params: { userId: DEFAULT_USER_ID },
+        params: { userId: getCurrentAquariumUserId() },
     });
     return true;
 };
@@ -102,7 +102,7 @@ export const saveTankLayout = async (
     };
 
     const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
-        params: { userId: DEFAULT_USER_ID },
+        params: { userId: getCurrentAquariumUserId() },
     });
 
     const mapped = mapUserTankToLayout(response.data, payload.size);
