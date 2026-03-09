@@ -11,7 +11,7 @@ const Header: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 p-5 bg-gradient-to-b from-blue-600 to-sky-400">
+    <header className="fixed top-0 inset-x-0 z-50 p-5 bg-gradient-to-b from-blue-600 to-sky-400">
       
       <div className="flex items-center justify-between mb-5 mt-5">
         <div className="flex items-start gap-3">

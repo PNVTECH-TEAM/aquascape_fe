@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
-declare module '*.svg' {
-  const content: any;
-  export default content;
+
+declare module 'three/examples/jsm/controls/OrbitControls' {
+    export { OrbitControls } from 'three';
 }
+
+declare module 'three/examples/jsm/objects/Water';

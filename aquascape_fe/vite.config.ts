@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { default as react } from "@vitejs/plugin-react";
 import path from "path";
-import { loadEnv,defineConfig } from "vite";
+import { loadEnv, defineConfig } from "vite";
 export default async ({ mode }: { mode: string }) => {
   const pluginRewriteAll = (await import("vite-plugin-rewrite-all")).default;
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -27,20 +27,12 @@ export default async ({ mode }: { mode: string }) => {
       },
       host: true,
       strictPort: true,
-      port: 5173,
+      port: 5001,
       proxy: {
         "/api": {
-          target: "http://localhost:8082",
+          target: "http://localhost:8080",
           changeOrigin: true,
         },
-      },
-    },
-    test: {
-      globals: true,
-      environment: "jsdom",
-      coverage: {
-        reporter: ["text", "html"],
-        exclude: ["node_modules/"],
       },
     },
   });
