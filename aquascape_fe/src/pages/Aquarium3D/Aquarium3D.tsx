@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
+import type { TankLightingMode } from "@app/core/hooks/useTankSetup.types";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
 import { getAquariumCatalog, getLatestTankLayout, getTankPresets, getTanks } from "@app/core/services/aquariumAPI";
 import * as aquariumImages from "@app/assets/images";
@@ -14,6 +15,10 @@ export default function Aquarium3D() {
     const [panelOpen, setPanelOpen] = useState<boolean>(false);
     const [explorerOpen, setExplorerOpen] = useState<boolean>(false);
     const [scoreHudOpen, setScoreHudOpen] = useState<boolean>(true);
+    const [lightingMode, setLightingMode] = useState<TankLightingMode>("day");
+    const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
+    const [tankNameInput, setTankNameInput] = useState<string>("");
+    const [tankPreviewImageUrl, setTankPreviewImageUrl] = useState<string>("");
 
     const [size, setSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
     const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
@@ -28,6 +33,10 @@ export default function Aquarium3D() {
     useEffect(() => {
         game.resetForTank(sizeKey);
     }, [game.resetForTank, sizeKey]);
+
+    useEffect(() => {
+        setTankNameInput(tankNameKey);
+    }, [tankNameKey]);
 
     useEffect(() => {
         const fetchPresets = async () => {
@@ -61,7 +70,7 @@ export default function Aquarium3D() {
         addItem,
         triggerFishRush,
         getLayoutSnapshot,
-    } = useTankSetup(size, setSize, onLoadingComplete, 8, game.onTankItemAdded);
+    } = useTankSetup(size, setSize, onLoadingComplete, lightingMode, 8, game.onTankItemAdded);
 
     useEffect(() => {
         if (loading || restoredSizeKeyRef.current === sizeKey) return;
@@ -72,8 +81,23 @@ export default function Aquarium3D() {
                 const [tanks, catalog] = await Promise.all([getTanks(), getAquariumCatalog()]);
                 const isSameSize = (a: TankSize, b: TankSize) =>
                     a.width === b.width && a.height === b.height && a.depth === b.depth;
-                const selectedTankByName = tanks.find((tank) => tank.name === tankNameKey);
-                const selectedTank = selectedTankByName ?? tanks.find((tank) => isSameSize(tank.size, size));
+                const toTimestamp = (value?: string): number => {
+                    if (!value) return 0;
+                    const timestamp = new Date(value).getTime();
+                    return Number.isFinite(timestamp) ? timestamp : 0;
+                };
+                const pickMostRecentTank = (entries: typeof tanks) =>
+                    [...entries].sort((a, b) => {
+                        const aTime = Math.max(toTimestamp(a.updatedAt), toTimestamp(a.createdAt));
+                        const bTime = Math.max(toTimestamp(b.updatedAt), toTimestamp(b.createdAt));
+                        return bTime - aTime;
+                    })[0];
+
+                const sameNameTanks = tanks.filter((tank) => tank.name === tankNameKey);
+                const sameSizeTanks = tanks.filter((tank) => isSameSize(tank.size, size));
+                const selectedTank = pickMostRecentTank(
+                    sameNameTanks.length > 0 ? sameNameTanks : sameSizeTanks
+                );
 
                 if (!selectedTank) return;
                 const latestLayout = await getLatestTankLayout(selectedTank.id);
@@ -117,11 +141,41 @@ export default function Aquarium3D() {
         onStatusChange: game.setStatusText,
     });
 
-    const onFeedFish = () => {
-        const didFeed = game.handleFeedFish();
-        if (didFeed) {
-            triggerFishRush(7);
+    const onOpenSaveDialog = () => {
+        if (!tankNameInput.trim()) {
+            setTankNameInput(tankNameKey);
         }
+        setSaveDialogOpen(true);
+    };
+
+    const onSelectPreviewImage = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                setTankPreviewImageUrl(reader.result);
+            }
+        };
+        reader.readAsDataURL(file);
+        event.target.value = "";
+    };
+
+    const onConfirmSave = async () => {
+        const saved = await handleSaveLayout({
+            tankName: tankNameInput,
+            previewImageUrl: tankPreviewImageUrl,
+        });
+
+        if (saved) {
+            setSaveDialogOpen(false);
+        }
+    };
+
+    const onFeedFish = () => {
+        game.handleFeedFish();
+        triggerFishRush(7);
     };
 
     return (
@@ -190,7 +244,7 @@ export default function Aquarium3D() {
                 <button className="control-btn" onClick={handleResetView} title={t("AQUARIUM3D.RESET_VIEW")}>R</button>
                 <button
                     className={`control-btn save-control-btn ${savingLayout ? "disabled" : ""}`}
-                    onClick={handleSaveLayout}
+                    onClick={onOpenSaveDialog}
                     disabled={savingLayout}
                     title={t("AQUARIUM3D.SAVE_LAYOUT")}
                 >
@@ -217,6 +271,24 @@ export default function Aquarium3D() {
             <div className={`control-panel ${panelOpen ? "active" : ""}`}>
                 <button className="close-panel" onClick={() => setPanelOpen(false)}>x</button>
                 <h1>{t("AQUARIUM3D.TITLE")}</h1>
+
+                <div className="section">
+                    <div className="section-title">Lighting</div>
+                    <div className="lighting-options">
+                        <button
+                            className={`lighting-btn ${lightingMode === "day" ? "active" : ""}`}
+                            onClick={() => setLightingMode("day")}
+                        >
+                            Ban ngay
+                        </button>
+                        <button
+                            className={`lighting-btn ${lightingMode === "night" ? "active" : ""}`}
+                            onClick={() => setLightingMode("night")}
+                        >
+                            Ban dem
+                        </button>
+                    </div>
+                </div>
 
                 <div className="section">
                     <div className="section-title">{t("AQUARIUM3D.TANK_SIZE")}</div>
@@ -342,6 +414,72 @@ export default function Aquarium3D() {
                     <div className="info-label">{t("AQUARIUM3D.GLASS_WEIGHT")}</div>
                 </div>
             </div>
+
+            {saveDialogOpen && (
+                <div className="save-dialog-overlay" onClick={() => !savingLayout && setSaveDialogOpen(false)}>
+                    <div className="save-dialog" onClick={(event) => event.stopPropagation()}>
+                        <div className="save-dialog-title">Save Aquarium</div>
+
+                        <label className="save-dialog-label" htmlFor="tankNameInputDialog">
+                            Tank name
+                        </label>
+                        <input
+                            id="tankNameInputDialog"
+                            className="save-dialog-input"
+                            value={tankNameInput}
+                            onChange={(event) => setTankNameInput(event.target.value)}
+                            placeholder="My dream tank"
+                        />
+
+                        <label className="save-dialog-label" htmlFor="tankImageUrlInputDialog">
+                            Preview image URL
+                        </label>
+                        <input
+                            id="tankImageUrlInputDialog"
+                            className="save-dialog-input"
+                            value={tankPreviewImageUrl}
+                            onChange={(event) => setTankPreviewImageUrl(event.target.value)}
+                            placeholder="https://..."
+                        />
+
+                        <label className="save-dialog-upload-btn" htmlFor="tankImageFileInputDialog">
+                            Choose image file
+                        </label>
+                        <input
+                            id="tankImageFileInputDialog"
+                            className="save-dialog-file-input"
+                            type="file"
+                            accept="image/*"
+                            onChange={onSelectPreviewImage}
+                        />
+
+                        {tankPreviewImageUrl && (
+                            <img
+                                className="save-dialog-preview-image"
+                                src={tankPreviewImageUrl}
+                                alt="Tank preview"
+                            />
+                        )}
+
+                        <div className="save-dialog-actions">
+                            <button
+                                className="save-dialog-btn secondary"
+                                onClick={() => setSaveDialogOpen(false)}
+                                disabled={savingLayout}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="save-dialog-btn primary"
+                                onClick={onConfirmSave}
+                                disabled={savingLayout}
+                            >
+                                {savingLayout ? "Saving..." : "Save"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

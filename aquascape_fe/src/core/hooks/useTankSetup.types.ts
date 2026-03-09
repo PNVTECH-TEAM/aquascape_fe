@@ -3,6 +3,8 @@ import type * as THREE from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import type { TankInfo, TankItemTransform, TankLayoutItem, TankSize, Vector3Data } from "@app/core/interface";
 
+export type TankLightingMode = "day" | "night";
+
 export interface UseTankSetupReturn {
     containerRef: RefObject<HTMLDivElement | null>;
     controlsRef: RefObject<OrbitControls | null>;

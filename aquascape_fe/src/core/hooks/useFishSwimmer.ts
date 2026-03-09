@@ -28,6 +28,7 @@ export class FishSwimmer {
     private readonly obstacleProbe = new THREE.Vector3();
     private readonly obstacleClosestPoint = new THREE.Vector3();
     private readonly obstacleBox = new THREE.Box3();
+    private readonly collisionPadding = 1.2;
 
     constructor(
         fishModel: THREE.Object3D,
@@ -48,7 +49,7 @@ export class FishSwimmer {
             isTurning: false,
             turnStartTime: 0,
             turnDuration: 1.5,
-            currentSpeed: 5,
+            currentSpeed: 10,
             targetSpeed: 5,
             isPaused: false,
             nextWanderUpdate: 0,
@@ -238,6 +239,56 @@ export class FishSwimmer {
         pos.x = THREE.MathUtils.clamp(pos.x, this.bounds.minX, this.bounds.maxX);
         pos.y = THREE.MathUtils.clamp(pos.y, this.bounds.minY, this.bounds.maxY);
         pos.z = THREE.MathUtils.clamp(pos.z, this.bounds.minZ, this.bounds.maxZ);
+
+        this.resolveObstaclePenetration();
+    }
+
+    private resolveObstaclePenetration(): void {
+        const fishPos = this.fishGroup.position;
+        const checkableObstacles = this.obstacles.filter((entry) => entry.uuid !== this.fishGroup.uuid);
+        if (checkableObstacles.length === 0) return;
+
+        checkableObstacles.forEach((obstacle) => {
+            this.obstacleBox.setFromObject(obstacle);
+            const min = this.obstacleBox.min;
+            const max = this.obstacleBox.max;
+
+            const insideX = fishPos.x > min.x && fishPos.x < max.x;
+            const insideY = fishPos.y > min.y && fishPos.y < max.y;
+            const insideZ = fishPos.z > min.z && fishPos.z < max.z;
+            if (!insideX || !insideY || !insideZ) return;
+
+            const pushLeft = Math.abs(fishPos.x - min.x);
+            const pushRight = Math.abs(max.x - fishPos.x);
+            const pushDown = Math.abs(fishPos.y - min.y);
+            const pushUp = Math.abs(max.y - fishPos.y);
+            const pushBack = Math.abs(fishPos.z - min.z);
+            const pushFront = Math.abs(max.z - fishPos.z);
+
+            const candidates = [
+                { axis: "x", sign: -1, dist: pushLeft },
+                { axis: "x", sign: 1, dist: pushRight },
+                { axis: "y", sign: -1, dist: pushDown },
+                { axis: "y", sign: 1, dist: pushUp },
+                { axis: "z", sign: -1, dist: pushBack },
+                { axis: "z", sign: 1, dist: pushFront },
+            ].sort((a, b) => a.dist - b.dist);
+
+            const best = candidates[0];
+            if (!best) return;
+
+            if (best.axis === "x") {
+                fishPos.x += best.sign * (best.dist + this.collisionPadding);
+            } else if (best.axis === "y") {
+                fishPos.y += best.sign * (best.dist + this.collisionPadding);
+            } else {
+                fishPos.z += best.sign * (best.dist + this.collisionPadding);
+            }
+        });
+
+        fishPos.x = THREE.MathUtils.clamp(fishPos.x, this.bounds.minX, this.bounds.maxX);
+        fishPos.y = THREE.MathUtils.clamp(fishPos.y, this.bounds.minY, this.bounds.maxY);
+        fishPos.z = THREE.MathUtils.clamp(fishPos.z, this.bounds.minZ, this.bounds.maxZ);
     }
 
 

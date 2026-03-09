@@ -80,11 +80,13 @@ export interface TankLayout {
 export interface CreateTankPayload {
   name: string;
   size: TankSize;
+  previewImageUrl?: string;
 }
 
 export interface UpdateTankPayload {
   name?: string;
   size?: TankSize;
+  previewImageUrl?: string;
 }
 
 export interface UpsertTankLayoutPayload {

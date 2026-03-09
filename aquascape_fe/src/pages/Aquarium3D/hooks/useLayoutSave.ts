@@ -1,12 +1,17 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankLayoutItem, TankSize } from "@app/core/interface";
-import { createTank, getTanks, saveTankLayout } from "@app/core/services/aquariumAPI";
+import { createTank, getTanks, saveTankLayout, updateTank } from "@app/core/services/aquariumAPI";
 
 interface UseLayoutSaveParams {
     size: TankSize;
     getLayoutSnapshot: () => TankLayoutItem[];
     onStatusChange: (message: string) => void;
+}
+
+interface SaveTankMetadata {
+    tankName: string;
+    previewImageUrl?: string;
 }
 
 export const useLayoutSave = ({
@@ -22,17 +27,17 @@ export const useLayoutSave = ({
     const isSameSize = (a: TankSize, b: TankSize) =>
         a.width === b.width && a.height === b.height && a.depth === b.depth;
 
-    const ensureActiveTankId = useCallback(async (): Promise<string> => {
+    const ensureActiveTankId = useCallback(async (tankName: string): Promise<string> => {
         if (activeTankId) {
             const existingTanks = await getTanks();
             const currentTank = existingTanks.find((tank) => tank.id === activeTankId);
-            if (currentTank && (currentTank.name === tankNameKey || isSameSize(currentTank.size, size))) {
+            if (currentTank && (currentTank.name === tankName || isSameSize(currentTank.size, size))) {
                 return activeTankId;
             }
         }
 
         const existingTanks = await getTanks();
-        const matchedTankByName = existingTanks.find((tank) => tank.name === tankNameKey);
+        const matchedTankByName = existingTanks.find((tank) => tank.name === tankName);
         if (matchedTankByName) {
             setActiveTankId(matchedTankByName.id);
             return matchedTankByName.id;
@@ -45,21 +50,30 @@ export const useLayoutSave = ({
         }
 
         const createdTank = await createTank({
-            name: tankNameKey,
+            name: tankName,
             size,
         });
         setActiveTankId(createdTank.id);
         return createdTank.id;
-    }, [activeTankId, size, sizeKey, tankNameKey]);
+    }, [activeTankId, size]);
 
-    const handleSaveLayout = useCallback(async () => {
-        if (savingLayout) return;
+    const handleSaveLayout = useCallback(async (metadata?: SaveTankMetadata): Promise<boolean> => {
+        if (savingLayout) return false;
 
         try {
             setSavingLayout(true);
             onStatusChange(t("AQUARIUM3D.SAVING_LAYOUT"));
 
-            const tankId = await ensureActiveTankId();
+            const normalizedName = metadata?.tankName?.trim() || tankNameKey;
+            const normalizedPreviewImage = metadata?.previewImageUrl?.trim() || undefined;
+            const tankId = await ensureActiveTankId(normalizedName);
+
+            await updateTank(tankId, {
+                name: normalizedName,
+                size,
+                previewImageUrl: normalizedPreviewImage,
+            });
+
             const items = getLayoutSnapshot();
 
             await saveTankLayout(tankId, {
@@ -68,13 +82,15 @@ export const useLayoutSave = ({
             });
 
             onStatusChange(t("AQUARIUM3D.SAVE_SUCCESS"));
+            return true;
         } catch (error) {
             console.error("Error saving layout:", error);
             onStatusChange(t("AQUARIUM3D.SAVE_ERROR"));
+            return false;
         } finally {
             setSavingLayout(false);
         }
-    }, [ensureActiveTankId, getLayoutSnapshot, onStatusChange, savingLayout, size, t]);
+    }, [ensureActiveTankId, getLayoutSnapshot, onStatusChange, savingLayout, size, t, tankNameKey]);
 
     return {
         savingLayout,
