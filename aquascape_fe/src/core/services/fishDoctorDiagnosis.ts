@@ -19,6 +19,7 @@ export interface FishDoctorTreatment {
     image?: string;
     link?: string;
     price?: string;
+    description?: string;
 }
 
 export interface FishDoctorDiagnosisResult {
@@ -39,11 +40,6 @@ const normalizeDiagnosisApiUrl = (rawUrl?: string): string => {
 
     const normalized = rawUrl.trim().replace(/\/+$/, "");
     if (normalized.endsWith("/api/v1/diagnose")) return normalized;
-
-    // Support when shared env var is set to advice endpoint.
-    if (normalized.endsWith("/api/v1/aquarium/advice")) {
-        return normalized.replace(/\/api\/v1\/aquarium\/advice$/, "/api/v1/diagnose");
-    }
 
     return `${normalized}/api/v1/diagnose`;
 };
