@@ -25,6 +25,7 @@ export class FishSwimmer {
     private readonly avoidDistance = 18;
     private readonly wanderMargin = 2.5;
     private forcedTargetUntil = 0;
+    private foodTarget: THREE.Vector3 | null = null;
     private readonly obstacleProbe = new THREE.Vector3();
     private readonly obstacleClosestPoint = new THREE.Vector3();
     private readonly obstacleBox = new THREE.Box3();
@@ -200,7 +201,12 @@ export class FishSwimmer {
 
     public update(delta: number, elapsed: number): void {
         if (!this.fishGroup || this.state.isPaused) return;
-        const hasForcedTarget = (performance.now() / 1000) < this.forcedTargetUntil;
+        const hasForcedTarget =
+            this.foodTarget !== null ||
+            (performance.now() / 1000) < this.forcedTargetUntil;
+        if (this.foodTarget) {
+            this.targetPosition.copy(this.foodTarget);
+        }
 
         // --- OPTIMIZATION: Throttle raycasting ---
         if (elapsed > this.nextObstacleCheck) {
@@ -221,17 +227,20 @@ export class FishSwimmer {
 
         this.targetRotation.lookAt(this.targetPosition, this.fishGroup.position, this.fishGroup.up);
         this.targetQuaternion.setFromRotationMatrix(this.targetRotation);
+        const turnLerpSpeed = hasForcedTarget ? 6.5 : 2.0;
+        const turningLerpSpeed = hasForcedTarget ? 8.5 : 3.0;
+        const turningMoveFactor = hasForcedTarget ? 0.95 : 0.5;
 
         if (this.state.isTurning) {
             const turnProgress = (elapsed - this.state.turnStartTime) / this.state.turnDuration;
             if (turnProgress >= 1) {
                 this.state.isTurning = false;
             } else {
-                this.fishGroup.quaternion.slerp(this.targetQuaternion, 3.0 * delta);
-                this.fishGroup.translateZ(this.state.currentSpeed * this.state.speedMultiplier * 0.5 * delta);
+                this.fishGroup.quaternion.slerp(this.targetQuaternion, turningLerpSpeed * delta);
+                this.fishGroup.translateZ(this.state.currentSpeed * this.state.speedMultiplier * turningMoveFactor * delta);
             }
         } else {
-            this.fishGroup.quaternion.slerp(this.targetQuaternion, 2.0 * delta);
+            this.fishGroup.quaternion.slerp(this.targetQuaternion, turnLerpSpeed * delta);
             this.fishGroup.translateZ(this.state.currentSpeed * this.state.speedMultiplier * delta);
         }
 
@@ -301,7 +310,7 @@ export class FishSwimmer {
     }
 
     public setSpeedMultiplier(multiplier: number): void {
-        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 3);
+        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 6);
     }
 
     public steerTowards(target: THREE.Vector3, holdSeconds: number = 0.8): void {
@@ -311,6 +320,12 @@ export class FishSwimmer {
             THREE.MathUtils.clamp(target.z, this.bounds.minZ + this.wanderMargin, this.bounds.maxZ - this.wanderMargin),
         );
         this.forcedTargetUntil = (performance.now() / 1000) + Math.max(0.2, holdSeconds);
+    }
+    public setFoodTarget(target: THREE.Vector3): void {
+        this.foodTarget = target.clone();
+    }
+    public clearFoodTarget(): void {
+        this.foodTarget = null;
     }
 
     public dispose(): void {

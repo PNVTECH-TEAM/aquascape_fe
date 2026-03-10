@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AddedItemEvent } from "../types";
+import type { TankAnalysisSnapshot } from "@app/core/hooks/useTankSetup.types";
 import {
     getAquariumAdviceFromAI,
     isAquariumAdviceRateLimitError,
@@ -29,7 +30,16 @@ const classifyItem = (item: AddedItemEvent): "fish" | "plants" | "rocks" | "othe
     return "other";
 };
 
-export const useGameMechanics = () => {
+const EMPTY_ANALYSIS_SNAPSHOT: TankAnalysisSnapshot = {
+    tank: {
+        size: { width: 0, height: 0, depth: 0 },
+        volumeLiters: 0,
+        glassThicknessMm: 0,
+    },
+    items: [],
+};
+
+export const useGameMechanics = (layoutSnapshot: TankAnalysisSnapshot = EMPTY_ANALYSIS_SNAPSHOT) => {
     const { t } = useTranslation();
 
     const [stats, setStats] = useState<TankStatistics>({
@@ -40,7 +50,6 @@ export const useGameMechanics = () => {
         totalItems: 0,
     });
 
-    const [addedItems, setAddedItems] = useState<AddedItemEvent[]>([]);
     const [statusText, setStatusText] = useState<string>(
         t("AQUARIUM3D.GAME_START_HINT")
     );
@@ -54,7 +63,6 @@ export const useGameMechanics = () => {
         if (!tankKey || currentTankKeyRef.current === tankKey) return;
         currentTankKeyRef.current = tankKey;
         lastRequestedKeyRef.current = "";
-        setAddedItems([]);
         setStats({
             fish: 0,
             plants: 0,
@@ -69,22 +77,6 @@ export const useGameMechanics = () => {
 
     const onTankItemAdded = useCallback((item: AddedItemEvent) => {
         const kind = classifyItem(item);
-        setAddedItems((prev) => [...prev, item]);
-
-        setStats((prev) => {
-            const next = { ...prev };
-
-            if (kind === "fish") {
-                next.fish += 1;
-            } else if (kind === "plants") {
-                next.plants += 1;
-            } else if (kind === "rocks") {
-                next.rocks += 1;
-            }
-
-            next.totalItems += 1;
-            return next;
-        });
 
         if (kind === "fish") {
             setStatusText(`Fish added: ${item.sourceName ?? "Unknown fish"}.`);
@@ -103,6 +95,35 @@ export const useGameMechanics = () => {
 
         setStatusText(`Item added: ${item.sourceName ?? "Unknown item"}.`);
     }, []);
+
+    useEffect(() => {
+        const nextStats = layoutSnapshot.items.reduce<TankStatistics>((acc, item) => {
+            const kind = classifyItem({
+                type: item.type,
+                sourceType: item.sourceType,
+                category: item.category,
+                sourceName: item.name,
+                isFish: item.isFish,
+            });
+
+            if (kind === "fish") acc.fish += 1;
+            if (kind === "plants") acc.plants += 1;
+            if (kind === "rocks") acc.rocks += 1;
+            acc.totalItems += 1;
+            return acc;
+        }, {
+            fish: 0,
+            plants: 0,
+            rocks: 0,
+            feeds: stats.feeds,
+            totalItems: 0,
+        });
+
+        setStats((prev) => ({
+            ...nextStats,
+            feeds: prev.feeds,
+        }));
+    }, [layoutSnapshot]);
 
     const handleFeedFish = useCallback((): boolean => {
         if (stats.fish === 0) {
@@ -125,11 +146,13 @@ export const useGameMechanics = () => {
             rocks: stats.rocks,
             feeds: stats.feeds,
             totalItems: stats.totalItems,
-            itemNames: addedItems.map(
-                (item) => item.sourceName || item.category || item.sourceType || item.type
+            itemNames: layoutSnapshot.items.map(
+                (item) => item.name || item.category || item.sourceType || item.type
             ),
+            tank: layoutSnapshot.tank,
+            items: layoutSnapshot.items,
         };
-    }, [addedItems, stats.feeds, stats.fish, stats.plants, stats.rocks, stats.totalItems]);
+    }, [layoutSnapshot, stats.feeds, stats.fish, stats.plants, stats.rocks, stats.totalItems]);
 
     const adviceRequestKey = useMemo(() => {
         const names = Array.from(
@@ -137,12 +160,24 @@ export const useGameMechanics = () => {
         ).sort();
 
         return JSON.stringify({
+            tank: advicePayload.tank,
             fish: advicePayload.fish,
             plants: advicePayload.plants,
             rocks: advicePayload.rocks,
             feeds: advicePayload.feeds,
             totalItems: advicePayload.totalItems,
             names,
+            items: advicePayload.items.map((item) => ({
+                catalogItemId: item.catalogItemId,
+                name: item.name,
+                type: item.type,
+                isFish: item.isFish,
+                category: item.category,
+                sourceType: item.sourceType,
+                position: item.position,
+                size: item.size,
+                zone: item.zone,
+            })),
         });
     }, [advicePayload]);
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
-import type { TankLightingMode } from "@app/core/hooks/useTankSetup.types";
+import type { TankAnalysisSnapshot, TankLightingMode } from "@app/core/hooks/useTankSetup.types";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
 import { getAquariumCatalog, getLatestTankLayout, getTankPresets, getTanks } from "@app/core/services/aquariumAPI";
 import * as aquariumImages from "@app/assets/images";
@@ -22,13 +22,21 @@ export default function Aquarium3D() {
 
     const [size, setSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
     const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
+    const [analysisSnapshot, setAnalysisSnapshot] = useState<TankAnalysisSnapshot>({
+        tank: {
+            size: { width: 90, height: 45, depth: 45 },
+            volumeLiters: calculateTankInfo(90, 45, 45).volume,
+            glassThicknessMm: calculateTankInfo(90, 45, 45).thickness,
+        },
+        items: [],
+    });
     const [presets, setPresets] = useState<TankPreset[]>([]);
     const [presetsLoading, setPresetsLoading] = useState<boolean>(true);
     const restoredSizeKeyRef = useRef<string>("");
     const sizeKey = `${size.width}x${size.height}x${size.depth}`;
     const tankNameKey = `My Tank ${sizeKey}`;
 
-    const game = useGameMechanics();
+    const game = useGameMechanics(analysisSnapshot);
 
     useEffect(() => {
         game.resetForTank(sizeKey);
@@ -70,7 +78,15 @@ export default function Aquarium3D() {
         addItem,
         triggerFishRush,
         getLayoutSnapshot,
-    } = useTankSetup(size, setSize, onLoadingComplete, lightingMode, 8, game.onTankItemAdded);
+    } = useTankSetup(
+        size,
+        setSize,
+        onLoadingComplete,
+        lightingMode,
+        8,
+        game.onTankItemAdded,
+        setAnalysisSnapshot
+    );
 
     useEffect(() => {
         if (loading || restoredSizeKeyRef.current === sizeKey) return;

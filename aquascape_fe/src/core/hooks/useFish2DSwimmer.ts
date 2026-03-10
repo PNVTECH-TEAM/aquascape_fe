@@ -21,6 +21,7 @@ export class Fish2DSwimmer {
     private readonly stepInterval = 1 / 30;
     private accumulatedDelta = 0;
     private forcedTargetUntil = 0;
+    private foodTarget: THREE.Vector3 | null = null;
     private obstacles: THREE.Object3D[] = [];
     private raycaster = new THREE.Raycaster();
     private nextObstacleCheck = 0;
@@ -71,7 +72,11 @@ export class Fish2DSwimmer {
 
     public update(delta: number, elapsed: number): void {
         if (this.state.isPaused) return;
-        const hasForcedTarget = (performance.now() / 1000) < this.forcedTargetUntil;
+        const hasForcedTarget = this.foodTarget !== null || (performance.now() / 1000) < this.forcedTargetUntil;
+
+        if (this.foodTarget) {
+            this.targetPosition.copy(this.foodTarget);
+        }
         this.accumulatedDelta += delta;
         if (this.accumulatedDelta < this.stepInterval) {
             return;
@@ -96,7 +101,8 @@ export class Fish2DSwimmer {
             this.nextObstacleCheck = elapsed + 0.08;
         }
 
-        this.swimDirection.lerp(this.desiredDirection, stepDelta * this.turnSpeed);
+        const activeTurnSpeed = hasForcedTarget ? this.turnSpeed * 3 : this.turnSpeed;
+        this.swimDirection.lerp(this.desiredDirection, stepDelta * activeTurnSpeed);
         this.swimDirection.normalize();
 
         this.fishPlane.position.addScaledVector(
@@ -105,7 +111,9 @@ export class Fish2DSwimmer {
         );
 
         if (elapsed > this.state.nextSpeedChange) {
-            this.state.targetSpeed = THREE.MathUtils.randFloat(4, 8);
+            this.state.targetSpeed = hasForcedTarget
+                ? THREE.MathUtils.randFloat(8, 11)
+                : THREE.MathUtils.randFloat(4, 8);
             this.state.nextSpeedChange = elapsed + THREE.MathUtils.randFloat(2, 4);
         }
 
@@ -249,7 +257,7 @@ export class Fish2DSwimmer {
     }
 
     public setSpeedMultiplier(multiplier: number): void {
-        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 3);
+        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 6);
     }
 
     public steerTowards(target: THREE.Vector3, holdSeconds: number = 0.8): void {
@@ -259,6 +267,14 @@ export class Fish2DSwimmer {
             THREE.MathUtils.clamp(target.z, this.bounds.minZ + this.margin, this.bounds.maxZ - this.margin)
         );
         this.forcedTargetUntil = (performance.now() / 1000) + Math.max(0.2, holdSeconds);
+    }
+
+    public setFoodTarget(target: THREE.Vector3): void {
+        this.foodTarget = target.clone();
+    }
+
+    public clearFoodTarget(): void {
+        this.foodTarget = null;
     }
 
     public dispose(): void { }
