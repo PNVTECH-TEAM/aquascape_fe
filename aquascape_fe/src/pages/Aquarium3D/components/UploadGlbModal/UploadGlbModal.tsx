@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Modal, Progress, Input, Button, message } from "antd";
+import { Modal, Progress, Input, Button, message, Select } from "antd";
 import { 
   CloudUploadOutlined, 
   CloseOutlined, 
@@ -18,6 +18,7 @@ interface UploadGlbModalProps {
 
 const UploadGlbModal: React.FC<UploadGlbModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [assetName, setAssetName] = useState("");
+  const [assetType, setAssetType] = useState("decoration");
   const [glbFile, setGlbFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -54,6 +55,7 @@ const UploadGlbModal: React.FC<UploadGlbModalProps> = ({ isOpen, onClose, onSucc
     try {
       await uploadGlb({
         name: assetName,
+        type: assetType,
         glbFile: glbFile,
         previewImage: previewImage,
         onProgress: (percent) => {
@@ -74,6 +76,7 @@ const UploadGlbModal: React.FC<UploadGlbModalProps> = ({ isOpen, onClose, onSucc
 
   const handleClose = () => {
     setAssetName("");
+    setAssetType("decoration");
     setGlbFile(null);
     setPreviewImage(null);
     setProgress(0);
@@ -101,14 +104,32 @@ const UploadGlbModal: React.FC<UploadGlbModalProps> = ({ isOpen, onClose, onSucc
       </div>
 
       <div className="modal-body">
-        <div className="asset-name-section">
-          <label>Asset Name</label>
-          <Input 
-            placeholder="Enter asset name" 
-            value={assetName} 
-            onChange={(e) => setAssetName(e.target.value)} 
-            className="custom-input"
-          />
+        <div className="asset-info-grid">
+          <div className="asset-name-section">
+            <label>Asset Name</label>
+            <Input 
+              placeholder="Enter asset name" 
+              value={assetName} 
+              onChange={(e) => setAssetName(e.target.value)} 
+              className="custom-input"
+            />
+          </div>
+
+          <div className="asset-type-section">
+            <label>Asset Type</label>
+            <Select
+              className="custom-select"
+              value={assetType}
+              onChange={setAssetType}
+              options={[
+                { value: 'fish', label: 'Fish' },
+                { value: 'decoration', label: 'Decoration' },
+                { value: 'plant', label: 'Plant' },
+                { value: 'hardscape', label: 'Hardscape' },
+              ]}
+              popupClassName="custom-select-popup"
+            />
+          </div>
         </div>
 
         <div className="upload-areas">

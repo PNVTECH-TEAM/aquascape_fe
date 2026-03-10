@@ -54,9 +54,19 @@
     }
 
     .tank-info {
-        padding: 3px 10px !important;
-        gap: 10px !important;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: #000 !important;
+        padding-bottom: env(safe-area-inset-bottom);
+        display: flex;
+        justify-content: space-around;
+        padding-top: 8px;
+        z-index: 1003;
+        border-top: 1px solid rgba(64, 164, 255, 0.2);
     }
+
 
     .info-value {
         font-size: 13px !important;
@@ -69,7 +79,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    touch-action: pan-x pan-y;
+    touch-action: none; // Tránh nhiễu loạn với OrbitControls trên màn hình cảm ứng
 
     canvas {
         width: 100%;
@@ -329,13 +339,15 @@
     align-items: center;
     justify-content: center;
     box-shadow: inset 0 0 0 1px rgba(16, 55, 92, 0.18);
-    overflow: hidden; /* Cắt ảnh nếu vượt quá khung tròn */
+    overflow: hidden;
+    /* Cắt ảnh nếu vượt quá khung tròn */
 }
 
 .explorer-item-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Đảm bảo ảnh lấp đầy vòng tròn mà không bị biến dạng */
+    object-fit: cover;
+    /* Đảm bảo ảnh lấp đầy vòng tròn mà không bị biến dạng */
     pointer-events: none;
 }
 

@@ -80,7 +80,15 @@
     }
   }
 
-  .asset-name-section {
+  .asset-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .asset-name-section,
+  .asset-type-section {
     label {
       display: block;
       margin-bottom: 8px;
@@ -89,21 +97,52 @@
       color: #334155;
     }
 
-    .custom-input {
-      border-radius: 10px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 10px 14px;
-      font-size: 14px;
-      transition: all 0.2s;
-      color: #334155;
+    .custom-input,
+    .custom-select .ant-select-selector {
+      height: 44px !important;
+      border-radius: 12px !important;
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      padding: 0 18px !important;
+      font-size: 14px !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      color: #334155 !important;
+      width: 100%;
+      display: flex;
+      align-items: center;
 
       &:focus,
+      &:focus-within,
       &:hover {
-        border-color: #3b82f6;
-        background: #ffffff;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6 !important;
+        background: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        outline: none;
       }
+    }
+  }
+
+  .custom-select {
+    width: 100%;
+
+    &:focus,
+    &:focus-within,
+    &:hover {
+      border-color: #3b82f6 !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+      outline: none;
+    }
+
+    .ant-select-selection-item {
+      font-size: 14px;
+      color: #334155 !important;
+      font-weight: 500;
+      line-height: 42px !important;
+    }
+
+    .ant-select-arrow {
+      color: #94a3b8;
     }
   }
 
@@ -478,6 +517,24 @@
     .upload-submit-btn {
       height: 40px;
       margin-top: 5px;
+    }
+  }
+}
+
+.custom-select-popup {
+  .ant-select-item {
+    border-radius: 6px;
+    margin: 4px;
+    font-size: 13px;
+
+    &-option-selected {
+      background-color: #f0f7ff !important;
+      color: #3b82f6 !important;
+      font-weight: 600;
+    }
+
+    &:hover {
+      background-color: #f8fafc !important;
     }
   }
 }

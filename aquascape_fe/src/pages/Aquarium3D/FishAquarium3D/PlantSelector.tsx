@@ -42,7 +42,7 @@ const mapUserAssetToPlant = (asset: any): Plant => {
     image: asset.previewImageUrl,
     url: asset.glbUrl,
     category: "My Assets",
-    type: "decoration",
+    type: asset.type || "decoration",
   };
 };
 
@@ -58,7 +58,7 @@ export default function PlantSelector() {
       setLoading(true);
       const [catalogData, userData] = await Promise.all([
         getAquariumCatalog(),
-        getUserAssets().catch(() => []) // Fallback in case user assets API fails or unauthorized
+        getUserAssets().catch(() => [])
       ]);
 
       const mappedCatalog = catalogData.map(mapCatalogItemToPlant);
@@ -84,7 +84,7 @@ export default function PlantSelector() {
 
   const handleDeleteAsset = async (id: string) => {
     await deleteUserAsset(id);
-    fetchCatalog(); // Refresh list after deletion
+    fetchCatalog();
   };
 
   useEffect(() => {

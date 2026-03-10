@@ -2,6 +2,7 @@ import axios from "axios";
 
 type UploadGlbRequest = {
     name: string;
+    type: string;
     glbFile: File;
     previewImage: File;
     onProgress?: (percent: number) => void;
@@ -10,6 +11,7 @@ type UploadGlbRequest = {
 type UploadGlbResponse = {
     id: string;
     name: string;
+    type: string;
     glbUrl: string;
     previewImageUrl: string;
 };
@@ -17,6 +19,7 @@ type UploadGlbResponse = {
 export const uploadGlb = async (request: UploadGlbRequest): Promise<UploadGlbResponse> => {
     const formData = new FormData();
     formData.append("name", request.name);
+    formData.append("type", request.type);
     formData.append("glbFile", request.glbFile);
     formData.append("previewImage", request.previewImage);
 

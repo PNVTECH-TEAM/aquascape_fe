@@ -365,8 +365,8 @@ export const useTankSetup = (
 
                 registerTankItem(
                     model,
-                    isFishUrl(url) ? 'fish' : 'decoration',
-                    isFishUrl(url),
+                    isFishModel ? 'fish' : 'decoration',
+                    isFishModel,
                     metadata,
                     bounds,
                     true
@@ -587,11 +587,17 @@ export const useTankSetup = (
 
                     transformControl.detach();
                     selectedItemRef.current = null;
+                    controls.enabled = true;
                 }
             }
         };
 
         const onPointerUp = () => {
+            controls.enabled = true;
+            setFishPausedForItem(selectedItemRef.current, false);
+        };
+
+        const onPointerCancel = () => {
             controls.enabled = true;
             setFishPausedForItem(selectedItemRef.current, false);
         };
@@ -636,6 +642,8 @@ export const useTankSetup = (
         };
 
         renderer.domElement.addEventListener('pointerdown', onPointerDown);
+        renderer.domElement.addEventListener('pointerup', onPointerUp);
+        renderer.domElement.addEventListener('pointercancel', onPointerCancel);
         renderer.domElement.addEventListener('pointerenter', onPointerEnterCanvas);
         renderer.domElement.addEventListener('pointerleave', onPointerLeaveCanvas);
 
@@ -794,6 +802,7 @@ export const useTankSetup = (
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('keydown', onKeyDown);
             renderer.domElement.removeEventListener('pointerup', onPointerUp);
+            renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
             renderer.domElement.removeEventListener('pointerenter', onPointerEnterCanvas);
             renderer.domElement.removeEventListener('pointerleave', onPointerLeaveCanvas);
             if (pointerDownHandlerRef.current) {
