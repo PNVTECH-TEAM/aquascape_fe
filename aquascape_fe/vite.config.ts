@@ -27,7 +27,7 @@ export default async ({ mode }: { mode: string }) => {
       },
       host: true,
       strictPort: true,
-      port: 5173,
+      port: 5001,
       proxy: {
         "/api": {
           target: "http://localhost:8080",

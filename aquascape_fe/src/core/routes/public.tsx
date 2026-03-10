@@ -1,5 +1,4 @@
 import { AquaForestSplash, AquaIntro, LoginForm, RegisterForm } from "@app/pages";
-import Aquarium3D from "@app/pages/Aquarium3D/Aquarium3D";
 
 export const publicRoutes = [
   {
@@ -14,10 +13,6 @@ export const publicRoutes = [
   {
     path: "register",
     element: <RegisterForm />,
-  },
-  {
-    path: "aquarium3d",
-    element: <Aquarium3D />,
   },
   {
     path: "login",

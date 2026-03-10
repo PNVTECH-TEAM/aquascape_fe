@@ -3,6 +3,8 @@ import type * as THREE from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import type { TankInfo, TankItemTransform, TankLayoutItem, TankSize, Vector3Data } from "@app/core/interface";
 
+export type TankLightingMode = "day" | "night";
+
 export interface UseTankSetupReturn {
     containerRef: RefObject<HTMLDivElement | null>;
     controlsRef: RefObject<OrbitControls | null>;
@@ -13,6 +15,7 @@ export interface UseTankSetupReturn {
     addItem: (item: unknown, position?: Vector3Data, transform?: TankItemTransform) => void;
     triggerFishRush: (durationSeconds?: number) => void;
     getLayoutSnapshot: () => TankLayoutItem[];
+    getAnalysisSnapshot: () => TankAnalysisSnapshot;
 }
 
 export interface TankItem {
@@ -34,6 +37,35 @@ export interface AddedTankItemEvent {
     category?: string;
     sourceName?: string;
     isFish: boolean;
+}
+
+export interface TankItemAnalysis {
+    instanceId: string;
+    catalogItemId: string;
+    name: string;
+    category?: string;
+    sourceType?: string;
+    type: 'fish' | 'decoration' | 'image';
+    isFish: boolean;
+    position: Vector3Data;
+    rotation: Vector3Data;
+    scale: Vector3Data;
+    size: Vector3Data;
+    normalizedPosition: Vector3Data;
+    zone: {
+        horizontal: "left" | "center" | "right";
+        vertical: "bottom" | "middle" | "top";
+        depth: "front" | "middle" | "back";
+    };
+}
+
+export interface TankAnalysisSnapshot {
+    tank: {
+        size: TankSize;
+        volumeLiters: number;
+        glassThicknessMm: number;
+    };
+    items: TankItemAnalysis[];
 }
 
 export interface TankBounds {

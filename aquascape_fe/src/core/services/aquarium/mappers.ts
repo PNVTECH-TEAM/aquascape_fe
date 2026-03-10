@@ -122,14 +122,25 @@ export const mapUserTankToLayout = (
 
     const now = new Date().toISOString();
     const size = tank.preset?.size ?? defaultTankSize(fallbackSize);
-    const items: TankLayoutItem[] = (tank.layout.tankLayoutItems ?? []).map((item) => ({
-        instanceId: item.instanceId ?? createId(),
-        catalogItemId: item.catalogItemId ?? "",
-        transform: normalizeTransform(item.transform),
-    }));
+    const latestLayoutId = tank.layout.id;
+    const rawItems = tank.layout.tankLayoutItems ?? [];
+    const filteredByLayout = latestLayoutId
+        ? rawItems.filter((item) => !item.tankLayoutId || item.tankLayoutId === latestLayoutId)
+        : rawItems;
+
+    const dedupedByInstance = new Map<string, TankLayoutItem>();
+    filteredByLayout.forEach((item) => {
+        const instanceId = item.instanceId ?? createId();
+        dedupedByInstance.set(instanceId, {
+            instanceId,
+            catalogItemId: item.catalogItemId ?? "",
+            transform: normalizeTransform(item.transform),
+        });
+    });
+    const items = Array.from(dedupedByInstance.values());
 
     return {
-        id: tank.layout.id ?? createId(),
+        id: latestLayoutId ?? createId(),
         tankId: tank.id,
         version: tank.layout.version ?? tank.latestLayoutVersion ?? 1,
         size,

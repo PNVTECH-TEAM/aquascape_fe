@@ -36,6 +36,7 @@ export const getTank = async (tankId: string): Promise<AquariumTank | null> => {
 export const createTank = async (payload: CreateTankPayload): Promise<AquariumTank> => {
     const body: SaveUserTankRequest = {
         name: payload.name,
+        previewImageUrl: payload.previewImageUrl,
     };
 
     const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
@@ -52,6 +53,7 @@ export const updateTank = async (
     const body: SaveUserTankRequest = {
         id: tankId,
         name: updates.name,
+        previewImageUrl: updates.previewImageUrl,
     };
 
     const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
