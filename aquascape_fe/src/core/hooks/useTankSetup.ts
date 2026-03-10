@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
@@ -12,12 +12,11 @@ import { calculateTankInfo } from "@app/core/utils/calculateTankInfo";
 import { FishSwimmer } from "./useFishSwimmer";
 import { Fish2DSwimmer } from "./useFish2DSwimmer";
 import {
-    FEED_ORBIT_DURATION_SECONDS,
-    FEED_ORBIT_LOOPS,
     GLASS_THICKNESS,
     isFishUrl,
 } from "./useTankSetup.constants";
 import {
+    applySceneLightingMode,
     clampObjectWithinBounds,
     createTank,
     setupCameraAndControls,
@@ -25,6 +24,8 @@ import {
 } from "./useTankSetup.scene";
 import type {
     AddedTankItemEvent,
+    TankAnalysisSnapshot,
+    TankLightingMode,
     TankBounds,
     TankItem,
     TankItemSourceMetadata,
@@ -37,18 +38,26 @@ export const useTankSetup = (
     size: TankSize,
     setSize: (size: TankSize) => void,
     onLoadingComplete: () => void,
+    lightingMode: TankLightingMode = "day",
     fishSize: number = 3.0,
-    onItemAdded?: (item: AddedTankItemEvent) => void
+    onItemAdded?: (item: AddedTankItemEvent) => void,
+    onLayoutUpdated?: (snapshot: TankAnalysisSnapshot) => void
 ): UseTankSetupReturn => {
     const containerRef = useRef<HTMLDivElement>(null);
     const controlsRef = useRef<OrbitControls | null>(null);
     const transformControlRef = useRef<TransformControls | null>(null);
     const tankRef = useRef<THREE.Group | null>(null);
     const waterRef = useRef<InstanceType<typeof Water> | null>(null);
+    const sceneRef = useRef<THREE.Scene | null>(null);
+    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const lightingRigRef = useRef<ReturnType<typeof setupSceneLighting> | null>(null);
+    const boundsRef = useRef<TankBounds | null>(null);
 
     // Item management
     const itemsRef = useRef<TankItem[]>([]);
     const selectedItemRef = useRef<TankItem | null>(null);
+    const feedPelletsRef = useRef<THREE.Mesh[]>([]);
+    const feedTimeoutRef = useRef<number | null>(null);
 
     // Fish swimmer instances
     const fishSwimmerRef = useRef<FishSwimmer | null>(null);
@@ -58,19 +67,137 @@ export const useTankSetup = (
     const modelTemplateCacheRef = useRef<Map<string, THREE.Object3D>>(new Map());
     const pointerDownHandlerRef = useRef<((event: PointerEvent) => void) | null>(null);
     const addItemRef = useRef<((item: unknown, pos?: THREE.Vector3, transform?: TankItemTransform) => void) | null>(null);
-    const feedingStartedAtRef = useRef<number>(0);
-    const feedingUntilRef = useRef<number>(0);
-    const feedingSpawnPendingRef = useRef<boolean>(false);
-    const feedCenterRef = useRef<THREE.Vector3 | null>(null);
-    const feedPelletsRef = useRef<THREE.Mesh[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
     const tankInfo: TankInfo = calculateTankInfo(size.width, size.height, size.depth);
+
+    const roundValue = (value: number): number => Number(value.toFixed(4));
+
+    const toRelativeAxis = (value: number, min: number, max: number): number => {
+        if (max <= min) return 0.5;
+        return roundValue(THREE.MathUtils.clamp((value - min) / (max - min), 0, 1));
+    };
+
+    const toHorizontalZone = (ratio: number): "left" | "center" | "right" => {
+        if (ratio <= 0.33) return "left";
+        if (ratio >= 0.67) return "right";
+        return "center";
+    };
+
+    const toVerticalZone = (ratio: number): "bottom" | "middle" | "top" => {
+        if (ratio <= 0.33) return "bottom";
+        if (ratio >= 0.67) return "top";
+        return "middle";
+    };
+
+    const toDepthZone = (ratio: number): "front" | "middle" | "back" => {
+        if (ratio <= 0.33) return "front";
+        if (ratio >= 0.67) return "back";
+        return "middle";
+    };
+
+    const getAnalysisSnapshot = useCallback((): TankAnalysisSnapshot => {
+        const bounds = boundsRef.current;
+        const items = itemsRef.current.map((item) => {
+            const box = new THREE.Box3().setFromObject(item.object);
+            const boxSize = new THREE.Vector3();
+            box.getSize(boxSize);
+
+            const normalizedPosition = bounds
+                ? {
+                    x: toRelativeAxis(item.object.position.x, bounds.minX, bounds.maxX),
+                    y: toRelativeAxis(item.object.position.y, bounds.minY, bounds.maxY),
+                    z: toRelativeAxis(item.object.position.z, bounds.minZ, bounds.maxZ),
+                }
+                : { x: 0.5, y: 0.5, z: 0.5 };
+
+            return {
+                instanceId: item.id,
+                catalogItemId: item.catalogItemId,
+                name: item.sourceName ?? item.catalogItemId,
+                category: item.category,
+                sourceType: item.sourceType,
+                type: item.type,
+                isFish: Boolean(item.isFish),
+                position: {
+                    x: roundValue(item.object.position.x),
+                    y: roundValue(item.object.position.y),
+                    z: roundValue(item.object.position.z),
+                },
+                rotation: {
+                    x: roundValue(item.object.rotation.x),
+                    y: roundValue(item.object.rotation.y),
+                    z: roundValue(item.object.rotation.z),
+                },
+                scale: {
+                    x: roundValue(item.object.scale.x),
+                    y: roundValue(item.object.scale.y),
+                    z: roundValue(item.object.scale.z),
+                },
+                size: {
+                    x: roundValue(boxSize.x),
+                    y: roundValue(boxSize.y),
+                    z: roundValue(boxSize.z),
+                },
+                normalizedPosition,
+                zone: {
+                    horizontal: toHorizontalZone(normalizedPosition.x),
+                    vertical: toVerticalZone(normalizedPosition.y),
+                    depth: toDepthZone(normalizedPosition.z),
+                },
+            };
+        });
+
+        return {
+            tank: {
+                size,
+                volumeLiters: tankInfo.volume,
+                glassThicknessMm: tankInfo.thickness,
+            },
+            items,
+        };
+    }, [size, tankInfo.thickness, tankInfo.volume]);
+
+    const emitLayoutUpdated = useCallback(() => {
+        onLayoutUpdated?.(getAnalysisSnapshot());
+    }, [getAnalysisSnapshot, onLayoutUpdated]);
 
     const initializeFish = () => {
         setLoading(false);
         onLoadingComplete();
     };
+
+    const clearFeedPellets = useCallback(() => {
+        if (feedTimeoutRef.current !== null) {
+            window.clearTimeout(feedTimeoutRef.current);
+            feedTimeoutRef.current = null;
+        }
+        if (feedPelletsRef.current.length === 0 || !sceneRef.current) return;
+        feedPelletsRef.current.forEach((pellet) => {
+            sceneRef.current?.remove(pellet);
+            pellet.geometry.dispose();
+            if (Array.isArray(pellet.material)) {
+                pellet.material.forEach((material) => material.dispose());
+            } else {
+                pellet.material.dispose();
+            }
+        });
+        feedPelletsRef.current = [];
+    }, []);
+
+    const finishFishFeeding = useCallback(() => {
+        clearFeedPellets();
+
+        if (fishSwimmerRef.current) {
+            fishSwimmerRef.current.clearFoodTarget();
+            fishSwimmerRef.current.setSpeedMultiplier(1);
+        }
+
+        fish2DSwimmersRef.current.forEach((swimmer) => {
+            swimmer.clearFoodTarget();
+            swimmer.setSpeedMultiplier(1);
+        });
+    }, [clearFeedPellets]);
 
     const refreshSwimmerObstacles = () => {
         obstacleObjectsRef.current = itemsRef.current
@@ -141,6 +268,8 @@ export const useTankSetup = (
             isFish: Boolean(newItem.isFish)
         });
 
+        emitLayoutUpdated();
+
         return newItem;
     };
 
@@ -161,6 +290,7 @@ export const useTankSetup = (
         const clock = new THREE.Clock();
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x111122);
+        sceneRef.current = scene;
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({
@@ -178,6 +308,7 @@ export const useTankSetup = (
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.5;
+        rendererRef.current = renderer;
 
         if (containerRef.current) {
             containerRef.current.innerHTML = "";
@@ -203,7 +334,6 @@ export const useTankSetup = (
 
         transformControl.setMode('translate');
 
-        // TransformControls helper is what gets added to scene, not the control itself
         const helper = (transformControl as any).getHelper();
         scene.add(helper);
 
@@ -247,7 +377,6 @@ export const useTankSetup = (
                         fish2DSwimmersRef.current.delete(selectedItemRef.current.id);
                     }
 
-                    // If the deleted item is the main 3D fish, clear the ref
                     if (fishSwimmerRef.current && selectedItemRef.current.object.uuid === fishSwimmerRef.current.fishGroup.uuid) {
                         fishSwimmerRef.current.dispose();
                         fishSwimmerRef.current = null;
@@ -259,6 +388,7 @@ export const useTankSetup = (
 
                     draggableObjectsRef.current = itemsRef.current.map(i => i.object);
                     refreshSwimmerObstacles();
+                    emitLayoutUpdated();
 
                     transformControl.detach();
                     selectedItemRef.current = null;
@@ -268,20 +398,24 @@ export const useTankSetup = (
 
         window.addEventListener('keydown', onKeyDown);
 
-        setupSceneLighting(scene);
+        const lightingRig = setupSceneLighting(scene);
+        lightingRigRef.current = lightingRig;
 
         if (tankRef.current) {
             scene.remove(tankRef.current);
         }
         const { tankGroup, water, bounds } = createTank(size.width, size.height, size.depth);
+        boundsRef.current = bounds;
         tankRef.current = tankGroup;
         waterRef.current = water;
         scene.add(tankGroup);
+        applySceneLightingMode(lightingMode, scene, renderer, lightingRig, water);
 
         itemsRef.current = [];
         draggableObjectsRef.current = [];
         obstacleObjectsRef.current = [];
         selectedItemRef.current = null;
+        emitLayoutUpdated();
         fish2DSwimmersRef.current.forEach((swimmer) => swimmer.dispose());
         fish2DSwimmersRef.current.clear();
         if (fishSwimmerRef.current) {
@@ -298,7 +432,6 @@ export const useTankSetup = (
             obj.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
         };
 
-        // primary addItem helper with extension detection and optional drop position
         const addItemToTank = (item: any, pos?: THREE.Vector3, transform?: TankItemTransform) => {
             let url: string | undefined;
 
@@ -317,6 +450,8 @@ export const useTankSetup = (
 
             const extension = url.split('/').pop()?.split('.').pop()?.toLowerCase() || '';
             const metadata = resolveItemSourceMetadata(item, url);
+            const sourceTypeLower = String(item?.type || "").toLowerCase();
+            const shouldTreatAsFish = sourceTypeLower === "fish" || isFishUrl(url);
             const buildModelInstance = (template: THREE.Object3D) => {
                 const model = cloneSkinnedObject(template);
 
@@ -324,11 +459,9 @@ export const useTankSetup = (
                 const sizeBox = new THREE.Vector3();
                 box.getSize(sizeBox);
 
-                const itemType = String(item?.type || "").toLowerCase();
-                const isFishModel = itemType === "fish" || isFishUrl(url);
+                const isFishModel = shouldTreatAsFish;
                 const dominantSize = Math.max(sizeBox.x, sizeBox.y, sizeBox.z, 0.0010);
 
-                // Keep rock/decor models smaller than fish by default.
                 const targetSpan = bounds.innerWidth * (isFishModel ? 0.20 : 0.35);
                 const scaleFactor = THREE.MathUtils.clamp(targetSpan / dominantSize, 0.01, 100);
                 model.scale.multiplyScalar(scaleFactor);
@@ -365,15 +498,14 @@ export const useTankSetup = (
 
                 registerTankItem(
                     model,
-                    isFishUrl(url) ? 'fish' : 'decoration',
-                    isFishUrl(url),
+                    shouldTreatAsFish ? 'fish' : 'decoration',
+                    shouldTreatAsFish,
                     metadata,
                     bounds,
                     true
                 );
             };
 
-            // ================= 3D MODEL =================
             if (extension === 'glb' || extension === 'gltf') {
                 const cachedTemplate = modelTemplateCacheRef.current.get(url);
                 if (cachedTemplate) {
@@ -383,19 +515,17 @@ export const useTankSetup = (
 
                 gltfLoader.load(url, (gltf: any) => {
                     const template = gltf.scene as THREE.Object3D;
-                    const isFishModel = isFishUrl(url);
+                    const isFishModel = shouldTreatAsFish;
 
                     template.traverse((child: any) => {
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
 
-                            // If it's a fish, adjust material and rotation
                             if (isFishModel) {
                                 child.rotation.y = Math.PI;
 
                                 if (child.material) {
-                                    // Handle both single material and material array
                                     if (Array.isArray(child.material)) {
                                         child.material.forEach((mat: any) => {
                                             mat.roughness = 0.3;
@@ -476,8 +606,8 @@ export const useTankSetup = (
 
                         registerTankItem(
                             mesh,
-                            isFishUrl(url) ? 'fish' : 'image',
-                            isFishUrl(url),
+                            shouldTreatAsFish ? 'fish' : 'image',
+                            shouldTreatAsFish,
                             metadata,
                             bounds,
                             false
@@ -497,7 +627,7 @@ export const useTankSetup = (
 
         initializeFish();
         setupCameraAndControls(camera, controls, size.width, size.height, size.depth);
-
+        
         transformControl.addEventListener('objectChange', () => {
             const obj = transformControl.object;
             if (!obj) return;
@@ -506,12 +636,12 @@ export const useTankSetup = (
             if (!selectedItem) return;
 
             clampObjectWithinBounds(obj, selectedItem, bounds);
+            emitLayoutUpdated();
         });
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        // drag & drop support
         const handleDragOver = (e: DragEvent) => {
             e.preventDefault();
         };
@@ -636,6 +766,7 @@ export const useTankSetup = (
         };
 
         renderer.domElement.addEventListener('pointerdown', onPointerDown);
+        renderer.domElement.addEventListener('pointerup', onPointerUp);
         renderer.domElement.addEventListener('pointerenter', onPointerEnterCanvas);
         renderer.domElement.addEventListener('pointerleave', onPointerLeaveCanvas);
 
@@ -647,119 +778,14 @@ export const useTankSetup = (
             containerRef.current.addEventListener('drop', handleDrop);
         }
 
-        const clearFeedPellets = () => {
-            if (feedPelletsRef.current.length === 0) return;
-            feedPelletsRef.current.forEach((pellet) => {
-                scene.remove(pellet);
-                pellet.geometry.dispose();
-                if (Array.isArray(pellet.material)) {
-                    pellet.material.forEach((material) => material.dispose());
-                } else {
-                    pellet.material.dispose();
-                }
-            });
-            feedPelletsRef.current = [];
-            feedCenterRef.current = null;
-        };
-
-        const spawnFeedPellets = () => {
-            clearFeedPellets();
-            const pelletCount = 10;
-            const pelletRadius = Math.max(0.25, Math.min(bounds.innerWidth, bounds.innerDepth) * 0.006);
-            const surfaceY = bounds.maxY + 0.12;
-            const centerX = THREE.MathUtils.randFloat(bounds.minX + 8, bounds.maxX - 8);
-            const centerZ = THREE.MathUtils.randFloat(bounds.minZ + 8, bounds.maxZ - 8);
-            const center = new THREE.Vector3(centerX, bounds.maxY - 1.1, centerZ);
-            const geometry = new THREE.SphereGeometry(pelletRadius, 8, 8);
-            const material = new THREE.MeshStandardMaterial({
-                color: 0xd48b45,
-                roughness: 0.65,
-                metalness: 0.05,
-                emissive: 0x1d1206,
-                emissiveIntensity: 0.08,
-            });
-
-            for (let i = 0; i < pelletCount; i += 1) {
-                const pellet = new THREE.Mesh(geometry.clone(), material.clone());
-                const angle = (Math.PI * 2 * i) / pelletCount;
-                const radius = THREE.MathUtils.randFloat(0.6, 2.6);
-                pellet.position.set(
-                    centerX + Math.cos(angle) * radius,
-                    surfaceY + THREE.MathUtils.randFloat(-0.08, 0.08),
-                    centerZ + Math.sin(angle) * radius
-                );
-                pellet.userData.baseY = pellet.position.y;
-                pellet.castShadow = true;
-                pellet.receiveShadow = false;
-                scene.add(pellet);
-                feedPelletsRef.current.push(pellet);
-            }
-
-            feedCenterRef.current = center;
-        };
-
         const animate = (): void => {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
             const elapsed = clock.getElapsedTime();
-            const nowSeconds = performance.now() / 1000;
-            const isFeeding = nowSeconds < feedingUntilRef.current;
-            const speedMultiplier = 1;
-
-            if (feedingSpawnPendingRef.current) {
-                spawnFeedPellets();
-                feedingSpawnPendingRef.current = false;
-            }
-
-            if (!isFeeding && feedPelletsRef.current.length > 0) {
-                clearFeedPellets();
-            }
+            const speedMultiplier = feedPelletsRef.current.length > 0 ? 5 : 1;
 
             if (waterRef.current) {
                 waterRef.current.material.uniforms.time.value += delta * 0.3;
-            }
-
-            if (isFeeding && feedCenterRef.current) {
-                const feedTarget = feedCenterRef.current;
-                const feedingTotal = Math.max(0.001, feedingUntilRef.current - feedingStartedAtRef.current);
-                const feedingElapsed = nowSeconds - feedingStartedAtRef.current;
-                const progress = THREE.MathUtils.clamp(feedingElapsed / feedingTotal, 0, 1);
-                const orbitAngle = progress * Math.PI * 2 * FEED_ORBIT_LOOPS;
-                const orbitRadius = 2.6;
-                const targetY = Math.min(bounds.maxY - 1.2, feedTarget.y);
-                const orbitX = Math.cos(orbitAngle) * orbitRadius;
-                const orbitZ = Math.sin(orbitAngle) * orbitRadius;
-
-                if (progress >= 1) {
-                    feedingUntilRef.current = nowSeconds;
-                }
-
-                if (fishSwimmerRef.current) {
-                    fishSwimmerRef.current.steerTowards(
-                        new THREE.Vector3(feedTarget.x + orbitX, targetY, feedTarget.z + orbitZ),
-                        0.5
-                    );
-                }
-
-                Array.from(fish2DSwimmersRef.current.values()).forEach((swimmer, index) => {
-                    const fishOffsetX = ((index % 3) - 1) * 1.4;
-                    const fishOffsetZ = Math.floor(index / 3) * 1.1;
-
-                    swimmer.steerTowards(
-                        new THREE.Vector3(
-                            feedTarget.x + fishOffsetX,
-                            targetY - 0.8,
-                            feedTarget.z + fishOffsetZ
-                        ),
-                        0.5
-                    );
-                });
-
-                feedPelletsRef.current.forEach((pellet, index) => {
-                    const baseY = typeof pellet.userData.baseY === "number" ? pellet.userData.baseY : pellet.position.y;
-                    pellet.position.y = baseY + Math.sin(elapsed * 4 + index * 0.7) * 0.05;
-                    pellet.rotation.y += delta * 0.8;
-                });
             }
 
             // Update swimmers only if they are not paused
@@ -776,6 +802,63 @@ export const useTankSetup = (
                     swimmer.update(delta, elapsed);
                 }
             });
+
+            if (feedPelletsRef.current.length > 0) {
+                const fishPositions = itemsRef.current
+                    .filter((item) => item.isFish)
+                    .map((item) => item.object.position);
+
+                feedPelletsRef.current = feedPelletsRef.current.filter((pellet, index) => {
+                    const pelletState = String(pellet.userData.state ?? "falling");
+                    const surfaceY = typeof pellet.userData.surfaceY === "number"
+                        ? pellet.userData.surfaceY
+                        : bounds.maxY - 0.2;
+
+                    if (pelletState === "falling") {
+                        pellet.position.y -= (pellet.userData.fallSpeed as number) * delta;
+                        if (pellet.position.y <= surfaceY) {
+                            pellet.position.y = surfaceY;
+                            pellet.userData.state = "floating";
+                            pellet.userData.floatUntil = elapsed + 0.35;
+                        }
+                    } else if (pelletState === "floating") {
+                        const floatOffset = Math.sin(elapsed * 7 + index) * 0.05;
+                        pellet.position.y = surfaceY + floatOffset;
+                        pellet.position.x += (pellet.userData.driftX as number) * delta;
+                        pellet.position.z += (pellet.userData.driftZ as number) * delta;
+
+                        if (elapsed >= (pellet.userData.floatUntil as number)) {
+                            pellet.userData.state = "sinking";
+                        }
+                    } else {
+                        pellet.position.y -= (pellet.userData.sinkSpeed as number) * delta;
+                    }
+
+                    const material = pellet.material as THREE.MeshStandardMaterial;
+                    material.emissiveIntensity = THREE.MathUtils.clamp(
+                        0.65 + Math.sin(elapsed * 8 + index) * 0.35,
+                        0.25,
+                        1.1
+                    );
+
+                    const eaten = fishPositions.some((fishPosition) => (
+                        fishPosition.distanceTo(pellet.position) < 2.4
+                    ));
+
+                    if (!eaten) {
+                        return true;
+                    }
+
+                    scene.remove(pellet);
+                    pellet.geometry.dispose();
+                    material.dispose();
+                    return false;
+                });
+
+                if (feedPelletsRef.current.length === 0) {
+                    finishFishFeeding();
+                }
+            }
 
             controls.update();
             renderer.render(scene, camera);
@@ -806,6 +889,9 @@ export const useTankSetup = (
             clearFeedPellets();
             transformControl.dispose();
             renderer.dispose();
+            sceneRef.current = null;
+            rendererRef.current = null;
+            lightingRigRef.current = null;
 
             if (fishSwimmerRef.current) {
                 fishSwimmerRef.current.dispose();
@@ -819,7 +905,18 @@ export const useTankSetup = (
             selectedItemRef.current = null;
             addItemRef.current = null;
         };
-    }, [size, onLoadingComplete, fishSize, onItemAdded]);
+    }, [size, onLoadingComplete, fishSize, onItemAdded, clearFeedPellets, emitLayoutUpdated]);
+
+    useEffect(() => {
+        if (!sceneRef.current || !rendererRef.current || !lightingRigRef.current) return;
+        applySceneLightingMode(
+            lightingMode,
+            sceneRef.current,
+            rendererRef.current,
+            lightingRigRef.current,
+            waterRef.current
+        );
+    }, [lightingMode]);
 
     useEffect(() => {
         return () => {
@@ -842,14 +939,61 @@ export const useTankSetup = (
         controlsRef.current.reset();
     };
 
-    const triggerFishRush = (durationSeconds: number = 6): void => {
-        const nowSeconds = performance.now() / 1000;
-        const duration = Math.max(1, Math.min(durationSeconds, FEED_ORBIT_DURATION_SECONDS));
-        feedingStartedAtRef.current = nowSeconds;
-        feedingUntilRef.current = nowSeconds + duration;
-        feedingSpawnPendingRef.current = true;
-    };
+    const triggerFishRush = useCallback((): void => {
+        if (!boundsRef.current || !sceneRef.current) return;
 
+        clearFeedPellets();
+
+        const foodPosition = new THREE.Vector3(
+            0,
+            boundsRef.current.maxY - 5,
+            0
+        );
+
+        const pelletCount = 9;
+        for (let index = 0; index < pelletCount; index += 1) {
+            const pelletGeometry = new THREE.SphereGeometry(0.24, 10, 10);
+            const pelletMaterial = new THREE.MeshStandardMaterial({
+                color: 0xf0c36a,
+                emissive: new THREE.Color(0xffe7a8),
+                emissiveIntensity: 0.7,
+                roughness: 0.45,
+                metalness: 0.05,
+            });
+            const pelletMesh = new THREE.Mesh(pelletGeometry, pelletMaterial);
+
+            pelletMesh.position.set(
+                foodPosition.x + THREE.MathUtils.randFloatSpread(6),
+                boundsRef.current.maxY + THREE.MathUtils.randFloat(2.5, 5),
+                foodPosition.z + THREE.MathUtils.randFloatSpread(6)
+            );
+            pelletMesh.userData.state = "falling";
+            pelletMesh.userData.surfaceY = boundsRef.current.maxY - THREE.MathUtils.randFloat(0.1, 0.35);
+            pelletMesh.userData.fallSpeed = THREE.MathUtils.randFloat(5.5, 7);
+            pelletMesh.userData.sinkSpeed = THREE.MathUtils.randFloat(0.7, 1.1);
+            pelletMesh.userData.driftX = THREE.MathUtils.randFloatSpread(0.12);
+            pelletMesh.userData.driftZ = THREE.MathUtils.randFloatSpread(0.12);
+            pelletMesh.renderOrder = 999;
+
+            sceneRef.current.add(pelletMesh);
+            feedPelletsRef.current.push(pelletMesh);
+        }
+
+        if (fishSwimmerRef.current) {
+            fishSwimmerRef.current.setFoodTarget(foodPosition);
+            fishSwimmerRef.current.setSpeedMultiplier(5);
+        }
+
+        fish2DSwimmersRef.current.forEach((swimmer) => {
+            swimmer.setFoodTarget(foodPosition);
+            swimmer.setSpeedMultiplier(5);
+        });
+
+        feedTimeoutRef.current = window.setTimeout(() => {
+            finishFishFeeding();
+        }, 1000);
+
+    }, [clearFeedPellets, finishFishFeeding]);
     const getLayoutSnapshot = (): TankLayoutItem[] => {
         return itemsRef.current.map((item) => ({
             instanceId: item.id,
@@ -890,7 +1034,7 @@ export const useTankSetup = (
                 transform
             ),
         triggerFishRush,
-        getLayoutSnapshot
+        getLayoutSnapshot,
+        getAnalysisSnapshot
     };
 };
-

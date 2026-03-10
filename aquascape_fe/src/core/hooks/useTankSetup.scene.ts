@@ -2,7 +2,19 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Water } from "three/examples/jsm/objects/Water";
 import { GLASS_THICKNESS, WATER_LEVEL } from "./useTankSetup.constants";
-import type { TankBounds, TankItem } from "./useTankSetup.types";
+import type { TankBounds, TankItem, TankLightingMode } from "./useTankSetup.types";
+
+export interface SceneLightingRig {
+    ambientLight: THREE.AmbientLight;
+    mainLight: THREE.DirectionalLight;
+    fillLight: THREE.DirectionalLight;
+    backLight: THREE.DirectionalLight;
+    topLight: THREE.DirectionalLight;
+    pointLight1: THREE.PointLight;
+    pointLight2: THREE.PointLight;
+    pointLight3: THREE.PointLight;
+    rimLight: THREE.DirectionalLight;
+}
 
 export const calculateTankBounds = (width: number, height: number, depth: number): TankBounds => {
     const innerWidth = width - GLASS_THICKNESS * 2;
@@ -117,6 +129,7 @@ export const createTank = (width: number, height: number, depth: number): {
         alpha: 0.4,
     });
 
+    water.renderOrder = 1;
     water.rotation.x = -Math.PI / 2;
     water.position.set(0, height * WATER_LEVEL - GLASS_THICKNESS, 0);
     water.material.depthWrite = true;
@@ -157,7 +170,7 @@ export const setupCameraAndControls = (
     controls.update();
 };
 
-export const setupSceneLighting = (scene: THREE.Scene) => {
+export const setupSceneLighting = (scene: THREE.Scene): SceneLightingRig => {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
@@ -201,6 +214,101 @@ export const setupSceneLighting = (scene: THREE.Scene) => {
     const rimLight = new THREE.DirectionalLight(0xccddff, 0.5);
     rimLight.position.set(-10, 20, 30);
     scene.add(rimLight);
+
+    return {
+        ambientLight,
+        mainLight,
+        fillLight,
+        backLight,
+        topLight,
+        pointLight1,
+        pointLight2,
+        pointLight3,
+        rimLight,
+    };
+};
+
+export const applySceneLightingMode = (
+    mode: TankLightingMode,
+    scene: THREE.Scene,
+    renderer: THREE.WebGLRenderer,
+    lighting: SceneLightingRig,
+    water?: InstanceType<typeof Water> | null
+) => {
+    if (mode === "night") {
+        scene.background = new THREE.Color(0x060b18);
+        renderer.toneMappingExposure = 0.8;
+
+        lighting.ambientLight.color.set(0x8eb6ff);
+        lighting.ambientLight.intensity = 0.3;
+
+        lighting.mainLight.color.set(0x90b8ff);
+        lighting.mainLight.intensity = 0.5;
+
+        lighting.fillLight.color.set(0x5579c5);
+        lighting.fillLight.intensity = 0.4;
+
+        lighting.backLight.color.set(0x9cc7ff);
+        lighting.backLight.intensity = 0.35;
+
+        lighting.topLight.color.set(0x9db7ff);
+        lighting.topLight.intensity = 0.45;
+
+        lighting.pointLight1.color.set(0x4a86ff);
+        lighting.pointLight1.intensity = 0.65;
+
+        lighting.pointLight2.color.set(0x294f92);
+        lighting.pointLight2.intensity = 0.2;
+
+        lighting.pointLight3.color.set(0x42c9c9);
+        lighting.pointLight3.intensity = 0.25;
+
+        lighting.rimLight.color.set(0xb5ccff);
+        lighting.rimLight.intensity = 0.6;
+
+        if (water) {
+            water.material.uniforms.sunColor.value = new THREE.Color(0x6f90ff);
+            water.material.uniforms.waterColor.value = new THREE.Color(0x173a62);
+            water.material.uniforms.distortionScale.value = 1.8;
+        }
+        return;
+    }
+
+    scene.background = new THREE.Color(0x111122);
+    renderer.toneMappingExposure = 1.5;
+
+    lighting.ambientLight.color.set(0xffffff);
+    lighting.ambientLight.intensity = 0.8;
+
+    lighting.mainLight.color.set(0xfff5e6);
+    lighting.mainLight.intensity = 1.5;
+
+    lighting.fillLight.color.set(0xe6f0ff);
+    lighting.fillLight.intensity = 0.8;
+
+    lighting.backLight.color.set(0xffffff);
+    lighting.backLight.intensity = 0.6;
+
+    lighting.topLight.color.set(0xffffff);
+    lighting.topLight.intensity = 1.2;
+
+    lighting.pointLight1.color.set(0xaaccff);
+    lighting.pointLight1.intensity = 0.8;
+
+    lighting.pointLight2.color.set(0xffccaa);
+    lighting.pointLight2.intensity = 0.5;
+
+    lighting.pointLight3.color.set(0xaaffcc);
+    lighting.pointLight3.intensity = 0.5;
+
+    lighting.rimLight.color.set(0xccddff);
+    lighting.rimLight.intensity = 0.5;
+
+    if (water) {
+        water.material.uniforms.sunColor.value = new THREE.Color(0xffffff);
+        water.material.uniforms.waterColor.value = new THREE.Color(0x88ccff);
+        water.material.uniforms.distortionScale.value = 2.5;
+    }
 };
 
 export const clampObjectWithinBounds = (obj: THREE.Object3D, selectedItem: TankItem, bounds: TankBounds) => {

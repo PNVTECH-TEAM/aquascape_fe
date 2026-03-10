@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import type { TankAnalysisSnapshot } from "@app/core/hooks/useTankSetup.types";
+
 export interface AquariumAdviceRequest {
     fish: number;
     plants: number;
@@ -7,6 +9,8 @@ export interface AquariumAdviceRequest {
     feeds: number;
     totalItems: number;
     itemNames: string[];
+    tank: TankAnalysisSnapshot["tank"];
+    items: TankAnalysisSnapshot["items"];
 }
 
 export interface AquariumAdviceResponse {
@@ -56,12 +60,24 @@ const adviceCache = new Map<string, AquariumAdviceResponse>();
 const buildCacheKey = (payload: AquariumAdviceRequest): string => {
     const names = Array.from(new Set(payload.itemNames.map((name) => name.trim()).filter(Boolean))).sort();
     return JSON.stringify({
+        tank: payload.tank,
         fish: payload.fish,
         plants: payload.plants,
         rocks: payload.rocks,
         feeds: payload.feeds,
         totalItems: payload.totalItems,
         names,
+        items: payload.items.map((item) => ({
+            catalogItemId: item.catalogItemId,
+            name: item.name,
+            type: item.type,
+            isFish: item.isFish,
+            category: item.category,
+            sourceType: item.sourceType,
+            position: item.position,
+            size: item.size,
+            zone: item.zone,
+        })),
     });
 };
 
