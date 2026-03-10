@@ -214,12 +214,13 @@
 .explorer-selector {
     height: 100%;
     display: flex;
+    gap: 5px;
     flex-direction: column;
 }
 
-.explorer-top {
-    margin-bottom: 10px;
-}
+// .explorer-top {
+//     margin-bottom: 10px;
+// }
 
 .explorer-tabs {
     display: grid;
@@ -251,6 +252,36 @@
     box-shadow: 0 6px 14px rgba(18, 121, 211, 0.35);
 }
 
+.explorer-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+
+    &:hover {
+        background: rgba(59, 130, 246, 0.25);
+        color: #fff;
+        border-color: #60a5fa;
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    .anticon {
+        font-size: 14px;
+    }
+}
+
 .explorer-grid {
     flex: 1;
     overflow-y: auto;
@@ -259,6 +290,7 @@
     gap: 10px;
     align-content: start;
     padding-right: 2px;
+    margin-top: 15px;
 }
 
 .explorer-item-card {
@@ -297,12 +329,13 @@
     align-items: center;
     justify-content: center;
     box-shadow: inset 0 0 0 1px rgba(16, 55, 92, 0.18);
+    overflow: hidden; /* Cắt ảnh nếu vượt quá khung tròn */
 }
 
 .explorer-item-image {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Đảm bảo ảnh lấp đầy vòng tròn mà không bị biến dạng */
     pointer-events: none;
 }
 

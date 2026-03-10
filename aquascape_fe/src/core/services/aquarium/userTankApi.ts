@@ -6,13 +6,13 @@ import type {
     UpdateTankPayload,
     UpsertTankLayoutPayload,
 } from "@app/core/interface/aquarium.interface";
-import { getCurrentAquariumUserId, USER_TANKS_API_BASE } from "./config";
+import { getCurrentAquariumUserId } from "./config";
 import { mapUserTankToAquariumTank, mapUserTankToLayout } from "./mappers";
 import type { ListEnvelope, SaveUserTankRequest, UserTankDto } from "./types";
 import { clone, createId, unwrapList } from "./utils";
 
 const fetchUserTanks = async (): Promise<UserTankDto[]> => {
-    const response = await axios.get<ListEnvelope<UserTankDto>>(USER_TANKS_API_BASE, {
+    const response = await axios.get<ListEnvelope<UserTankDto>>("/user-tanks", {
         params: { userId: getCurrentAquariumUserId() },
     });
     return unwrapList(response.data);
@@ -38,7 +38,7 @@ export const createTank = async (payload: CreateTankPayload): Promise<AquariumTa
         name: payload.name,
     };
 
-    const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
+    const response = await axios.post<UserTankDto>("/user-tanks", body, {
         params: { userId: getCurrentAquariumUserId() },
     });
 
@@ -54,7 +54,7 @@ export const updateTank = async (
         name: updates.name,
     };
 
-    const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
+    const response = await axios.post<UserTankDto>("/user-tanks", body, {
         params: { userId: getCurrentAquariumUserId() },
     });
 
@@ -62,7 +62,7 @@ export const updateTank = async (
 };
 
 export const deleteTank = async (tankId: string): Promise<boolean> => {
-    await axios.delete(`${USER_TANKS_API_BASE}/${tankId}`, {
+    await axios.delete(`/user-tanks/${tankId}`, {
         params: { userId: getCurrentAquariumUserId() },
     });
     return true;
@@ -101,7 +101,7 @@ export const saveTankLayout = async (
         items: payload.items,
     };
 
-    const response = await axios.post<UserTankDto>(USER_TANKS_API_BASE, body, {
+    const response = await axios.post<UserTankDto>("/user-tanks", body, {
         params: { userId: getCurrentAquariumUserId() },
     });
 
