@@ -25,9 +25,11 @@ export class FishSwimmer {
     private readonly avoidDistance = 18;
     private readonly wanderMargin = 2.5;
     private forcedTargetUntil = 0;
+    private foodTarget: THREE.Vector3 | null = null;
     private readonly obstacleProbe = new THREE.Vector3();
     private readonly obstacleClosestPoint = new THREE.Vector3();
     private readonly obstacleBox = new THREE.Box3();
+    private readonly collisionPadding = 1.2;
 
     constructor(
         fishModel: THREE.Object3D,
@@ -48,7 +50,7 @@ export class FishSwimmer {
             isTurning: false,
             turnStartTime: 0,
             turnDuration: 1.5,
-            currentSpeed: 5,
+            currentSpeed: 10,
             targetSpeed: 5,
             isPaused: false,
             nextWanderUpdate: 0,
@@ -199,7 +201,12 @@ export class FishSwimmer {
 
     public update(delta: number, elapsed: number): void {
         if (!this.fishGroup || this.state.isPaused) return;
-        const hasForcedTarget = (performance.now() / 1000) < this.forcedTargetUntil;
+        const hasForcedTarget =
+            this.foodTarget !== null ||
+            (performance.now() / 1000) < this.forcedTargetUntil;
+        if (this.foodTarget) {
+            this.targetPosition.copy(this.foodTarget);
+        }
 
         // --- OPTIMIZATION: Throttle raycasting ---
         if (elapsed > this.nextObstacleCheck) {
@@ -220,17 +227,20 @@ export class FishSwimmer {
 
         this.targetRotation.lookAt(this.targetPosition, this.fishGroup.position, this.fishGroup.up);
         this.targetQuaternion.setFromRotationMatrix(this.targetRotation);
+        const turnLerpSpeed = hasForcedTarget ? 6.5 : 2.0;
+        const turningLerpSpeed = hasForcedTarget ? 8.5 : 3.0;
+        const turningMoveFactor = hasForcedTarget ? 0.95 : 0.5;
 
         if (this.state.isTurning) {
             const turnProgress = (elapsed - this.state.turnStartTime) / this.state.turnDuration;
             if (turnProgress >= 1) {
                 this.state.isTurning = false;
             } else {
-                this.fishGroup.quaternion.slerp(this.targetQuaternion, 3.0 * delta);
-                this.fishGroup.translateZ(this.state.currentSpeed * this.state.speedMultiplier * 0.5 * delta);
+                this.fishGroup.quaternion.slerp(this.targetQuaternion, turningLerpSpeed * delta);
+                this.fishGroup.translateZ(this.state.currentSpeed * this.state.speedMultiplier * turningMoveFactor * delta);
             }
         } else {
-            this.fishGroup.quaternion.slerp(this.targetQuaternion, 2.0 * delta);
+            this.fishGroup.quaternion.slerp(this.targetQuaternion, turnLerpSpeed * delta);
             this.fishGroup.translateZ(this.state.currentSpeed * this.state.speedMultiplier * delta);
         }
 
@@ -238,6 +248,56 @@ export class FishSwimmer {
         pos.x = THREE.MathUtils.clamp(pos.x, this.bounds.minX, this.bounds.maxX);
         pos.y = THREE.MathUtils.clamp(pos.y, this.bounds.minY, this.bounds.maxY);
         pos.z = THREE.MathUtils.clamp(pos.z, this.bounds.minZ, this.bounds.maxZ);
+
+        this.resolveObstaclePenetration();
+    }
+
+    private resolveObstaclePenetration(): void {
+        const fishPos = this.fishGroup.position;
+        const checkableObstacles = this.obstacles.filter((entry) => entry.uuid !== this.fishGroup.uuid);
+        if (checkableObstacles.length === 0) return;
+
+        checkableObstacles.forEach((obstacle) => {
+            this.obstacleBox.setFromObject(obstacle);
+            const min = this.obstacleBox.min;
+            const max = this.obstacleBox.max;
+
+            const insideX = fishPos.x > min.x && fishPos.x < max.x;
+            const insideY = fishPos.y > min.y && fishPos.y < max.y;
+            const insideZ = fishPos.z > min.z && fishPos.z < max.z;
+            if (!insideX || !insideY || !insideZ) return;
+
+            const pushLeft = Math.abs(fishPos.x - min.x);
+            const pushRight = Math.abs(max.x - fishPos.x);
+            const pushDown = Math.abs(fishPos.y - min.y);
+            const pushUp = Math.abs(max.y - fishPos.y);
+            const pushBack = Math.abs(fishPos.z - min.z);
+            const pushFront = Math.abs(max.z - fishPos.z);
+
+            const candidates = [
+                { axis: "x", sign: -1, dist: pushLeft },
+                { axis: "x", sign: 1, dist: pushRight },
+                { axis: "y", sign: -1, dist: pushDown },
+                { axis: "y", sign: 1, dist: pushUp },
+                { axis: "z", sign: -1, dist: pushBack },
+                { axis: "z", sign: 1, dist: pushFront },
+            ].sort((a, b) => a.dist - b.dist);
+
+            const best = candidates[0];
+            if (!best) return;
+
+            if (best.axis === "x") {
+                fishPos.x += best.sign * (best.dist + this.collisionPadding);
+            } else if (best.axis === "y") {
+                fishPos.y += best.sign * (best.dist + this.collisionPadding);
+            } else {
+                fishPos.z += best.sign * (best.dist + this.collisionPadding);
+            }
+        });
+
+        fishPos.x = THREE.MathUtils.clamp(fishPos.x, this.bounds.minX, this.bounds.maxX);
+        fishPos.y = THREE.MathUtils.clamp(fishPos.y, this.bounds.minY, this.bounds.maxY);
+        fishPos.z = THREE.MathUtils.clamp(fishPos.z, this.bounds.minZ, this.bounds.maxZ);
     }
 
 
@@ -250,7 +310,7 @@ export class FishSwimmer {
     }
 
     public setSpeedMultiplier(multiplier: number): void {
-        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 3);
+        this.state.speedMultiplier = THREE.MathUtils.clamp(multiplier, 0.5, 6);
     }
 
     public steerTowards(target: THREE.Vector3, holdSeconds: number = 0.8): void {
@@ -260,6 +320,12 @@ export class FishSwimmer {
             THREE.MathUtils.clamp(target.z, this.bounds.minZ + this.wanderMargin, this.bounds.maxZ - this.wanderMargin),
         );
         this.forcedTargetUntil = (performance.now() / 1000) + Math.max(0.2, holdSeconds);
+    }
+    public setFoodTarget(target: THREE.Vector3): void {
+        this.foodTarget = target.clone();
+    }
+    public clearFoodTarget(): void {
+        this.foodTarget = null;
     }
 
     public dispose(): void {
