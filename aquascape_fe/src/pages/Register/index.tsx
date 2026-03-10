@@ -40,9 +40,7 @@ const RegisterForm = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      
       <div className="w-full bg-white shadow-lg flex flex-col flex-1">
-
         <div className="w-full aspect-[1]">
           <img
             src={registerLogin}
@@ -69,77 +67,83 @@ const RegisterForm = () => {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-4 flex-1 flex flex-col"
+            className="flex flex-col flex-1"
           >
-            <div>
-              <label className="block text-sm font-bold text-gray-900">
-                {t("REGISTER.REQUIREMENT.FULL_NAME")}
-              </label>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-900">
+                  {t("REGISTER.REQUIREMENT.FULL_NAME")}
+                </label>
 
-              <input
-                {...register("fullName")}
-                placeholder="Full name"
-                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              {errors.fullName && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.fullName.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-900">
-                {t("REGISTER.REQUIREMENT.EMAIL")}
-              </label>
-
-              <input
-                {...register("email")}
-                placeholder="Email"
-                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-900">
-                {t("REGISTER.REQUIREMENT.PASSWORD")}
-              </label>
-
-              <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  {...register("password")}
-                  placeholder="Password"
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  {...register("fullName")}
+                  placeholder="Full name"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                >
-                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                </button>
+                {errors.fullName && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.fullName.message}
+                  </p>
+                )}
               </div>
 
-              {errors.password && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.password.message}
-                </p>
-              )}
+              <div>
+                <label className="block text-sm font-bold text-gray-900">
+                  {t("REGISTER.REQUIREMENT.EMAIL")}
+                </label>
+
+                <input
+                  {...register("email")}
+                  placeholder="Email"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-900">
+                  {t("REGISTER.REQUIREMENT.PASSWORD")}
+                </label>
+
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    placeholder="Password"
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? (
+                      <FiEyeOff size={18} />
+                    ) : (
+                      <FiEye size={18} />
+                    )}
+                  </button>
+                </div>
+
+                {errors.password && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={registerMutation.isPending}
-              className="w-full h-10 rounded-xl bg-blue-600 py-2 text-white font-bold hover:bg-blue-700 transition disabled:opacity-50 mt-4"
+              className="mt-auto w-full h-10 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition disabled:opacity-50"
             >
               {registerMutation.isPending
                 ? "Registering..."
@@ -147,15 +151,12 @@ const RegisterForm = () => {
             </button>
           </form>
 
-          <p className="mt-auto mb-10 text-center text-sm text-gray-500 pb-4">
+          <p className="text-center text-sm text-gray-500 mt-4 pb-4">
             {t("REGISTER.REQUIREMENT.CONTENTREGISTER")}
             <RegisterNavigate />
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 };
