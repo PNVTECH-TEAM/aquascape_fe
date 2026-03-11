@@ -458,6 +458,30 @@
     box-shadow: 0 0 10px rgba(64, 164, 255, 0.5);
 }
 
+.lighting-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.lighting-btn {
+    border: 1px solid rgba(64, 164, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lighting-btn.active {
+    background: linear-gradient(135deg, #40a4ff, #0066cc);
+    border-color: #40a4ff;
+    box-shadow: 0 0 10px rgba(64, 164, 255, 0.45);
+}
+
 /* Input tùy chỉnh */
 .custom-size {
     display: grid;
@@ -832,4 +856,102 @@
         width: 50px;
         font-size: 10px;
     }
+}
+
+.save-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 8, 20, 0.7);
+    backdrop-filter: blur(4px);
+    padding: 16px;
+}
+
+.save-dialog {
+    width: min(420px, 100%);
+    border-radius: 14px;
+    border: 1px solid rgba(98, 178, 255, 0.34);
+    background: linear-gradient(180deg, rgba(5, 26, 47, 0.96), rgba(1, 10, 20, 0.96));
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+    padding: 14px;
+}
+
+.save-dialog-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #dff1ff;
+    margin-bottom: 10px;
+}
+
+.save-dialog-label {
+    display: block;
+    font-size: 12px;
+    color: #9fd0ff;
+    margin: 8px 0 6px;
+}
+
+.save-dialog-input {
+    width: 100%;
+    border: 1px solid rgba(98, 178, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 9px 10px;
+    font-size: 13px;
+}
+
+.save-dialog-upload-btn {
+    margin-top: 10px;
+    display: inline-block;
+    border: 1px solid rgba(98, 178, 255, 0.35);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #d8ecff;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.save-dialog-file-input {
+    display: none;
+}
+
+.save-dialog-preview-image {
+    display: block;
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 10px;
+    border: 1px solid rgba(98, 178, 255, 0.25);
+}
+
+.save-dialog-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.save-dialog-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.save-dialog-btn.secondary {
+    color: #d8ecff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.save-dialog-btn.primary {
+    color: #fff;
+    background: linear-gradient(120deg, #00a1ff, #00d3a8);
 }
