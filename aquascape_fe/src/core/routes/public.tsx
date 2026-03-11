@@ -1,5 +1,6 @@
 import { AquaForestSplash, AquaIntro, LoginForm, RegisterForm } from "@app/pages";
 import Aquarium3D from "@app/pages/Aquarium3D/Aquarium3D";
+import FishDoctorHome from "@app/pages/FishDoctorDiagnosis/FishDoctorHome";
 import FishDoctorDiagnosis from "@app/pages/FishDoctorDiagnosis/FishDoctorDiagnosis";
 
 export const publicRoutes = [
@@ -22,6 +23,10 @@ export const publicRoutes = [
   },
   {
     path: "fish-doctor",
+    element: <FishDoctorHome />,
+  },
+  {
+    path: "fish-doctor/diagnosis",
     element: <FishDoctorDiagnosis />,
   },
   {

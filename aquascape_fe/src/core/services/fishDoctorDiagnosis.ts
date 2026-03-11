@@ -5,13 +5,21 @@ export interface FishDiagnosis {
     label_code: string;
     disease_name: string;
     confidence: number;
-    source: string;
+    source?: string;
     vision_note?: string;
 }
 
 export interface FishDoctorVisualReference {
     image_url: string;
     description?: string;
+}
+
+export interface FishDoctorTreatmentStage {
+    stage: string;
+    goal?: string;
+    actions?: string[];
+    duration?: string;
+    notes?: string;
 }
 
 export interface FishDoctorTreatment {
@@ -24,7 +32,18 @@ export interface FishDoctorTreatment {
 
 export interface FishDoctorDiagnosisResult {
     diagnosis: FishDiagnosis;
-    doctor_advice: string;
+    doctor_advice?: string;
+    diagnosis_detail?: {
+        summary?: string;
+        key_signs?: string[];
+        confidence_note?: string;
+        text?: string;
+    };
+    treatment_guide?: {
+        overview?: string;
+        stages?: FishDoctorTreatmentStage[];
+        text?: string;
+    };
     visual_reference?: FishDoctorVisualReference;
     suggested_treatments?: FishDoctorTreatment[];
 }

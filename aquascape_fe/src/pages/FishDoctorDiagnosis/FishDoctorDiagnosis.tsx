@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     diagnoseFishDiseaseFromImage,
     FishDoctorDiagnosisResult,
@@ -6,13 +7,14 @@ import {
 import "./FishDoctorDiagnosis.scss";
 
 export default function FishDoctorDiagnosis() {
+    const navigate = useNavigate();
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [userPrompt, setUserPrompt] = useState<string>("");
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [result, setResult] = useState<FishDoctorDiagnosisResult | null>(null);
-    const [activeScreen, setActiveScreen] = useState<'dashboard' | 'scan' | 'result' | 'treatment'>('dashboard');
+    const [activeScreen, setActiveScreen] = useState<'scan' | 'result' | 'treatment'>('scan');
     const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
     const cameraInputRef = useRef<HTMLInputElement | null>(null);
     const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -84,11 +86,6 @@ export default function FishDoctorDiagnosis() {
         galleryInputRef.current?.click();
     };
 
-    const handleStartDiagnosisFromDashboard = async () => {
-        setActiveScreen('scan');
-        await handleOpenCamera();
-    };
-
     const handleCloseCameraModal = () => {
         setIsCameraModalOpen(false);
         stopCameraStream();
@@ -152,128 +149,6 @@ export default function FishDoctorDiagnosis() {
         }
     };
 
-    const renderDashboard = () => (
-        <div className="dashboard-screen px-6 pt-5 pb-24">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <p className="text-gray-500 text-sm flex items-center gap-1">
-                        <i className="fa-regular fa-hand-peace text-[#4db6ac]"></i>
-                        Xin chào,
-                    </p>
-                    <h1 className="text-2xl font-bold text-[#003f5c] flex items-center gap-2">
-                        Người yêu cá
-                        <span className="animate-bounce">🐠</span>
-                    </h1>
-                </div>
-                <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4db6ac] to-[#009688] p-0.5">
-                        <div className="w-full h-full rounded-full bg-white overflow-hidden border-2 border-white">
-                            <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" className="w-full h-full object-cover" />
-                        </div>
-                    </div>
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
-                </div>
-            </div>
-
-            <div className="glass-card health-overview-card rounded-3xl p-6 relative overflow-hidden mb-6 text-center">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#4db6ac] opacity-5 rounded-full -mr-8 -mt-8"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#009688] opacity-5 rounded-full -ml-6 -mb-6"></div>
-
-                <h2 className="text-[#003f5c] font-bold text-lg mb-4 flex items-center justify-center gap-2">
-                    <i className="fa-solid fa-heart-pulse text-[#4db6ac]"></i>
-                    Sức khỏe bể cá
-                </h2>
-
-                <div className="flex justify-center mb-4">
-                    <div className="liquid-container">
-                        <div className="liquid"></div>
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                            <span className="text-4xl font-black text-white drop-shadow-md">85</span>
-                            <span className="text-white text-sm mt-3 ml-1 font-bold">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 text-[#009688] font-bold bg-teal-50 inline-block px-4 py-2 rounded-full text-sm border border-teal-100">
-                    <i className="fa-regular fa-face-smile text-base"></i>
-                    <span>Trạng thái: Ổn định</span>
-                </div>
-            </div>
-
-            <div className="metrics-grid grid grid-cols-3 gap-3 mb-6">
-                <div className="glass-card metric-card rounded-2xl p-4 flex flex-col items-center shadow-sm group hover:bg-white">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <i className="fa-solid fa-temperature-high"></i>
-                    </div>
-                    <span className="text-gray-500 text-xs">Nhiệt độ</span>
-                    <span className="text-[#003f5c] font-bold text-lg">28°C</span>
-                </div>
-
-                <div className="glass-card metric-card rounded-2xl p-4 flex flex-col items-center shadow-sm group hover:bg-white">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <i className="fa-solid fa-flask"></i>
-                    </div>
-                    <span className="text-gray-500 text-xs">pH</span>
-                    <span className="text-[#003f5c] font-bold text-lg">6.5</span>
-                </div>
-
-                <div className="glass-card metric-card rounded-2xl p-4 flex flex-col items-center shadow-sm group hover:bg-white">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <i className="fa-solid fa-droplet"></i>
-                    </div>
-                    <span className="text-gray-500 text-xs">NO3</span>
-                    <span className="text-[#003f5c] font-bold text-lg">0mg</span>
-                </div>
-            </div>
-
-            <button
-                onClick={handleStartDiagnosisFromDashboard}
-                className="primary-diagnose-cta w-full bg-gradient-to-r from-[#003f5c] to-[#005b96] text-white rounded-2xl p-5 shadow-lg shadow-blue-900/20 active:scale-[0.98] transition-all flex items-center justify-between group relative overflow-hidden"
-            >
-                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-3xl group-hover:rotate-12 transition-transform">
-                        <i className="fa-solid fa-robot"></i>
-                    </div>
-                    <div className="text-left">
-                        <p className="font-bold text-lg flex items-center gap-2">
-                            AI Bác sĩ cá
-                            <i className="fa-solid fa-stethoscope text-sm opacity-75"></i>
-                        </p>
-                        <p className="text-blue-100 text-sm flex items-center gap-1">
-                            <i className="fa-regular fa-eye"></i>
-                            Quét & Chẩn đoán ngay
-                        </p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-sm opacity-75 group-hover:opacity-100 transition-opacity">Bắt đầu</span>
-                    <i className="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
-                </div>
-            </button>
-
-            {/* Quick Actions */}
-            <div className="mt-6 grid grid-cols-4 gap-2">
-                <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
-                    <i className="fa-solid fa-water text-[#4db6ac] text-xl mb-1"></i>
-                    <span className="text-[10px] text-gray-600">Chất lượng</span>
-                </button>
-                <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
-                    <i className="fa-solid fa-clock text-[#ff7c43] text-xl mb-1"></i>
-                    <span className="text-[10px] text-gray-600">Nhắc nhở</span>
-                </button>
-                <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
-                    <i className="fa-solid fa-book-open text-[#003f5c] text-xl mb-1"></i>
-                    <span className="text-[10px] text-gray-600">Nhật ký</span>
-                </button>
-                <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
-                    <i className="fa-solid fa-chart-line text-[#009688] text-xl mb-1"></i>
-                    <span className="text-[10px] text-gray-600">Thống kê</span>
-                </button>
-            </div>
-        </div>
-    );
-
     const renderScan = () => (
         <div className="scan-screen relative h-full">
             <img
@@ -285,7 +160,7 @@ export default function FishDoctorDiagnosis() {
             <div className="scan-overlay absolute inset-0 z-10 flex flex-col p-5 pt-8 pb-8">
                 <div className="flex justify-between items-center text-white mb-6">
                     <button
-                        onClick={() => setActiveScreen('dashboard')}
+                        onClick={() => navigate("/fish-doctor")}
                         className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center active:bg-black/50 border border-white/20 hover:scale-110 transition-transform"
                     >
                         <i className="fa-solid fa-arrow-left text-lg"></i>
@@ -303,8 +178,6 @@ export default function FishDoctorDiagnosis() {
                 </div>
 
                 <form onSubmit={handleDiagnose} className="scan-diagnose-form flex flex-1 flex-col items-center gap-4">
-                    {previewUrl && (
-                        <>
                     <div className="scan-frame relative w-72 h-72 mx-auto rounded-3xl overflow-hidden shadow-2xl">
                         <div className="absolute inset-0 border-2 border-white/30 rounded-3xl"></div>
 
@@ -314,7 +187,14 @@ export default function FishDoctorDiagnosis() {
                         <div className="absolute bottom-3 left-3 w-8 h-8 border-b-3 border-l-3 border-[#4db6ac] rounded-bl-xl"></div>
                         <div className="absolute bottom-3 right-3 w-8 h-8 border-b-3 border-r-3 border-[#4db6ac] rounded-br-xl"></div>
 
-                        {previewUrl && (<img src={previewUrl} alt="Fish preview" className="w-full h-full object-cover" />)}
+                        {previewUrl ? (
+                            <img src={previewUrl} alt="Fish preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 text-white">
+                                <i className="fa-solid fa-fish text-5xl mb-2 opacity-50"></i>
+                                <span className="text-sm opacity-70">Chưa có ảnh</span>
+                            </div>
+                        )}
 
                         {loading && (
                             <>
@@ -336,8 +216,6 @@ export default function FishDoctorDiagnosis() {
                             Chọn ảnh
                         </label>
                     </div>
-                        </>
-                    )}
 
                     <input
                         ref={cameraInputRef}
@@ -357,8 +235,6 @@ export default function FishDoctorDiagnosis() {
                         onChange={handleSelectImage}
                     />
 
-                    {previewUrl && (
-                        <>
                     <div className="w-72 relative">
                         <textarea
                             className="scan-note-input w-full bg-black/30 backdrop-blur-md text-white placeholder-white/60 rounded-2xl p-4 text-sm border border-white/20 focus:border-[#4db6ac] focus:ring-1 focus:ring-[#4db6ac] transition-all"
@@ -377,8 +253,6 @@ export default function FishDoctorDiagnosis() {
                             </button>
                         )}
                     </div>
-                        </>
-                    )}
 
                     <div className="scan-action-bar mt-auto flex justify-center items-center gap-6 w-full">
                         <button
@@ -390,22 +264,20 @@ export default function FishDoctorDiagnosis() {
                             <i className="fa-solid fa-camera-retro"></i>
                         </button>
 
-                        {previewUrl && (
-                            <button
-                                type="submit"
-                                disabled={!canSubmit}
-                                className="scan-shutter-btn relative group"
-                            >
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#4db6ac] to-[#009688] opacity-0 group-hover:opacity-100 transition-opacity blur-md"></div>
-                                <div className={`relative w-20 h-20 rounded-full border-4 border-white bg-gradient-to-br from-[#4db6ac] to-[#009688] flex items-center justify-center ${!canSubmit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'} transition-transform`}>
-                                    {loading ? (
-                                        <i className="fa-solid fa-circle-notch fa-spin text-white text-3xl"></i>
-                                    ) : (
-                                        <i className="fa-solid fa-magnifying-glass text-white text-3xl"></i>
-                                    )}
-                                </div>
-                            </button>
-                        )}
+                        <button
+                            type="submit"
+                            disabled={!canSubmit}
+                            className="scan-shutter-btn relative group"
+                        >
+                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#4db6ac] to-[#009688] opacity-0 group-hover:opacity-100 transition-opacity blur-md"></div>
+                            <div className={`relative w-20 h-20 rounded-full border-4 border-white bg-gradient-to-br from-[#4db6ac] to-[#009688] flex items-center justify-center ${!canSubmit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'} transition-transform`}>
+                                {loading ? (
+                                    <i className="fa-solid fa-circle-notch fa-spin text-white text-3xl"></i>
+                                ) : (
+                                    <i className="fa-solid fa-magnifying-glass text-white text-3xl"></i>
+                                )}
+                            </div>
+                        </button>
 
                         <button
                             type="button"
@@ -468,6 +340,8 @@ export default function FishDoctorDiagnosis() {
 
         const confidencePercent = (result.diagnosis.confidence * 100).toFixed(1);
         const isHighRisk = result.diagnosis.confidence > 0.7;
+        const diagnosisDetail = result.diagnosis_detail;
+        const visualRef = result.visual_reference;
 
         return (
             <div className="result-screen px-6 pt-5 pb-24">
@@ -485,13 +359,14 @@ export default function FishDoctorDiagnosis() {
                     </h1>
 
                     <button
-                        onClick={() => setActiveScreen('dashboard')}
+                        onClick={() => navigate("/fish-doctor")}
                         className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
                     >
                         <i className="fa-solid fa-house text-gray-600"></i>
                     </button>
                 </div>
 
+                {/* Diagnosis Hero Section */}
                 <div className={`diagnosis-hero bg-gradient-to-br ${isHighRisk ? 'from-[#ff7c43] to-[#f55a42]' : 'from-[#4db6ac] to-[#009688]'} text-white rounded-3xl p-6 mb-6 shadow-lg relative overflow-hidden`}>
                     <div className="absolute -right-6 -top-6 text-white opacity-10 text-9xl">
                         <i className={`fa-solid ${isHighRisk ? 'fa-biohazard' : 'fa-shield-heart'}`}></i>
@@ -523,7 +398,8 @@ export default function FishDoctorDiagnosis() {
                     </div>
                 </div>
 
-                {result.visual_reference && (
+                {/* Visual Reference */}
+                {visualRef && (
                     <div className="mb-6">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                             <i className="fa-solid fa-images text-[#4db6ac]"></i>
@@ -531,8 +407,12 @@ export default function FishDoctorDiagnosis() {
                         </h3>
                         <div className="flex gap-3">
                             <div className="flex-1 rounded-2xl bg-gray-100 overflow-hidden relative aspect-square shadow-md group">
-                                {previewUrl && (
+                                {previewUrl ? (
                                     <img src={previewUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="Your fish" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                        <i className="fa-regular fa-image text-gray-400 text-3xl"></i>
+                                    </div>
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <span className="absolute bottom-2 left-2 text-white text-xs font-bold backdrop-blur-md bg-black/40 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1">
@@ -542,9 +422,12 @@ export default function FishDoctorDiagnosis() {
                             </div>
                             <div className="flex-1 rounded-2xl bg-gray-100 overflow-hidden relative aspect-square shadow-md group">
                                 <img
-                                    src={result.visual_reference.image_url}
-                                    className="w-full h-full object-cover filter grayscale contrast-125 brightness-110 group-hover:scale-105 transition-transform"
+                                    src={visualRef.image_url}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                     alt="Disease sample"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300?text=No+Image';
+                                    }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <span className="absolute bottom-2 left-2 text-white text-xs font-bold backdrop-blur-md bg-red-600/80 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1">
@@ -553,13 +436,20 @@ export default function FishDoctorDiagnosis() {
                                 </span>
                             </div>
                         </div>
+                        {visualRef.description && (
+                            <p className="text-xs text-gray-500 mt-3 flex items-center gap-2">
+                                <i className="fa-regular fa-note-sticky text-[#4db6ac]"></i>
+                                <span>{visualRef.description}</span>
+                            </p>
+                        )}
                     </div>
                 )}
 
+                {/* Diagnosis Details */}
                 <div className="glass-card detail-card rounded-2xl p-5 mb-4">
                     <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                         <i className="fa-solid fa-clipboard-list text-[#4db6ac]"></i>
-                        Chẩn đoán chi tiết
+                        Thông tin chẩn đoán
                     </h3>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
@@ -574,30 +464,61 @@ export default function FishDoctorDiagnosis() {
                                 <i className="fa-regular fa-id-card text-[#4db6ac]"></i>
                                 ID phân tích:
                             </span>
-                            <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg text-sm">{result.diagnosis.inference_id}</strong>
+                            <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg text-sm font-mono">{result.diagnosis.inference_id.slice(0, 8)}...</strong>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                            <span className="text-gray-600 flex items-center gap-2">
-                                <i className="fa-regular fa-database text-[#4db6ac]"></i>
-                                Nguồn dữ liệu:
-                            </span>
-                            <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg">{result.diagnosis.source}</strong>
-                        </div>
+                        {result.diagnosis.source && (
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                                <span className="text-gray-600 flex items-center gap-2">
+                                    <i className="fa-regular fa-database text-[#4db6ac]"></i>
+                                    Nguồn dữ liệu:
+                                </span>
+                                <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg">{result.diagnosis.source}</strong>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {result.doctor_advice && (
+                {/* Diagnosis Summary */}
+                {diagnosisDetail && (
                     <div className="glass-card detail-card rounded-2xl p-5 mb-6">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                             <i className="fa-solid fa-user-doctor text-[#4db6ac]"></i>
-                            Lời khuyên từ bác sĩ
+                            Chẩn đoán chi tiết
                         </h3>
-                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                            <p className="text-gray-700 text-sm leading-relaxed flex items-start gap-2">
-                                <i className="fa-regular fa-message text-[#4db6ac] mt-1"></i>
-                                <span>{result.doctor_advice}</span>
-                            </p>
-                        </div>
+
+                        {diagnosisDetail.summary && (
+                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
+                                <p className="text-gray-700 text-sm leading-relaxed">
+                                    {diagnosisDetail.summary}
+                                </p>
+                            </div>
+                        )}
+
+                        {diagnosisDetail.key_signs && diagnosisDetail.key_signs.length > 0 && (
+                            <div className="mb-4">
+                                <h4 className="text-sm font-semibold text-[#003f5c] mb-2 flex items-center gap-2">
+                                    <i className="fa-solid fa-list-check text-[#4db6ac]"></i>
+                                    Dấu hiệu nhận biết:
+                                </h4>
+                                <ul className="space-y-2">
+                                    {diagnosisDetail.key_signs.map((sign, index) => (
+                                        <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                                            <i className="fa-regular fa-circle-check text-[#4db6ac] mt-1 text-xs"></i>
+                                            <span>{sign}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {diagnosisDetail.confidence_note && (
+                            <div className="bg-amber-50 p-3 rounded-xl border border-amber-100">
+                                <p className="text-xs text-amber-800 flex items-start gap-2">
+                                    <i className="fa-regular fa-lightbulb text-amber-600 mt-0.5"></i>
+                                    <span>{diagnosisDetail.confidence_note}</span>
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -613,123 +534,184 @@ export default function FishDoctorDiagnosis() {
         );
     };
 
-    const renderTreatment = () => (
-        <div className="treatment-screen px-6 pt-5 pb-24">
-            <div className="flex justify-between items-center mb-6">
-                <button
-                    onClick={() => setActiveScreen('result')}
-                    className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
-                >
-                    <i className="fa-solid fa-arrow-left text-gray-600"></i>
-                </button>
+    const renderTreatment = () => {
+        if (!result) return null;
 
-                <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
-                    <i className="fa-solid fa-prescription-bottle text-[#4db6ac]"></i>
-                    Phác đồ điều trị
-                </h1>
+        const overviewText = result.treatment_guide?.overview || result.treatment_guide?.text || result.doctor_advice;
+        const overviewBlocks = (overviewText || "")
+            .trim()
+            .split(/\r?\n\s*\r?\n/)
+            .map((block) => block.trim())
+            .filter(Boolean);
+        const stages = result.treatment_guide?.stages ?? [];
 
-                <button
-                    onClick={() => setActiveScreen('dashboard')}
-                    className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
-                >
-                    <i className="fa-solid fa-house text-gray-600"></i>
-                </button>
-            </div>
+        return (
+            <div className="treatment-screen px-6 pt-5 pb-24">
+                <div className="flex justify-between items-center mb-6">
+                    <button
+                        onClick={() => setActiveScreen('result')}
+                        className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
+                    >
+                        <i className="fa-solid fa-arrow-left text-gray-600"></i>
+                    </button>
 
-            <div className="timeline relative ml-4 space-y-8 mb-10">
-                {result?.suggested_treatments?.map((treatment, index) => (
-                    <div key={index} className="timeline-item relative">
-                        <div className={`timeline-dot ${index === 0 ? 'today' : index === 1 ? 'tomorrow' : 'future'}`}>
-                            <i className={`fa-solid ${index === 0 ? 'fa-play' : index === 1 ? 'fa-clock' : 'fa-calendar'} text-white text-[8px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`}></i>
-                        </div>
+                    <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
+                        <i className="fa-solid fa-prescription-bottle text-[#4db6ac]"></i>
+                        Phác đồ điều trị
+                    </h1>
 
-                        <div className="timeline-date">
-                            <span className="day">
-                                {index === 0 ? 'Hôm nay' : index === 1 ? 'Ngày mai' : `Ngày ${index * 2 + 1}`}
-                            </span>
-                            <span className="sub">
-                                {index === 0 ? 'Bắt đầu ngay' : index === 1 ? 'Tiếp theo' : 'Theo dõi'}
-                            </span>
-                        </div>
+                    <button
+                        onClick={() => navigate("/fish-doctor")}
+                        className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
+                    >
+                        <i className="fa-solid fa-house text-gray-600"></i>
+                    </button>
+                </div>
 
-                        <div className="treatment-card">
-                            <div className="card-header">
-                                <i className="fa-solid fa-syringe"></i>
-                                <span>Điều trị {index + 1}</span>
-                            </div>
-
-                            <div className="treatment-content">
-                                <div className="treatment-image">
-                                    {treatment.image ? (
-                                        <img src={treatment.image} alt={treatment.name} />
-                                    ) : (
-                                        <div className="placeholder-icon">
-                                            <i className="fa-solid fa-pills"></i>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="treatment-info">
-                                    <h4>{treatment.name}</h4>
-                                    {treatment.price && (
-                                        <div className="price">
-                                            <i className="fa-regular fa-tag"></i> {treatment.price}
-                                        </div>
-                                    )}
-                                    {treatment.description && (
-                                        <p className="description">{treatment.description}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {treatment.link && (
-                                <a
-                                    href={treatment.link}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="buy-btn"
-                                >
-                                    <i className="fa-solid fa-cart-shopping"></i>
-                                    Mua ngay
-                                    <i className="fa-solid fa-arrow-up-right-from-squares"></i>
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                ))}
-
-                {(!result?.suggested_treatments || result.suggested_treatments.length === 0) && (
-                    <div className="timeline-item relative">
-                        <div className="timeline-dot future"></div>
-                        <div className="timeline-date">
-                            <span className="day">Ngày 1</span>
-                            <span className="sub">Khuyến nghị</span>
-                        </div>
-                        <div className="bg-gradient-to-br from-blue-50 to-white p-5 rounded-2xl border border-blue-100">
-                            <div className="flex items-start gap-3">
-                                <i className="fa-regular fa-face-smile text-[#4db6ac] text-2xl"></i>
-                                <div>
-                                    <p className="text-gray-700 font-medium mb-1">Theo dõi và quan sát</p>
-                                    <p className="text-gray-500 text-sm">Quan sát cá thường xuyên. Đảm bảo chất lượng nước tốt.</p>
-                                </div>
+                {overviewBlocks.length > 0 && (
+                    <div className="glass-card detail-card rounded-2xl p-5 mb-6">
+                        <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
+                            <i className="fa-solid fa-clipboard-check text-[#4db6ac]"></i>
+                            Hướng dẫn xử lý
+                        </h3>
+                        <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                            <div className="guidance-block">
+                                {overviewBlocks.map((block, index) => (
+                                    <p key={`${index}-${block.slice(0, 12)}`} className="guidance-line">
+                                        {block}
+                                    </p>
+                                ))}
                             </div>
                         </div>
                     </div>
                 )}
-            </div>
 
-            {/* Additional info */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200">
-                <div className="flex items-start gap-3">
-                    <i className="fa-regular fa-lightbulb text-amber-500 text-xl mt-1"></i>
-                    <div>
-                        <p className="text-sm font-medium text-amber-800 mb-1">Lưu ý quan trọng</p>
-                        <p className="text-xs text-amber-700">Tuân thủ liều lượng và theo dõi phản ứng của cá trong quá trình điều trị.</p>
+                <div className="timeline relative ml-4 space-y-8 mb-10">
+                    {stages.map((stage, index) => (
+                        <div key={`${index}-${stage.stage}`} className="timeline-item relative">
+                            <div className={`timeline-dot ${index === 0 ? 'today' : index === 1 ? 'tomorrow' : 'future'}`}>
+                                <i className={`fa-solid ${index === 0 ? 'fa-play' : index === 1 ? 'fa-clock' : 'fa-calendar'} text-white text-[8px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`}></i>
+                            </div>
+
+                            <div className="timeline-date">
+                                <span className="day">{stage.stage}</span>
+                                <span className="sub">{stage.duration || "Theo dõi"}</span>
+                            </div>
+
+                            <div className="treatment-card">
+                                <div className="card-header">
+                                    <i className="fa-solid fa-syringe"></i>
+                                    <span>{stage.goal || `Giai đoạn ${index + 1}`}</span>
+                                </div>
+
+                                <div className="treatment-content">
+                                    <div className="treatment-info">
+                                        {stage.actions && stage.actions.length > 0 && (
+                                            <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1 mb-2">
+                                                {stage.actions.map((action, actionIndex) => (
+                                                    <li key={`${index}-${actionIndex}-${action.slice(0, 12)}`}>{action}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        {stage.notes && (
+                                            <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3">
+                                                {stage.notes}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    {stages.length === 0 && (
+                        <div className="timeline-item relative">
+                            <div className="timeline-dot future"></div>
+                            <div className="timeline-date">
+                                <span className="day">Giai đoạn 1</span>
+                                <span className="sub">Khuyến nghị</span>
+                            </div>
+                            <div className="bg-gradient-to-br from-blue-50 to-white p-5 rounded-2xl border border-blue-100">
+                                <div className="flex items-start gap-3">
+                                    <i className="fa-regular fa-face-smile text-[#4db6ac] text-2xl"></i>
+                                    <div>
+                                        <p className="text-gray-700 font-medium mb-1">Theo dõi và quan sát</p>
+                                        <p className="text-gray-500 text-sm">Quan sát cá thường xuyên. Đảm bảo chất lượng nước tốt.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {result.suggested_treatments && result.suggested_treatments.length > 0 && (
+                    <div className="mt-8">
+                        <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
+                            <i className="fa-solid fa-basket-shopping text-[#4db6ac]"></i>
+                            Gợi ý sản phẩm
+                        </h3>
+                        <div className="space-y-4">
+                            {result.suggested_treatments.map((treatment, index) => (
+                                <div key={`${index}-${treatment.name}`} className="treatment-card">
+                                    <div className="card-header">
+                                        <i className="fa-solid fa-bottle-droplet"></i>
+                                        <span>{`Sản phẩm ${index + 1}`}</span>
+                                    </div>
+
+                                    <div className="treatment-content">
+                                        <div className="treatment-image">
+                                            {treatment.image ? (
+                                                <img src={treatment.image} alt={treatment.name} />
+                                            ) : (
+                                                <div className="placeholder-icon">
+                                                    <i className="fa-solid fa-pills"></i>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="treatment-info">
+                                            <h4>{treatment.name}</h4>
+                                            {treatment.price && (
+                                                <div className="price">
+                                                    <i className="fa-regular fa-tag"></i> {treatment.price}
+                                                </div>
+                                            )}
+                                            {treatment.description && (
+                                                <p className="description">{treatment.description}</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {treatment.link && (
+                                        <a
+                                            href={treatment.link}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="buy-btn"
+                                        >
+                                            <i className="fa-solid fa-cart-shopping"></i>
+                                            Mua ngay
+                                            <i className="fa-solid fa-arrow-up-right-from-squares"></i>
+                                        </a>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-regular fa-lightbulb text-amber-500 text-xl mt-1"></i>
+                        <div>
+                            <p className="text-sm font-medium text-amber-800 mb-1">Lưu ý quan trọng</p>
+                            <p className="text-xs text-amber-700">Tuân thủ liều lượng và theo dõi phản ứng của cá trong quá trình điều trị.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="fish-doctor-page h-screen overflow-hidden bg-gradient-to-b from-[#f0fdfa] to-white">
@@ -740,10 +722,6 @@ export default function FishDoctorDiagnosis() {
 
             <main className="relative h-full overflow-y-auto hide-scrollbar">
                 {/* Screens */}
-                <div className={`screen ${activeScreen === 'dashboard' ? 'active' : ''}`}>
-                    {renderDashboard()}
-                </div>
-
                 <div className={`screen scan-screen-wrapper ${activeScreen === 'scan' ? 'active' : ''}`}>
                     {renderScan()}
                 </div>
@@ -756,50 +734,16 @@ export default function FishDoctorDiagnosis() {
                     {renderTreatment()}
                 </div>
 
-                {/* Bottom Navigation (temporarily disabled)
-                {activeScreen !== 'scan' && (
-                    <div className="bottom-nav">
-                        <button
-                            onClick={() => setActiveScreen('dashboard')}
-                            className={`nav-item ${activeScreen === 'dashboard' ? 'active' : ''}`}
-                        >
-                            <i className="fa-solid fa-house"></i>
-                        </button>
-
-                        <button className="nav-item">
-                            <i className="fa-solid fa-store"></i>
-                        </button>
-
-                        <div className="scan-btn-wrapper">
-                            <button
-                                onClick={() => setActiveScreen('scan')}
-                                className="scan-btn"
-                            >
-                                <i className="fa-solid fa-camera"></i>
-                            </button>
-                        </div>
-
-                        <button className="nav-item">
-                            <i className="fa-regular fa-compass"></i>
-                        </button>
-
-                        <button className="nav-item">
-                            <i className="fa-regular fa-user"></i>
-                        </button>
-                    </div>
-                )}
-                */}
-
                 {/* Error Message */}
                 {errorMessage && (
-                    <div className="error-message">
-                        <i className="fa-solid fa-circle-exclamation"></i>
-                        <span>{errorMessage}</span>
+                    <div className="error-message fixed bottom-24 left-4 right-4 bg-red-500 text-white p-4 rounded-xl shadow-lg flex items-center gap-3 z-50">
+                        <i className="fa-solid fa-circle-exclamation text-lg"></i>
+                        <span className="flex-1 text-sm">{errorMessage}</span>
                         <button
-                            className="close-btn"
+                            className="close-btn text-white/70 hover:text-white"
                             onClick={() => setErrorMessage("")}
                         >
-                            <i className="fa-solid fa-xmark"></i>
+                            <i className="fa-solid fa-xmark text-xl"></i>
                         </button>
                     </div>
                 )}
@@ -807,4 +751,3 @@ export default function FishDoctorDiagnosis() {
         </div>
     );
 }
-
