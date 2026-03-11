@@ -114,7 +114,8 @@ export const useTankSetup = (
             return {
                 instanceId: item.id,
                 catalogItemId: item.catalogItemId,
-                name: item.sourceName ?? item.catalogItemId,
+                userAssetId: item.userAssetId,
+                name: String(item.sourceName ?? item.catalogItemId ?? item.userAssetId ?? "Unknown"),
                 category: item.category,
                 sourceType: item.sourceType,
                 type: item.type,
@@ -212,6 +213,36 @@ export const useTankSetup = (
         });
     };
 
+    const clearItems = useCallback(() => {
+        if (!sceneRef.current) return;
+        
+        itemsRef.current.forEach(item => {
+            sceneRef.current?.remove(item.object);
+            
+            const fish2D = fish2DSwimmersRef.current.get(item.id);
+            if (fish2D) {
+                fish2D.dispose();
+                fish2DSwimmersRef.current.delete(item.id);
+            }
+        });
+
+        if (fishSwimmerRef.current) {
+            fishSwimmerRef.current.dispose();
+            fishSwimmerRef.current = null;
+        }
+
+        itemsRef.current = [];
+        draggableObjectsRef.current = [];
+        obstacleObjectsRef.current = [];
+        selectedItemRef.current = null;
+        
+        if (transformControlRef.current) {
+            transformControlRef.current.detach();
+        }
+
+        emitLayoutUpdated();
+    }, [emitLayoutUpdated]);
+
     const setFishPausedForItem = (item: TankItem | null, paused: boolean) => {
         if (!item?.isFish) return;
 
@@ -236,6 +267,7 @@ export const useTankSetup = (
             id: crypto.randomUUID(),
             type: itemType,
             catalogItemId: metadata.catalogItemId,
+            userAssetId: metadata.userAssetId,
             sourceType: metadata.sourceType,
             category: metadata.sourceCategory,
             sourceName: metadata.sourceName,
@@ -275,10 +307,14 @@ export const useTankSetup = (
 
     const resolveItemSourceMetadata = (item: any, url: string): TankItemSourceMetadata => {
         const sourceType = typeof item?.type === "string" ? item.type : undefined;
+        const sourceCategory = typeof item?.category === "string" ? item.category : undefined;
+        const isUserAsset = sourceCategory === "My Assets";
+
         return {
-            catalogItemId: String(item?.id || url),
+            catalogItemId: !isUserAsset ? String(item?.id || url) : undefined,
+            userAssetId: isUserAsset ? Number(item?.id) : undefined,
             sourceType,
-            sourceCategory: typeof item?.category === "string" ? item.category : undefined,
+            sourceCategory,
             sourceName: typeof item?.name === "string" ? item.name : undefined,
             allowSurfacePlacement:
                 !isFishUrl(url) &&
@@ -500,8 +536,6 @@ export const useTankSetup = (
                     model,
                     shouldTreatAsFish ? 'fish' : 'decoration',
                     shouldTreatAsFish,
-                    isFishModel ? 'fish' : 'decoration',
-                    isFishModel,
                     metadata,
                     bounds,
                     true
@@ -792,7 +826,7 @@ export const useTankSetup = (
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
             const elapsed = clock.getElapsedTime();
-            const speedMultiplier = feedPelletsRef.current.length > 0 ? 5 : 1;
+            const speedMultiplier = feedPelletsRef.current.length > 0 ? 3 : 1;
 
             if (waterRef.current) {
                 waterRef.current.material.uniforms.time.value += delta * 0.3;
@@ -949,7 +983,6 @@ export const useTankSetup = (
         if (!controlsRef.current) return;
         controlsRef.current.reset();
     };
-
     const triggerFishRush = useCallback((): void => {
         if (!boundsRef.current || !sceneRef.current) return;
 
@@ -992,12 +1025,12 @@ export const useTankSetup = (
 
         if (fishSwimmerRef.current) {
             fishSwimmerRef.current.setFoodTarget(foodPosition);
-            fishSwimmerRef.current.setSpeedMultiplier(5);
+            fishSwimmerRef.current.setSpeedMultiplier(3);
         }
 
         fish2DSwimmersRef.current.forEach((swimmer) => {
             swimmer.setFoodTarget(foodPosition);
-            swimmer.setSpeedMultiplier(5);
+            swimmer.setSpeedMultiplier(3);
         });
 
         feedTimeoutRef.current = window.setTimeout(() => {
@@ -1009,6 +1042,7 @@ export const useTankSetup = (
         return itemsRef.current.map((item) => ({
             instanceId: item.id,
             catalogItemId: item.catalogItemId,
+            userAssetId: item.userAssetId,
             transform: {
                 position: {
                     x: Number(item.object.position.x.toFixed(4)),
@@ -1044,6 +1078,7 @@ export const useTankSetup = (
                     : undefined,
                 transform
             ),
+        clearItems,
         triggerFishRush,
         getLayoutSnapshot,
         getAnalysisSnapshot

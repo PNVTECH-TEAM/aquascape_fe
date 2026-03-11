@@ -20,3 +20,4 @@ export {
     saveTankLayout,
     updateTankLayout,
 } from "./aquarium/userTankApi";
+export { getUserAssets } from "./uploadAPI";

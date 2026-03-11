@@ -39,11 +39,11 @@ export class Fish2DSwimmer {
         this.raycaster.far = this.avoidDistance;
 
         this.state = {
-            currentSpeed: 6,
-            targetSpeed: 6,
+            currentSpeed: 3,
+            targetSpeed: 3,
             isPaused: false,
             nextSpeedChange: 0,
-            speedMultiplier: 1.5
+            speedMultiplier: 1.0
         };
 
         this.pickNewTarget();
@@ -112,8 +112,8 @@ export class Fish2DSwimmer {
 
         if (elapsed > this.state.nextSpeedChange) {
             this.state.targetSpeed = hasForcedTarget
-                ? THREE.MathUtils.randFloat(8, 11)
-                : THREE.MathUtils.randFloat(4, 8);
+                ? THREE.MathUtils.randFloat(5, 8)
+                : THREE.MathUtils.randFloat(2, 4);
             this.state.nextSpeedChange = elapsed + THREE.MathUtils.randFloat(2, 4);
         }
 

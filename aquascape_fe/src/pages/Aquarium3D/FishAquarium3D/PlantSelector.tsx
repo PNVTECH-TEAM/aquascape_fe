@@ -36,11 +36,19 @@ const mapCatalogItemToPlant = (item: AquariumCatalogItem): Plant => {
 };
 
 const mapUserAssetToPlant = (asset: any): Plant => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
+  const getFullUrl = (path?: string) => {
+    if (!path) return undefined;
+    if (/^https?:\/\//i.test(path)) return path;
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${backendUrl}${normalizedPath}`;
+  };
+
   return {
-    id: asset.id,
+    id: String(asset.id),
     name: asset.name,
-    image: asset.previewImageUrl,
-    url: asset.glbUrl,
+    image: getFullUrl(asset.previewImageUrl),
+    url: getFullUrl(asset.glbUrl),
     category: "My Assets",
     type: asset.type || "decoration",
   };

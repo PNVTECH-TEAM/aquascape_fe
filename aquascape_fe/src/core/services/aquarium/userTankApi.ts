@@ -6,15 +6,12 @@ import type {
     UpdateTankPayload,
     UpsertTankLayoutPayload,
 } from "@app/core/interface/aquarium.interface";
-import { getCurrentAquariumUserId } from "./config";
 import { mapUserTankToAquariumTank, mapUserTankToLayout } from "./mappers";
 import type { ListEnvelope, SaveUserTankRequest, UserTankDto } from "./types";
 import { clone, createId, unwrapList } from "./utils";
 
 const fetchUserTanks = async (): Promise<UserTankDto[]> => {
-    const response = await axios.get<ListEnvelope<UserTankDto>>("/user-tanks", {
-        params: { userId: getCurrentAquariumUserId() },
-    });
+    const response = await axios.get<ListEnvelope<UserTankDto>>("/user-tanks");
     return unwrapList(response.data);
 };
 
@@ -39,9 +36,7 @@ export const createTank = async (payload: CreateTankPayload): Promise<AquariumTa
         previewImageUrl: payload.previewImageUrl,
     };
 
-    const response = await axios.post<UserTankDto>("/user-tanks", body, {
-        params: { userId: getCurrentAquariumUserId() },
-    });
+    const response = await axios.post<UserTankDto>("/user-tanks", body);
 
     return clone(mapUserTankToAquariumTank(response.data, payload.size));
 };
@@ -56,17 +51,13 @@ export const updateTank = async (
         previewImageUrl: updates.previewImageUrl,
     };
 
-    const response = await axios.post<UserTankDto>("/user-tanks", body, {
-        params: { userId: getCurrentAquariumUserId() },
-    });
+    const response = await axios.post<UserTankDto>("/user-tanks", body);
 
     return clone(mapUserTankToAquariumTank(response.data, updates.size));
 };
 
 export const deleteTank = async (tankId: string): Promise<boolean> => {
-    await axios.delete(`/user-tanks/${tankId}`, {
-        params: { userId: getCurrentAquariumUserId() },
-    });
+    await axios.delete(`/user-tanks/${tankId}`);
     return true;
 };
 
@@ -101,11 +92,11 @@ export const saveTankLayout = async (
     const body: SaveUserTankRequest = {
         id: tankId,
         items: payload.items,
+        name: payload.name,
+        previewImageUrl: payload.previewImageUrl,
     };
 
-    const response = await axios.post<UserTankDto>("/user-tanks", body, {
-        params: { userId: getCurrentAquariumUserId() },
-    });
+    const response = await axios.post<UserTankDto>("/user-tanks", body);
 
     const mapped = mapUserTankToLayout(response.data, payload.size);
     if (mapped) {

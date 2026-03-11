@@ -431,7 +431,7 @@
     background: rgba(0, 10, 20, 0.95);
     backdrop-filter: blur(20px);
     z-index: 1000;
-    padding: 60px 15px 20px 15px;
+    padding: 20px 15px 20px 15px;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
@@ -643,7 +643,6 @@
     right: 10px;
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.1);
     border: none;
     border-radius: 50%;
     color: #fff;
