@@ -14,7 +14,7 @@ export default function Aquarium3D() {
     const { t } = useTranslation();
     const [panelOpen, setPanelOpen] = useState<boolean>(false);
     const [explorerOpen, setExplorerOpen] = useState<boolean>(false);
-    const [scoreHudOpen, setScoreHudOpen] = useState<boolean>(true);
+    const [scoreHudOpen, setScoreHudOpen] = useState<boolean>(false);
     const [lightingMode, setLightingMode] = useState<TankLightingMode>("day");
     const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
     const [tankNameInput, setTankNameInput] = useState<string>("");
