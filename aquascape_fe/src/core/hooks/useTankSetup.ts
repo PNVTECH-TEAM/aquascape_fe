@@ -6,6 +6,8 @@ import { Water } from "three/examples/jsm/objects/Water";
 // @ts-ignore
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 // @ts-ignore
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+// @ts-ignore
 import { clone as cloneSkinnedObject } from "three/examples/jsm/utils/SkeletonUtils";
 import type { TankSize, TankInfo, TankItemTransform, TankLayoutItem } from "@app/core/interface";
 import { calculateTankInfo } from "@app/core/utils/calculateTankInfo";
@@ -66,7 +68,7 @@ export const useTankSetup = (
     const obstacleObjectsRef = useRef<THREE.Object3D[]>([]);
     const modelTemplateCacheRef = useRef<Map<string, THREE.Object3D>>(new Map());
     const pointerDownHandlerRef = useRef<((event: PointerEvent) => void) | null>(null);
-    const addItemRef = useRef<((item: unknown, pos?: THREE.Vector3, transform?: TankItemTransform) => void) | null>(null);
+    const addItemRef = useRef<((item: unknown, pos?: THREE.Vector3, transform?: TankItemTransform) => Promise<void>) | null>(null);
 
     const [loading, setLoading] = useState<boolean>(true);
     const tankInfo: TankInfo = calculateTankInfo(size.width, size.height, size.depth);
@@ -459,7 +461,11 @@ export const useTankSetup = (
             fishSwimmerRef.current = null;
         }
 
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
         const gltfLoader = new GLTFLoader();
+        (gltfLoader as any).setDRACOLoader(dracoLoader);
 
         const applySavedTransform = (obj: THREE.Object3D, transform?: TankItemTransform) => {
             if (!transform) return;
@@ -468,7 +474,7 @@ export const useTankSetup = (
             obj.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
         };
 
-        const addItemToTank = (item: any, pos?: THREE.Vector3, transform?: TankItemTransform) => {
+        const addItemToTank = (item: any, pos?: THREE.Vector3, transform?: TankItemTransform): Promise<void> => {
             let url: string | undefined;
 
             if (typeof item === 'string') {
@@ -481,7 +487,7 @@ export const useTankSetup = (
 
             if (!url || !url.trim()) {
                 console.warn('❌ No valid URL found in dropped item:', item);
-                return;
+                return Promise.resolve();
             }
 
             const extension = url.split('/').pop()?.split('.').pop()?.toLowerCase() || '';
@@ -498,7 +504,7 @@ export const useTankSetup = (
                 const isFishModel = shouldTreatAsFish;
                 const dominantSize = Math.max(sizeBox.x, sizeBox.y, sizeBox.z, 0.0010);
 
-                const targetSpan = bounds.innerWidth * (isFishModel ? 0.20 : 0.35);
+                const targetSpan = (boundsRef.current?.innerWidth || 1) * (isFishModel ? 0.20 : 0.35);
                 const scaleFactor = THREE.MathUtils.clamp(targetSpan / dominantSize, 0.01, 100);
                 model.scale.multiplyScalar(scaleFactor);
 
@@ -506,157 +512,173 @@ export const useTankSetup = (
                 const newSize = new THREE.Vector3();
                 newBox.getSize(newSize);
 
-                if (pos) {
+                if (pos && boundsRef.current) {
                     model.position.x = THREE.MathUtils.clamp(
                         pos.x,
-                        bounds.minX + newSize.x / 2,
-                        bounds.maxX - newSize.x / 2
+                        boundsRef.current.minX + newSize.x / 2,
+                        boundsRef.current.maxX - newSize.x / 2
                     );
                     model.position.z = THREE.MathUtils.clamp(
                         pos.z,
-                        bounds.minZ + newSize.z / 2,
-                        bounds.maxZ - newSize.z / 2
+                        boundsRef.current.minZ + newSize.z / 2,
+                        boundsRef.current.maxZ - newSize.z / 2
                     );
                     const minY = GLASS_THICKNESS + newSize.y / 2;
                     const maxY = metadata.allowSurfacePlacement
-                        ? bounds.maxY + newSize.y * 0.9
-                        : bounds.maxY - newSize.y / 2;
+                        ? boundsRef.current.maxY + newSize.y * 0.9
+                        : boundsRef.current.maxY - newSize.y / 2;
                     model.position.y = THREE.MathUtils.clamp(pos.y, minY, maxY);
-                } else {
+                } else if (boundsRef.current) {
                     model.position.set(0, 0, 0);
                     model.position.y = metadata.allowSurfacePlacement
-                        ? bounds.maxY + newSize.y / 2
+                        ? boundsRef.current.maxY + newSize.y / 2
                         : GLASS_THICKNESS + newSize.y / 2;
                 }
 
                 applySavedTransform(model, transform);
                 scene.add(model);
 
-                registerTankItem(
-                    model,
-                    shouldTreatAsFish ? 'fish' : 'decoration',
-                    shouldTreatAsFish,
-                    metadata,
-                    bounds,
-                    true
-                );
+                if (boundsRef.current) {
+                    registerTankItem(
+                        model,
+                        shouldTreatAsFish ? 'fish' : 'decoration',
+                        shouldTreatAsFish,
+                        metadata,
+                        boundsRef.current,
+                        true
+                    );
+                }
             };
 
-            if (extension === 'glb' || extension === 'gltf') {
-                const cachedTemplate = modelTemplateCacheRef.current.get(url);
-                if (cachedTemplate) {
-                    buildModelInstance(cachedTemplate);
-                    return;
-                }
+            return new Promise<void>((resolve, reject) => {
+                if (extension === 'glb' || extension === 'gltf') {
+                    const cachedTemplate = modelTemplateCacheRef.current.get(url);
+                    if (cachedTemplate) {
+                        buildModelInstance(cachedTemplate);
+                        resolve();
+                        return;
+                    }
 
-                gltfLoader.load(url, (gltf: any) => {
-                    const template = gltf.scene as THREE.Object3D;
-                    const isFishModel = shouldTreatAsFish;
+                    gltfLoader.load(
+                        url,
+                        (gltf: any) => {
+                            const template = gltf.scene as THREE.Object3D;
+                            const isFishModel = shouldTreatAsFish;
 
-                    template.traverse((child: any) => {
-                        if (child.isMesh) {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
+                            template.traverse((child: any) => {
+                                if (child.isMesh) {
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
 
-                            if (isFishModel) {
-                                child.rotation.y = Math.PI;
+                                    if (isFishModel) {
+                                        child.rotation.y = Math.PI;
 
-                                if (child.material) {
-                                    if (Array.isArray(child.material)) {
-                                        child.material.forEach((mat: any) => {
-                                            mat.roughness = 0.3;
-                                            mat.metalness = 0.1;
-                                            mat.envMapIntensity = 1.2;
-                                            mat.emissive = new THREE.Color(0x000000);
-                                            mat.emissiveIntensity = 0;
-                                            mat.needsUpdate = true;
-                                        });
-                                    } else {
-                                        const mat = child.material as THREE.MeshStandardMaterial;
-                                        mat.roughness = 0.3;
-                                        mat.metalness = 0.1;
-                                        mat.envMapIntensity = 1.2;
-                                        mat.emissive = new THREE.Color(0x000000);
-                                        mat.emissiveIntensity = 0;
-                                        mat.needsUpdate = true;
+                                        if (child.material) {
+                                            if (Array.isArray(child.material)) {
+                                                child.material.forEach((mat: any) => {
+                                                    mat.roughness = 0.3;
+                                                    mat.metalness = 0.1;
+                                                    mat.envMapIntensity = 1.2;
+                                                    mat.emissive = new THREE.Color(0x000000);
+                                                    mat.emissiveIntensity = 0;
+                                                    mat.needsUpdate = true;
+                                                });
+                                            } else {
+                                                const mat = child.material as THREE.MeshStandardMaterial;
+                                                mat.roughness = 0.3;
+                                                mat.metalness = 0.1;
+                                                mat.envMapIntensity = 1.2;
+                                                mat.emissive = new THREE.Color(0x000000);
+                                                mat.emissiveIntensity = 0;
+                                                mat.needsUpdate = true;
+                                            }
+                                        }
                                     }
                                 }
-                            }
+                            });
+                            modelTemplateCacheRef.current.set(url, template);
+                            buildModelInstance(template);
+                            resolve();
+                        },
+                        undefined,
+                        (error: any) => {
+                            console.error('❌ GLTF load failed:', url, error);
+                            reject(error);
                         }
-                    });
-                    modelTemplateCacheRef.current.set(url, template);
-                    buildModelInstance(template);
-                });
+                    );
+                } else if (['png', 'jpg', 'jpeg', 'webp'].includes(extension)) {
+                    const loader = new THREE.TextureLoader();
 
-            } else if (['png', 'jpg', 'jpeg', 'webp'].includes(extension)) {
-                const loader = new THREE.TextureLoader();
+                    loader.load(
+                        url,
+                        (texture) => {
+                            const material = new THREE.MeshBasicMaterial({
+                                map: texture,
+                                transparent: true,
+                                side: THREE.DoubleSide,
+                            });
 
-                loader.load(
-                    url,
-                    (texture) => {
-                        const material = new THREE.MeshBasicMaterial({
-                            map: texture,
-                            transparent: true,
-                            side: THREE.DoubleSide,
-                        });
+                            const scaleFactor = size.width / 300;
+                            const planeWidth = 30 * scaleFactor;
+                            const planeHeight = 25 * scaleFactor;
 
-                        const scaleFactor = size.width / 300;
-                        const planeWidth = 30 * scaleFactor;
-                        const planeHeight = 25 * scaleFactor;
+                            const mesh = new THREE.Mesh(
+                                new THREE.PlaneGeometry(planeWidth, planeHeight),
+                                material
+                            );
+                            mesh.userData.is2DImage = true;
+                            mesh.userData.planeWidth = planeWidth;
+                            mesh.userData.planeHeight = planeHeight;
 
-                        const mesh = new THREE.Mesh(
-                            new THREE.PlaneGeometry(planeWidth, planeHeight),
-                            material
-                        );
-                        mesh.userData.is2DImage = true;
-                        mesh.userData.planeWidth = planeWidth;
-                        mesh.userData.planeHeight = planeHeight;
+                            let initialX = pos?.x || 0;
+                            let initialZ = pos?.z || 0;
+                            initialX = THREE.MathUtils.clamp(
+                                initialX,
+                                bounds.minX + planeWidth / 2,
+                                bounds.maxX - planeWidth / 2
+                            );
+                            initialZ = THREE.MathUtils.clamp(
+                                initialZ,
+                                bounds.minZ,
+                                bounds.maxZ
+                            );
 
-                        let initialX = pos?.x || 0;
-                        let initialZ = pos?.z || 0;
-                        initialX = THREE.MathUtils.clamp(
-                            initialX,
-                            bounds.minX + planeWidth / 2,
-                            bounds.maxX - planeWidth / 2
-                        );
-                        initialZ = THREE.MathUtils.clamp(
-                            initialZ,
-                            bounds.minZ,
-                            bounds.maxZ
-                        );
+                            const minY = GLASS_THICKNESS + planeHeight / 2;
+                            const maxY = metadata.allowSurfacePlacement
+                                ? bounds.maxY + planeHeight * 0.9
+                                : bounds.maxY - planeHeight / 2;
+                            const initialY = THREE.MathUtils.clamp(
+                                pos?.y ?? (GLASS_THICKNESS + planeHeight / 2 + 1),
+                                minY,
+                                maxY
+                            );
 
-                        const minY = GLASS_THICKNESS + planeHeight / 2;
-                        const maxY = metadata.allowSurfacePlacement
-                            ? bounds.maxY + planeHeight * 0.9
-                            : bounds.maxY - planeHeight / 2;
-                        const initialY = THREE.MathUtils.clamp(
-                            pos?.y ?? (GLASS_THICKNESS + planeHeight / 2 + 1),
-                            minY,
-                            maxY
-                        );
+                            mesh.position.set(initialX, initialY, initialZ);
+                            applySavedTransform(mesh, transform);
 
-                        mesh.position.set(initialX, initialY, initialZ);
-                        applySavedTransform(mesh, transform);
+                            scene.add(mesh);
 
-                        scene.add(mesh);
-
-                        registerTankItem(
-                            mesh,
-                            shouldTreatAsFish ? 'fish' : 'image',
-                            shouldTreatAsFish,
-                            metadata,
-                            bounds,
-                            false
-                        );
-                    },
-                    undefined,
-                    (error) => {
-                        console.error('❌ Texture load failed:', url, error);
-                    }
-                );
-            } else {
-                console.warn("Unsupported file type:", url);
-            }
+                            registerTankItem(
+                                mesh,
+                                shouldTreatAsFish ? 'fish' : 'image',
+                                shouldTreatAsFish,
+                                metadata,
+                                bounds,
+                                false
+                            );
+                            resolve();
+                        },
+                        undefined,
+                        (error) => {
+                            console.error('❌ Texture load failed:', url, error);
+                            reject(error);
+                        }
+                    );
+                } else {
+                    console.warn("Unsupported file type:", url);
+                    resolve(); // Resolve anyway to not hang the loader
+                }
+            });
         };
 
         addItemRef.current = addItemToTank;
@@ -1070,14 +1092,17 @@ export const useTankSetup = (
         loading,
         handleApplySize,
         handleResetView,
-        addItem: (item: unknown, position, transform) =>
-            addItemRef.current?.(
-                item,
-                position
-                    ? new THREE.Vector3(position.x, position.y, position.z)
-                    : undefined,
-                transform
-            ),
+        addItem: async (item: unknown, position, transform) => {
+            if (addItemRef.current) {
+                return await addItemRef.current(
+                    item,
+                    position
+                        ? new THREE.Vector3(position.x, position.y, position.z)
+                        : undefined,
+                    transform
+                );
+            }
+        },
         clearItems,
         triggerFishRush,
         getLayoutSnapshot,

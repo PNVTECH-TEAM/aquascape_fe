@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, type ChangeEvent } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
 import type { TankAnalysisSnapshot, TankLightingMode } from "@app/core/hooks/useTankSetup.types";
@@ -18,7 +18,6 @@ export default function Aquarium3D() {
     const [lightingMode, setLightingMode] = useState<TankLightingMode>("day");
     const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
     const [tankNameInput, setTankNameInput] = useState<string>("");
-    const [tankPreviewImageUrl, setTankPreviewImageUrl] = useState<string>("");
 
     const [size, setSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
     const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
@@ -34,7 +33,7 @@ export default function Aquarium3D() {
     const [presets, setPresets] = useState<TankPreset[]>([]);
     const [presetsLoading, setPresetsLoading] = useState<boolean>(true);
     const [userTanks, setUserTanks] = useState<any[]>([]);
-    const [selectedTankId, setSelectedTankId] = useState<string | null>(null);
+    const [itemsLoading, setItemsLoading] = useState<boolean>(false);
     
     // Flag to ensure initial restoration only happens once
     const initialRestorationDoneRef = useRef<boolean>(false);
@@ -86,6 +85,7 @@ export default function Aquarium3D() {
                         }
                         setTankNameInput(mostRecentTank.name);
                         // Delay loading items until the scene is likely initialized for the new size
+                        setItemsLoading(true);
                         setTimeout(() => loadTankItems(mostRecentTank.id), 500);
                     }
                 } else if (presetData.length > 0 && !initialRestorationDoneRef.current) {
@@ -128,6 +128,7 @@ export default function Aquarium3D() {
     );
 
     const loadTankItems = useCallback(async (tankId: string) => {
+        setItemsLoading(true);
         try {
             const [catalog, userAssets, latestLayout] = await Promise.all([
                 getAquariumCatalog().catch(() => []),
@@ -137,7 +138,6 @@ export default function Aquarium3D() {
 
             // Clear current items before adding new ones
             clearItems();
-            setSelectedTankId(tankId);
 
             if (!latestLayout || latestLayout.items.length === 0) return;
 
@@ -167,26 +167,34 @@ export default function Aquarium3D() {
                 return (aquariumImages as Record<string, string>)[imageKey];
             };
 
+            const addPromises: Promise<void>[] = [];
+
             latestLayout.items.forEach((savedItem: any) => {
                 const itemId = savedItem.userAssetId || savedItem.catalogItemId;
                 const catalogItem = catalogById.get(String(itemId));
                 if (!catalogItem) return;
 
-                addItem(
-                    {
-                        id: catalogItem.id,
-                        name: catalogItem.name,
-                        category: catalogItem.category,
-                        type: catalogItem.type,
-                        url: catalogItem.url as string,
-                        image: getImageFromKey(catalogItem.imageKey),
-                    },
-                    savedItem.transform.position,
-                    savedItem.transform
+                addPromises.push(
+                    addItem(
+                        {
+                            id: catalogItem.id,
+                            name: catalogItem.name,
+                            category: catalogItem.category,
+                            type: catalogItem.type,
+                            url: catalogItem.url as string,
+                            image: getImageFromKey(catalogItem.imageKey),
+                        },
+                        savedItem.transform.position,
+                        savedItem.transform
+                    )
                 );
             });
+
+            await Promise.all(addPromises);
         } catch (error) {
             console.error("Error loading tank items:", error);
+        } finally {
+            setItemsLoading(false);
         }
     }, [addItem, clearItems]);
 
@@ -203,24 +211,10 @@ export default function Aquarium3D() {
         setSaveDialogOpen(true);
     };
 
-    const onSelectPreviewImage = (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            if (typeof reader.result === "string") {
-                setTankPreviewImageUrl(reader.result);
-            }
-        };
-        reader.readAsDataURL(file);
-        event.target.value = "";
-    };
-
     const onConfirmSave = async () => {
         const saved = await handleSaveLayout({
             tankName: tankNameInput,
-            previewImageUrl: tankPreviewImageUrl,
+            previewImageUrl: "",
         });
 
         if (saved) {
@@ -237,8 +231,9 @@ export default function Aquarium3D() {
 
     return (
         <div className="aquarium3d-page">
-            <div className={`loading ${loading ? "" : "hidden"}`}>
+            <div className={`loading ${(loading || itemsLoading) ? "" : "hidden"} ${!loading && itemsLoading ? "items-loading" : ""}`}>
                 <div className="spinner"></div>
+                {itemsLoading && !loading && <div className="loading-text">Loading items...</div>}
             </div>
 
             <div ref={containerRef} className="canvas-container" />
@@ -381,10 +376,10 @@ export default function Aquarium3D() {
                                             if (latestForSize) {
                                                 setTankNameInput(latestForSize.name);
                                                 // Slight delay to allow the 3D scene to reset
+                                                setItemsLoading(true);
                                                 setTimeout(() => loadTankItems(latestForSize.id), 300);
                                             }
                                         } else {
-                                            setSelectedTankId(null);
                                             setTankNameInput(`My Tank ${s.width}x${s.height}x${s.depth}`);
                                         }
                                     }}

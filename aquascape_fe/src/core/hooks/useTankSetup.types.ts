@@ -12,7 +12,7 @@ export interface UseTankSetupReturn {
     loading: boolean;
     handleApplySize: (customSize: TankSize) => void;
     handleResetView: () => void;
-    addItem: (item: unknown, position?: Vector3Data, transform?: TankItemTransform) => void;
+    addItem: (item: unknown, position?: Vector3Data, transform?: TankItemTransform) => Promise<void>;
     clearItems: () => void;
     triggerFishRush: (durationSeconds?: number) => void;
     getLayoutSnapshot: () => TankLayoutItem[];
