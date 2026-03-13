@@ -8,6 +8,8 @@ import {
 import type { RegisterPayload, LoginPayload } from "@app/core/interface";
 import type { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
+import { ACCESS_TOKEN, USER_PROFILE } from "../constants";
+
 export const useRegister = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -56,15 +58,26 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: async (payload: LoginPayload) => {
       const { data } = await loginApi(payload);
-      return data as string;
+      return data;
     },
-    onSuccess: (token: string) => {
+    onSuccess: (data: any) => {
       openNotificationWithIcon(
         NotificationTypeEnum.SUCCESS,
         t("NOTIFICATION.LOGIN_SUCCESS"),
       );
 
-      localStorage.setItem("accessToken", token);
+      // Extract token and user data from response
+      const token = typeof data === "string" ? data : data?.token || data?.accessToken || data?.data?.token;
+      const user = data?.user || data?.data?.user || (typeof data === "object" && !data.token ? data : null);
+
+      if (token) {
+        localStorage.setItem(ACCESS_TOKEN, token);
+      }
+      
+      if (user) {
+        localStorage.setItem(USER_PROFILE, JSON.stringify(user));
+      }
+
       navigate("/homePage");
     },
     onError: (error: AxiosError<{ code?: number; message?: string }>) => {

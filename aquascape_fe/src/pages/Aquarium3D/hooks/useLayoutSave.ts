@@ -68,17 +68,13 @@ export const useLayoutSave = ({
             const normalizedPreviewImage = metadata?.previewImageUrl?.trim() || undefined;
             const tankId = await ensureActiveTankId(normalizedName);
 
-            await updateTank(tankId, {
-                name: normalizedName,
-                size,
-                previewImageUrl: normalizedPreviewImage,
-            });
-
             const items = getLayoutSnapshot();
 
             await saveTankLayout(tankId, {
                 size,
                 items,
+                name: normalizedName,
+                previewImageUrl: normalizedPreviewImage,
             });
 
             onStatusChange(t("AQUARIUM3D.SAVE_SUCCESS"));

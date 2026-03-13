@@ -1,5 +1,4 @@
 import { AquaForestSplash, AquaIntro, LoginForm, RegisterForm } from "@app/pages";
-
 export const publicRoutes = [
   {
     path: "",
@@ -14,6 +13,7 @@ export const publicRoutes = [
     path: "register",
     element: <RegisterForm />,
   },
+  
   {
     path: "login",
     element: <LoginForm />,

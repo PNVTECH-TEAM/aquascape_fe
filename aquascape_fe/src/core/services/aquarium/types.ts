@@ -3,13 +3,15 @@ import type { TankLayoutItem, TankPreset } from "@app/core/interface/aquarium.in
 export type ListEnvelope<T> = T[] | { data?: T[]; items?: T[]; results?: T[] };
 
 export type SaveUserTankRequest = {
-    id?: string;
+    id?: string | null; // null = create new tank
     name?: string;
     presetId?: number | string;
     previewImageUrl?: string | null;
     items?: Array<{
+        id?: string;
         instanceId: string;
-        catalogItemId: string;
+        catalogItemId?: string;
+        userAssetId?: number;
         transform: TankLayoutItem["transform"];
     }>;
 };
@@ -19,6 +21,7 @@ export interface UserTankLayoutItemDto {
     tankLayoutId?: string;
     instanceId?: string;
     catalogItemId?: string;
+    userAssetId?: number;
     transform?: TankLayoutItem["transform"];
 }
 

@@ -133,7 +133,8 @@ export const mapUserTankToLayout = (
         const instanceId = item.instanceId ?? createId();
         dedupedByInstance.set(instanceId, {
             instanceId,
-            catalogItemId: item.catalogItemId ?? "",
+            catalogItemId: item.catalogItemId,
+            userAssetId: item.userAssetId,
             transform: normalizeTransform(item.transform),
         });
     });

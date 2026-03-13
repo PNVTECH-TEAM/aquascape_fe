@@ -13,7 +13,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#2563eb] px-5 pt-[30px] pb-[30px] mb-6">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-[#002f4b] via-[#005b96] to-[#00a8cc] px-5 pt-[30px] pb-[30px] mb-6 rounded-b-xl">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <EnvironmentOutlined className="text-white text-2xl" />

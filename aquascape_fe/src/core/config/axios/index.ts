@@ -1,67 +1,56 @@
-import axios, { InternalAxiosRequestConfig } from 'axios';
+import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 
-import { getStorageData, removeStorageData, setStorageData } from '../storage';
-import { ACCESS_TOKEN, API_URL, REFRESH_TOKEN, USER_PROFILE } from '@app/core/constants';
-import { CLIENT_TYPE } from '@app/core/constants/appName';
-import { refreshTokenApi } from '@app/core/services';
+import { getStorageData, removeStorageData } from "../storage";
+import { ACCESS_TOKEN, USER_PROFILE } from "@app/core/constants";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL_API;
 axios.defaults.baseURL = BASE_URL;
 
 axios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (config.url === API_URL.LOGIN) {
-      config.headers['X-Client-Type'] = CLIENT_TYPE;
-      return config;
-    }
-
-    if (config.url === API_URL.REFRESH_TOKEN) {
-      const refreshToken = getStorageData(REFRESH_TOKEN);
-      if (refreshToken) {
-        config.headers['Authorization'] = `Bearer ${refreshToken}`;
-      }
-
-      return config;
-    }
-
+    // Note: getStorageData retrieves the token from localStorage
     const accessToken = getStorageData(ACCESS_TOKEN);
+    
     if (accessToken) {
-      config.headers['Authorization'] = `Bearer ${accessToken}`;
+      // Handle if accessToken is an object (common if stored via JSON.stringify incorrectly)
+      const token = typeof accessToken === "string" ? accessToken : accessToken?.token || accessToken?.accessToken;
+      
+      if (token && config.headers) {
+        config.headers.set("Authorization", `Bearer ${token}`);
+      }
     }
-
     return config;
   },
-  (error) => Promise.reject(error),
+  (error: AxiosError) => Promise.reject(error)
 );
 
 axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const { config, response } = error;
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
+    const { response } = error;
 
-    if (config.url === API_URL.REFRESH_TOKEN && response.data?.error === 'Unauthorized') {
+    if (
+      response?.status === 401 ||
+      response?.status === 403 ||
+      response?.data?.message === "Unauthorized" ||
+      response?.data?.message === "TOKEN_EXPIRED"
+    ) {
       removeToken();
-    }
-
-    if (response.data?.message === 'Unauthorized') {
-      await handleUnauthorized();
-    }
-
-    if (response.data?.message === 'TOKEN_EXPIRED') {
-      removeToken();
+      // Only redirect if not already on the login page or register page to avoid redirect loops
+      if (
+        typeof window !== "undefined" &&
+        !window.location.pathname.includes("/login") &&
+        !window.location.pathname.includes("/register")
+      ) {
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
-async function removeToken() {
+function removeToken() {
   removeStorageData(USER_PROFILE);
   removeStorageData(ACCESS_TOKEN);
-  removeStorageData(REFRESH_TOKEN);
-}
-
-async function handleUnauthorized() {
-  const { data } = await refreshTokenApi();
-  setStorageData(ACCESS_TOKEN, data.data.accessToken);
 }

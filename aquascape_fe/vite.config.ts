@@ -33,6 +33,11 @@ export default async ({ mode }: { mode: string }) => {
           target: "http://localhost:8080",
           changeOrigin: true,
         },
+        "/ai-aquarium": {
+          target: "https://ai-aquarium.onrender.com",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/ai-aquarium/, ""),
+        },
       },
     },
   });

@@ -1,4 +1,4 @@
-import { Home, Fish, MessageCircle, Camera, User } from "lucide-react";
+import { Home, Fish, Box, Camera, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MenuItemType } from "@app/core/interface";
 
@@ -10,19 +10,19 @@ const leftMenu: MenuItemType[] = [
     path: "/homePage",
   },
   {
-    id: "check-fish",
-    label: "Check Fish",
-    icon: <Fish className="w-6 h-6" />,
-    path: "/fishAquarium",
+    id: "create3D",
+    label: "create3D",
+    icon: <Box className="w-6 h-6" />,
+    path: "/aquarium3d",
   },
 ];
 
 const rightMenu: MenuItemType[] = [
   {
-    id: "chat",
-    label: "Chat",
-    icon: <MessageCircle className="w-6 h-6" />,
-    path: "/aquarium3d",
+    id: "check-fish",
+    label: "Check Fish",
+    icon: <Fish className="w-6 h-6" />,
+    path: "/fish-doctor",
   },
   {
     id: "profile",
@@ -67,7 +67,6 @@ export function MenuItem() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-100 border-t shadow-sm">
       <div className="grid grid-cols-5 items-center py-3 relative">
-
         {renderItem(leftMenu[0])}
         {renderItem(leftMenu[1])}
 
@@ -84,7 +83,6 @@ export function MenuItem() {
 
         {renderItem(rightMenu[0])}
         {renderItem(rightMenu[1])}
-
       </div>
     </div>
   );

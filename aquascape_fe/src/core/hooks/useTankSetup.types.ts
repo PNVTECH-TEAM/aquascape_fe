@@ -12,7 +12,8 @@ export interface UseTankSetupReturn {
     loading: boolean;
     handleApplySize: (customSize: TankSize) => void;
     handleResetView: () => void;
-    addItem: (item: unknown, position?: Vector3Data, transform?: TankItemTransform) => void;
+    addItem: (item: unknown, position?: Vector3Data, transform?: TankItemTransform) => Promise<void>;
+    clearItems: () => void;
     triggerFishRush: (durationSeconds?: number) => void;
     getLayoutSnapshot: () => TankLayoutItem[];
     getAnalysisSnapshot: () => TankAnalysisSnapshot;
@@ -21,7 +22,8 @@ export interface UseTankSetupReturn {
 export interface TankItem {
     id: string;
     type: 'fish' | 'decoration' | 'image';
-    catalogItemId: string;
+    catalogItemId?: string;
+    userAssetId?: number;
     sourceType?: string;
     category?: string;
     sourceName?: string;
@@ -41,7 +43,8 @@ export interface AddedTankItemEvent {
 
 export interface TankItemAnalysis {
     instanceId: string;
-    catalogItemId: string;
+    catalogItemId?: string;
+    userAssetId?: number;
     name: string;
     category?: string;
     sourceType?: string;
@@ -82,7 +85,8 @@ export interface TankBounds {
 }
 
 export interface TankItemSourceMetadata {
-    catalogItemId: string;
+    catalogItemId?: string;
+    userAssetId?: number;
     sourceType?: string;
     sourceCategory?: string;
     sourceName?: string;
