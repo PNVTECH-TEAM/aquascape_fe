@@ -33,6 +33,7 @@ export default function Aquarium3D() {
     const [presets, setPresets] = useState<TankPreset[]>([]);
     const [presetsLoading, setPresetsLoading] = useState<boolean>(true);
     const restoredSizeKeyRef = useRef<string>("");
+    const defaultMeshAddedRef = useRef<boolean>(false);
     const sizeKey = `${size.width}x${size.height}x${size.depth}`;
     const tankNameKey = `My Tank ${sizeKey}`;
 
@@ -88,6 +89,18 @@ export default function Aquarium3D() {
         setAnalysisSnapshot
     );
 
+    const addDefaultMesh = useCallback(() => {
+        if (defaultMeshAddedRef.current) return;
+        defaultMeshAddedRef.current = true;
+        addItem({
+            id: "default-mesh",
+            name: "Default Mesh",
+            category: "Decoration",
+            type: "decoration",
+            url: "/mesh.glb",
+        });
+    }, [addItem]);
+
     useEffect(() => {
         if (loading || restoredSizeKeyRef.current === sizeKey) return;
         restoredSizeKeyRef.current = sizeKey;
@@ -115,9 +128,15 @@ export default function Aquarium3D() {
                     sameNameTanks.length > 0 ? sameNameTanks : sameSizeTanks
                 );
 
-                if (!selectedTank) return;
+                if (!selectedTank) {
+                    addDefaultMesh();
+                    return;
+                }
                 const latestLayout = await getLatestTankLayout(selectedTank.id);
-                if (!latestLayout || latestLayout.items.length === 0) return;
+                if (!latestLayout || latestLayout.items.length === 0) {
+                    addDefaultMesh();
+                    return;
+                }
 
                 const catalogById = new Map(catalog.map((item) => [item.id, item]));
                 const getImageFromKey = (imageKey?: string): string | undefined => {
@@ -145,11 +164,12 @@ export default function Aquarium3D() {
                 });
             } catch (error) {
                 console.error("Error restoring latest layout:", error);
+                addDefaultMesh();
             }
         };
 
         restoreLatestLayout();
-    }, [addItem, loading, size, sizeKey, tankNameKey]);
+    }, [addDefaultMesh, addItem, loading, size, sizeKey, tankNameKey]);
 
     const { savingLayout, handleSaveLayout } = useLayoutSave({
         size,

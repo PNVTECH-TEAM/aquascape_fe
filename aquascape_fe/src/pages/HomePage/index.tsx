@@ -44,13 +44,14 @@ const HomePage: React.FC = () => {
 
         <Card
           hoverable
-          className="rounded-2xl shadow-md"
+          className="rounded-2xl shadow-md cursor-pointer"
+          onClick={() => navigate("/fish-doctor")}
         >
           <h3 className="text-lg font-semibold mb-2">
-            Smart Fish Suggestion
+            AI Fish Doctor
           </h3>
           <p className="text-gray-500">
-            AI-powered suggestions based on tank size and style.
+            Scan fish symptoms and get AI-powered diagnosis and treatment.
           </p>
         </Card>
 

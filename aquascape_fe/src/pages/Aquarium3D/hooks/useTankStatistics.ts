@@ -140,6 +140,20 @@ export const useGameMechanics = (layoutSnapshot: TankAnalysisSnapshot = EMPTY_AN
     }, [stats.fish, t]);
 
     const advicePayload = useMemo(() => {
+        const { size, volumeLiters, glassThicknessMm } = layoutSnapshot.tank;
+        const snapshot = {
+            tank: {
+                size: {
+                    x: size.width,
+                    y: size.height,
+                    z: size.depth,
+                },
+                volumeLiters,
+                glassThicknessMm,
+            },
+            items: layoutSnapshot.items,
+        };
+
         return {
             fish: stats.fish,
             plants: stats.plants,
@@ -151,6 +165,7 @@ export const useGameMechanics = (layoutSnapshot: TankAnalysisSnapshot = EMPTY_AN
             ),
             tank: layoutSnapshot.tank,
             items: layoutSnapshot.items,
+            snapshot,
         };
     }, [layoutSnapshot, stats.feeds, stats.fish, stats.plants, stats.rocks, stats.totalItems]);
 

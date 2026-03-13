@@ -146,5 +146,86 @@
         "reward": 110
       }
     ]
+  },
+  "FISH_DOCTOR": {
+    "HOME": {
+      "TITLE": "Fish Tank Health",
+      "STATUS_STABLE": "Status: Stable",
+      "METRICS": {
+        "TEMP": "Temperature",
+        "PH": "pH",
+        "NO3": "NO3"
+      },
+      "CTA": {
+        "TITLE": "AI Fish Doctor",
+        "SUBTITLE": "Scan & diagnose now",
+        "START": "Start"
+      },
+      "SHORTCUTS": {
+        "QUALITY": "Quality",
+        "REMINDER": "Reminder",
+        "LOG": "Log",
+        "STATS": "Stats"
+      }
+    },
+    "DIAGNOSIS": {
+      "AI_VISION": "AI Vision",
+      "SCAN": {
+        "LOADING": "Analyzing...",
+        "NOTE_PLACEHOLDER": "Describe additional symptoms... (e.g., sluggish swimming, white spots)",
+        "CAMERA_LABEL": "Take a photo",
+        "GALLERY_LABEL": "Choose from gallery"
+      },
+      "CAMERA_MODAL": {
+        "TITLE": "Take a photo",
+        "CLOSE": "Close camera",
+        "SEARCHING": "Finding fish...",
+        "CAPTURE": "Capture now"
+      },
+      "ERRORS": {
+        "CAMERA_UNAVAILABLE": "Cannot open the camera. Please grant permission or choose from the gallery.",
+        "FRAME_UNAVAILABLE": "Unable to read the camera frame. Please try again.",
+        "CAPTURE_FAILED": "Could not create an image from the camera. Please try again.",
+        "SELECT_IMAGE": "Please select a fish photo before diagnosing.",
+        "DIAGNOSE_FAILED": "Unable to diagnose right now. Please try again later."
+      },
+      "RESULT": {
+        "TITLE": "Diagnosis Result",
+        "HIGH_RISK": "High risk",
+        "LOW_RISK": "Low risk",
+        "ACCURACY": "Accuracy: {{percent}}%",
+        "VISUAL_REFERENCE": "Visual reference",
+        "YOUR_FISH": "Your fish",
+        "DISEASE_SAMPLE": "Disease sample",
+        "DIAGNOSIS_INFO": "Diagnosis Info",
+        "DISEASE_CODE": "Disease code:",
+        "ANALYSIS_ID": "Analysis ID:",
+        "DATA_SOURCE": "Data source:",
+        "DETAIL_TITLE": "Detailed diagnosis",
+        "KEY_SIGNS": "Key signs:",
+        "VIEW_TREATMENT": "View treatment plan"
+      },
+      "TREATMENT": {
+        "TITLE": "Treatment Plan",
+        "GUIDE_TITLE": "Handling guide",
+        "TIMELINE_FOLLOW": "Monitoring",
+        "STAGE_LABEL": "Stage {{index}}",
+        "STAGE_FALLBACK_GOAL": "Stage {{index}}",
+        "RECOMMENDATION": "Recommendation",
+        "OBSERVE_TITLE": "Monitor and observe",
+        "OBSERVE_DESC": "Observe your fish regularly. Ensure good water quality.",
+        "PRODUCT_SUGGESTIONS": "Suggested products",
+        "PRODUCT_LABEL": "Product {{index}}",
+        "BUY_NOW": "Buy now",
+        "IMPORTANT_NOTE": "Important note",
+        "IMPORTANT_DESC": "Follow dosage instructions and monitor fish reactions during treatment."
+      },
+      "ALT": {
+        "FISH_CAMERA": "Fish camera",
+        "FISH_PREVIEW": "Fish preview",
+        "DISEASE_SAMPLE": "Disease sample",
+        "YOUR_FISH": "Your fish"
+      }
+    }
   }
 }
