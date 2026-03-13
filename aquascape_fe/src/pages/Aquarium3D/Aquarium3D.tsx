@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
-import type { TankAnalysisSnapshot, TankLightingMode } from "@app/core/hooks/useTankSetup.types";
+import type {
+  TankAnalysisSnapshot,
+  TankLightingMode,
+} from "@app/core/hooks/useTankSetup.types";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
 import { getAquariumCatalog, getLatestTankLayout, getTankPresets, getTanks, getUserAssets } from "@app/core/services/aquariumAPI";
 import * as aquariumImages from "@app/assets/images";
@@ -19,15 +22,24 @@ export default function Aquarium3D() {
     const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
     const [tankNameInput, setTankNameInput] = useState<string>("");
 
-    const [size, setSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
-    const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
-    const [analysisSnapshot, setAnalysisSnapshot] = useState<TankAnalysisSnapshot>({
-        tank: {
-            size: { width: 90, height: 45, depth: 45 },
-            volumeLiters: calculateTankInfo(90, 45, 45).volume,
-            glassThicknessMm: calculateTankInfo(90, 45, 45).thickness,
-        },
-        items: [],
+  const [size, setSize] = useState<TankSize>({
+    width: 90,
+    height: 45,
+    depth: 45,
+  });
+  const [customSize, setCustomSize] = useState<TankSize>({
+    width: 90,
+    height: 45,
+    depth: 45,
+  });
+  const [analysisSnapshot, setAnalysisSnapshot] =
+    useState<TankAnalysisSnapshot>({
+      tank: {
+        size: { width: 90, height: 45, depth: 45 },
+        volumeLiters: calculateTankInfo(90, 45, 45).volume,
+        glassThicknessMm: calculateTankInfo(90, 45, 45).thickness,
+      },
+      items: [],
     });
     
     const [presets, setPresets] = useState<TankPreset[]>([]);
@@ -41,15 +53,15 @@ export default function Aquarium3D() {
     const sizeKey = `${size.width}x${size.height}x${size.depth}`;
     const tankNameKey = `My Tank ${sizeKey}`;
 
-    const game = useGameMechanics(analysisSnapshot);
+  const game = useGameMechanics(analysisSnapshot);
 
-    useEffect(() => {
-        game.resetForTank(sizeKey);
-    }, [game.resetForTank, sizeKey]);
+  useEffect(() => {
+    game.resetForTank(sizeKey);
+  }, [game.resetForTank, sizeKey]);
 
-    useEffect(() => {
-        setTankNameInput(tankNameKey);
-    }, [tankNameKey]);
+  useEffect(() => {
+    setTankNameInput(tankNameKey);
+  }, [tankNameKey]);
 
     useEffect(() => {
         const fetchPresetsAndTanks = async () => {
@@ -103,9 +115,9 @@ export default function Aquarium3D() {
         fetchPresetsAndTanks();
     }, []);
 
-    const onLoadingComplete = useCallback(() => {
-        // Scene loaded successfully
-    }, []);
+  const onLoadingComplete = useCallback(() => {
+    // Scene loaded successfully
+  }, []);
 
     const {
         containerRef,
@@ -198,11 +210,11 @@ export default function Aquarium3D() {
         }
     }, [addItem, clearItems]);
 
-    const { savingLayout, handleSaveLayout } = useLayoutSave({
-        size,
-        getLayoutSnapshot,
-        onStatusChange: game.setStatusText,
-    });
+  const { savingLayout, handleSaveLayout } = useLayoutSave({
+    size,
+    getLayoutSnapshot,
+    onStatusChange: game.setStatusText,
+  });
 
     const onOpenSaveDialog = () => {
         if (!tankNameInput.trim()) {
@@ -224,10 +236,10 @@ export default function Aquarium3D() {
         }
     };
 
-    const onFeedFish = () => {
-        game.handleFeedFish();
-        triggerFishRush(7);
-    };
+  const onFeedFish = () => {
+    game.handleFeedFish();
+    triggerFishRush(7);
+  };
 
     return (
         <div className="aquarium3d-page">
@@ -236,7 +248,7 @@ export default function Aquarium3D() {
                 {itemsLoading && !loading && <div className="loading-text">Loading items...</div>}
             </div>
 
-            <div ref={containerRef} className="canvas-container" />
+      <div ref={containerRef} className="canvas-container" />
 
             <button
                 className="hud-toggle-btn"
@@ -301,16 +313,18 @@ export default function Aquarium3D() {
                 {explorerOpen ? "<" : ">"}
             </button>
 
-            <div className={`explorer-panel ${explorerOpen ? "active" : ""}`}>
-                <div className="explorer-header">Aquatic Explorer</div>
-                <div className="explorer-content">
-                    <FishAquarium3D />
-                </div>
-            </div>
+      <div className={`explorer-panel ${explorerOpen ? "active" : ""}`}>
+        <div className="explorer-header">Aquatic Explorer</div>
+        <div className="explorer-content">
+          <FishAquarium3D />
+        </div>
+      </div>
 
-            <div className={`control-panel ${panelOpen ? "active" : ""}`}>
-                <button className="close-panel" onClick={() => setPanelOpen(false)}>x</button>
-                <h1>{t("AQUARIUM3D.TITLE")}</h1>
+      <div className={`control-panel ${panelOpen ? "active" : ""}`}>
+        <button className="close-panel" onClick={() => setPanelOpen(false)}>
+          x
+        </button>
+        <h1>{t("AQUARIUM3D.TITLE")}</h1>
 
                 <div className="section">
                     <div className="section-title">Lighting</div>
@@ -426,8 +440,13 @@ export default function Aquarium3D() {
                     </div>
                 </div>
 
-                <button className="apply-btn" onClick={() => handleApplySize(customSize)}>{t("AQUARIUM3D.APPLY_SIZE")}</button>
-            </div>
+        <button
+          className="apply-btn"
+          onClick={() => handleApplySize(customSize)}
+        >
+          {t("AQUARIUM3D.APPLY_SIZE")}
+        </button>
+      </div>
 
             <div className="tank-info">
                 <div className="info-item">
