@@ -3,91 +3,73 @@ import { videoFish1 } from "@app/assets/video";
 import {
   background1,
   background2,
-  background3,
   background4,
 } from "@app/assets/images";
 import { Bot, ChevronRight, Layers, MessageCircle, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+  const navigate = useNavigate();
   return (
     <div className="max-w-sm mx-auto min-h-screen rounded-3xl overflow-hidden shadow-lg pb-24">
       <div className="p-4">
-        <div className="relative h-48 text-white rounded-2xl p-6 flex items-center justify-between shadow-xl overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="flex animate-slideLeft h-full w-max">
-              <img
-                src={background1}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background2}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background3}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background4}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background1}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background2}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background3}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-              <img
-                src={background4}
-                className="w-80 h-full object-cover flex-shrink-0"
-              />
-            </div>
-          </div>
-          <div className="max-w-[60%] relative z-10">
-            <h2 className="text-xl font-bold leading-tight">YOUR SOLUTION,</h2>
+  <div className="relative h-48 rounded-2xl overflow-hidden shadow-xl">
 
-            <h2 className="text-xl font-bold leading-tight mb-3">
-              ONE TAP AWAY!
-            </h2>
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="flex w-max h-full animate-slideLeft">
+        <img src={background1} className="w-full h-full object-contain"/>
+        <img src={background2} className="w-full h-full object-contain"/>
+        <img src={background4} className="w-full h-full object-contain"/>
 
-            <button className="bg-white text-blue-700 px-4 py-2 text-sm font-semibold shadow-md hover:scale-105 transition">
-              Explore
-            </button>
-          </div>
+        <img src={background1} className="w-full h-full object-contain"/>
+        <img src={background2} className="w-full h-full object-contain"/>
+        <img src={background4} className="w-full h-full object-contain"/>
+      </div>
+    </div>
 
-          <div className="relative w-32 h-32 flex items-center justify-center z-10">
-            <div className="absolute w-28 h-28 bg-black/30 blur-2xl translate-y-3"></div>
+    <div className="relative z-10 flex items-center justify-between h-full p-6 text-white">
 
-            <div className="relative w-28 h-28 bg-white p-2 shadow-2xl rotate-6 hover:rotate-3 transition duration-300">
-              <video
-                className="w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-              >
-                <source src={videoFish1} type="video/mp4" />
-              </video>
-            </div>
-          </div>
+      <div className="max-w-[60%]">
+        <h2 className="text-xl font-bold">YOUR SOLUTION,</h2>
+        <h2 className="text-xl font-bold mb-3">ONE TAP AWAY!</h2>
+
+        <button className="bg-white text-blue-700 px-4 py-2 text-sm font-semibold shadow-md hover:scale-105 transition">
+          Explore
+        </button>
+      </div>
+
+      <div className="relative w-28 h-28 flex items-center justify-center">
+        <div className="absolute w-24 h-24 bg-black/30 blur-2xl translate-y-3"></div>
+
+        <div className="relative w-28 h-28 bg-white p-2 shadow-2xl rotate-6 hover:rotate-3 transition">
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src={videoFish1} type="video/mp4"/>
+          </video>
         </div>
       </div>
+
+    </div>
+
+  </div>
+</div>
 
       <div className="px-4">
         <div className="flex justify-between mb-3">
           <h3 className="font-semibold text-gray-800">Service Categories</h3>
-          <span className="text-sm text-gray-400">View all</span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3"
+              onClick={() => navigate("/aquarium3d")}
+            >
               <Layers className="w-5 h-5 text-blue-500" />
               <p className="text-sm font-medium text-gray-700 m-0">Create 3D</p>
             </div>
@@ -95,7 +77,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3"
+              onClick={() => navigate("/aquarium3d")}
+            >
               <Search className="w-5 h-5 text-blue-500" />
               <p className="text-sm font-medium text-gray-700 m-0">
                 Check Fish
@@ -105,7 +90,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3"
+              onClick={() => navigate("/aquarium3d")}
+            >
               <MessageCircle className="w-5 h-5 text-blue-500" />
               <p className="text-sm font-medium text-gray-700 m-0">Chat</p>
             </div>
@@ -113,7 +101,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3"
+              onClick={() => navigate("/aquarium3d")}
+            >
               <Bot className="w-5 h-5 text-blue-500" />
               <p className="text-sm font-medium text-gray-700 m-0">
                 AI Support
@@ -141,7 +132,7 @@ export default function HomePage() {
               </div>
 
               <p className="text-sm font-semibold text-gray-800">
-                Home Cleaning
+                3D Aquarium Design
               </p>
 
               <p className="text-xs text-gray-400">$25 - $30</p>
@@ -157,7 +148,9 @@ export default function HomePage() {
                 <span>4.8 (28 Reviews)</span>
               </div>
 
-              <p className="text-sm font-semibold text-gray-800">Cooking</p>
+              <p className="text-sm font-semibold text-gray-800">
+                3D Aquarium Design
+              </p>
 
               <p className="text-xs text-gray-400">$35 - $50</p>
             </div>

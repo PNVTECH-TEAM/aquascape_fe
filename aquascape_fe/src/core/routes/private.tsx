@@ -1,6 +1,6 @@
 import { HomePage } from "@app/pages";
 import FishAquarium3D from "@app/pages/Aquarium3D/FishAquarium3D/FishAquarium3D";
-import Aquarium3D from "@app/pages/Aquarium3D/Aquarium3D";
+import Profile from "@app/pages/Profile/Profile";
 
 export const privateRoutes = [
   {
@@ -8,11 +8,11 @@ export const privateRoutes = [
     element: <HomePage />,
   },
   {
-    path: "fishAquarium",
-    element: <FishAquarium3D />,
+    path: "profile",
+    element: <Profile />,
   },
   {
-    path: "aquarium3d",
-    element: <Aquarium3D />,
+    path: "fishAquarium",
+    element: <FishAquarium3D />,
   },
 ];

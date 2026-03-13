@@ -6,31 +6,33 @@ import {
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { avatar } from "@app/assets/images";
+import { useNavigate } from "react-router-dom";
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#93c5fd] px-5 pt-5 pb-5 mb-6">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#2563eb] px-5 pt-[30px] pb-[30px] mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <EnvironmentOutlined className="text-black text-2xl" />
+          <EnvironmentOutlined className="text-white text-2xl" />
           <div className="leading-tight">
-            <p className="text-sm text-black opacity-90 m-0">
+            <p className="text-sm text-white opacity-90 m-0">
               Ho Chi Minh City
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="bg-white w-11 h-11 rounded-full flex items-center justify-center shadow">
-            <BellOutlined className="text-gray-700 text-xl" />
+          <button className="bg-transparent border-none p-0">
+            <BellOutlined className="text-white text-2xl" />
           </button>
-
           <img
             src={avatar}
+            onClick={() => navigate("/profile")}
             alt="avatar"
-            className="w-11 h-11 rounded-full object-cover border-2 border-white"
+            className="w-11 h-11 rounded-full object-cover border-2 border-white cursor-pointer"
           />
         </div>
       </div>
