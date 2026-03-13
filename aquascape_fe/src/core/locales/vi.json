@@ -64,5 +64,86 @@
         "reward": 110
       }
     ]
+  },
+  "FISH_DOCTOR": {
+    "HOME": {
+      "TITLE": "S?c kh?e b? c?",
+      "STATUS_STABLE": "Tr?ng th?i: ?n ??nh",
+      "METRICS": {
+        "TEMP": "Nhi?t ??",
+        "PH": "pH",
+        "NO3": "NO3"
+      },
+      "CTA": {
+        "TITLE": "AI B?c s? c?",
+        "SUBTITLE": "Qu?t & Ch?n ?o?n ngay",
+        "START": "B?t ??u"
+      },
+      "SHORTCUTS": {
+        "QUALITY": "Ch?t l??ng",
+        "REMINDER": "Nh?c nh?",
+        "LOG": "Nh?t k?",
+        "STATS": "Th?ng k?"
+      }
+    },
+    "DIAGNOSIS": {
+      "AI_VISION": "AI Vision",
+      "SCAN": {
+        "LOADING": "?ang ph?n t?ch...",
+        "NOTE_PLACEHOLDER": "M? t? th?m tri?u ch?ng... (VD: C? b?i l? ??, c? ??m tr?ng)",
+        "CAMERA_LABEL": "Ch?p ?nh tr?c ti?p",
+        "GALLERY_LABEL": "Ch?n ?nh t? th? vi?n"
+      },
+      "CAMERA_MODAL": {
+        "TITLE": "Ch?p ?nh tr?c ti?p",
+        "CLOSE": "??ng camera",
+        "SEARCHING": "?ang t?m c?...",
+        "CAPTURE": "Ch?p ?nh ngay"
+      },
+      "ERRORS": {
+        "CAMERA_UNAVAILABLE": "Kh?ng m? ???c camera. Vui l?ng c?p quy?n ho?c ch?n ?nh t? th? vi?n.",
+        "FRAME_UNAVAILABLE": "Kh?ng ??c ???c khung h?nh camera. Th? l?i gi?p m?nh.",
+        "CAPTURE_FAILED": "Kh?ng t?o ???c ?nh t? camera. Th? l?i gi?p m?nh.",
+        "SELECT_IMAGE": "Vui l?ng ch?n ?nh c? tr??c khi ch?n ?o?n.",
+        "DIAGNOSE_FAILED": "Kh?ng th? ch?n ?o?n l?c n?y. Vui l?ng th? l?i sau."
+      },
+      "RESULT": {
+        "TITLE": "K?t qu? ch?n ?o?n",
+        "HIGH_RISK": "Nguy c? cao",
+        "LOW_RISK": "Nguy c? th?p",
+        "ACCURACY": "?? ch?nh x?c: {{percent}}%",
+        "VISUAL_REFERENCE": "H?nh ?nh tham kh?o",
+        "YOUR_FISH": "C? c?a b?n",
+        "DISEASE_SAMPLE": "M?u b?nh",
+        "DIAGNOSIS_INFO": "Th?ng tin ch?n ?o?n",
+        "DISEASE_CODE": "M? b?nh:",
+        "ANALYSIS_ID": "ID ph?n t?ch:",
+        "DATA_SOURCE": "Ngu?n d? li?u:",
+        "DETAIL_TITLE": "Ch?n ?o?n chi ti?t",
+        "KEY_SIGNS": "D?u hi?u nh?n bi?t:",
+        "VIEW_TREATMENT": "Xem ph?c ?? ?i?u tr?"
+      },
+      "TREATMENT": {
+        "TITLE": "Ph?c ?? ?i?u tr?",
+        "GUIDE_TITLE": "H??ng d?n x? l?",
+        "TIMELINE_FOLLOW": "Theo d?i",
+        "STAGE_LABEL": "Giai ?o?n {{index}}",
+        "STAGE_FALLBACK_GOAL": "Giai ?o?n {{index}}",
+        "RECOMMENDATION": "Khuy?n ngh?",
+        "OBSERVE_TITLE": "Theo d?i v? quan s?t",
+        "OBSERVE_DESC": "Quan s?t c? th??ng xuy?n. ??m b?o ch?t l??ng n??c t?t.",
+        "PRODUCT_SUGGESTIONS": "G?i ? s?n ph?m",
+        "PRODUCT_LABEL": "S?n ph?m {{index}}",
+        "BUY_NOW": "Mua ngay",
+        "IMPORTANT_NOTE": "L?u ? quan tr?ng",
+        "IMPORTANT_DESC": "Tu?n th? li?u l??ng v? theo d?i ph?n ?ng c?a c? trong qu? tr?nh ?i?u tr?."
+      },
+      "ALT": {
+        "FISH_CAMERA": "Camera c?",
+        "FISH_PREVIEW": "Xem tr??c ?nh c?",
+        "DISEASE_SAMPLE": "M?u b?nh",
+        "YOUR_FISH": "C? c?a b?n"
+      }
+    }
   }
 }

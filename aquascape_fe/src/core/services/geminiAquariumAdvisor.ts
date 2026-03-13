@@ -11,6 +11,14 @@ export interface AquariumAdviceRequest {
     itemNames: string[];
     tank: TankAnalysisSnapshot["tank"];
     items: TankAnalysisSnapshot["items"];
+    snapshot?: {
+        tank: {
+            size: { x: number; y: number; z: number };
+            volumeLiters: number;
+            glassThicknessMm: number;
+        };
+        items: TankAnalysisSnapshot["items"];
+    };
 }
 
 export interface AquariumAdviceResponse {
@@ -59,8 +67,14 @@ const adviceCache = new Map<string, AquariumAdviceResponse>();
 
 const buildCacheKey = (payload: AquariumAdviceRequest): string => {
     const names = Array.from(new Set(payload.itemNames.map((name) => name.trim()).filter(Boolean))).sort();
+    const snapshotTank = payload.snapshot?.tank;
     return JSON.stringify({
         tank: payload.tank,
+        snapshot: snapshotTank
+            ? {
+                tank: snapshotTank,
+            }
+            : undefined,
         fish: payload.fish,
         plants: payload.plants,
         rocks: payload.rocks,
