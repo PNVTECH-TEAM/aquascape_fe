@@ -408,7 +408,7 @@ export default function Aquarium3D() {
             </div>
 
             <div className={`control-panel ${panelOpen ? "active" : ""}`}>
-                <button className="close-panel" onClick={() => setPanelOpen(false)}>x</button>
+                <button className="text-white/70 w-8 h-8 rounded-full hover:bg-white/10 transition-all hover:rotate-90" onClick={() => setPanelOpen(false)}><i className="fa-solid fa-xmark text-xl"></i></button>
                 <h1>{t("AQUARIUM3D.TITLE")}</h1>
 
                 <div className="section">
