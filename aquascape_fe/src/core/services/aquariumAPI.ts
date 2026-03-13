@@ -16,8 +16,9 @@ export {
     deleteTank,
     getTankLayouts,
     getLatestTankLayout,
-    getTankLayoutByVersion,
     saveTankLayout,
     updateTankLayout,
+    getTankVersions,
+    getTankLayoutDetail,
 } from "./aquarium/userTankApi";
 export { getUserAssets } from "./uploadAPI";

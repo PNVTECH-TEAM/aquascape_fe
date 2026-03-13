@@ -139,3 +139,29 @@ export interface TankItem {
   image: string;
   category: Category;
 }
+
+export interface TankMetadata {
+  layoutId: string;       // ID dùng cho API tiếp theo
+  tankId: string;         // ID của dự án gốc
+  tankName: string;       // Tên dự án (VD: "Bể Iwagumi 01")
+  version: number;        // Số thứ tự phiên bản (VD: 1, 2, 5...)
+  previewImageUrl: string; // URL ảnh snapshot của bể
+  savedAt: string;        // Thời gian lưu (ISO format)
+}
+
+export interface TankLayoutDetail {
+  id: string;
+  version: number;
+  previewImageUrl: string;
+  tankLayoutItems: {
+    id: string;
+    instanceId: string;      // ID duy nhất của object trong scene
+    catalogItemId: string;   // ID để map với file .glb trong Catalog
+    userAssetId: number | null; // ID nếu là asset do user tự upload
+    transform: {
+      position: { x: number, y: number, z: number },
+      rotation: { x: number, y: number, z: number },
+      scale: { x: number, y: number, z: number }
+    }
+  }[];
+}

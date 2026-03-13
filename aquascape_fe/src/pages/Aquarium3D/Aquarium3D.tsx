@@ -3,7 +3,16 @@ import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
 import type { TankAnalysisSnapshot, TankLightingMode } from "@app/core/hooks/useTankSetup.types";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
-import { getAquariumCatalog, getLatestTankLayout, getTankPresets, getTanks, getUserAssets } from "@app/core/services/aquariumAPI";
+import {
+    getAquariumCatalog,
+    getLatestTankLayout,
+    getTankPresets,
+    getTanks,
+    getUserAssets,
+    getTankVersions,
+    getTankLayoutDetail
+} from "@app/core/services/aquariumAPI";
+import type { TankMetadata } from "@app/core/interface";
 import * as aquariumImages from "@app/assets/images";
 import { useGameMechanics } from "./hooks/useTankStatistics";
 import { useLayoutSave } from "./hooks/useLayoutSave";
@@ -34,6 +43,10 @@ export default function Aquarium3D() {
     const [presetsLoading, setPresetsLoading] = useState<boolean>(true);
     const [userTanks, setUserTanks] = useState<any[]>([]);
     const [itemsLoading, setItemsLoading] = useState<boolean>(false);
+    
+    const [versions, setVersions] = useState<TankMetadata[]>([]);
+    const [versionsLoading, setVersionsLoading] = useState<boolean>(false);
+    const [versionSelectorOpen, setVersionSelectorOpen] = useState<boolean>(false);
     
     // Flag to ensure initial restoration only happens once
     const initialRestorationDoneRef = useRef<boolean>(false);
@@ -126,6 +139,92 @@ export default function Aquarium3D() {
         game.onTankItemAdded,
         setAnalysisSnapshot
     );
+
+    const fetchVersions = async (presetId: string) => {
+        setVersionsLoading(true);
+        setVersionSelectorOpen(true);
+        try {
+            const data = await getTankVersions(presetId);
+            setVersions(data);
+        } catch (error) {
+            console.error("Error fetching versions:", error);
+        } finally {
+            setVersionsLoading(false);
+        }
+    };
+
+    const loadLayoutVersion = async (layoutId: string) => {
+        setVersionSelectorOpen(false);
+        setItemsLoading(true);
+        try {
+            const [catalog, userAssets, layoutDetail] = await Promise.all([
+                getAquariumCatalog().catch(() => []),
+                getUserAssets().catch(() => []),
+                getTankLayoutDetail(layoutId)
+            ]);
+
+            // Clear current items before adding new ones
+            clearItems();
+
+            if (!layoutDetail || layoutDetail.tankLayoutItems.length === 0) return;
+
+            // Merge system catalog and user assets into one lookup map
+            const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
+            const getFullUrl = (path?: string) => {
+                if (!path) return undefined;
+                if (/^https?:\/\//i.test(path)) return path;
+                const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+                return `${backendUrl}${normalizedPath}`;
+            };
+
+            const mappedUserAssets = userAssets.map((asset) => ({
+                id: String(asset.id),
+                name: asset.name,
+                category: "My Assets",
+                type: asset.type as any,
+                url: getFullUrl(asset.glbUrl),
+                imageKey: getFullUrl(asset.previewImageUrl),
+            }));
+
+            const allCatalogItems = [...catalog, ...mappedUserAssets];
+            const catalogById = new Map(allCatalogItems.map((item) => [String(item.id), item]));
+            
+            const getImageFromKey = (imageKey?: string): string | undefined => {
+                if (!imageKey) return undefined;
+                if (/^https?:\/\//i.test(imageKey) || imageKey.startsWith("/")) return imageKey;
+                return (aquariumImages as Record<string, string>)[imageKey];
+            };
+
+            const addPromises: Promise<void>[] = [];
+
+            layoutDetail.tankLayoutItems.forEach((savedItem) => {
+                const itemId = savedItem.userAssetId || savedItem.catalogItemId;
+                const catalogItem = catalogById.get(String(itemId));
+                if (!catalogItem) return;
+
+                addPromises.push(
+                    addItem(
+                        {
+                            id: catalogItem.id,
+                            name: catalogItem.name,
+                            category: catalogItem.category,
+                            type: catalogItem.type,
+                            url: catalogItem.url as string,
+                            image: getImageFromKey(catalogItem.imageKey),
+                        },
+                        savedItem.transform.position,
+                        savedItem.transform as any
+                    )
+                );
+            });
+
+            await Promise.all(addPromises);
+        } catch (error) {
+            console.error("Error loading layout version:", error);
+        } finally {
+            setItemsLoading(false);
+        }
+    };
 
     const loadTankItems = useCallback(async (tankId: string) => {
         setItemsLoading(true);
@@ -375,9 +474,6 @@ export default function Aquarium3D() {
                                             
                                             if (latestForSize) {
                                                 setTankNameInput(latestForSize.name);
-                                                // Slight delay to allow the 3D scene to reset
-                                                setItemsLoading(true);
-                                                setTimeout(() => loadTankItems(latestForSize.id), 300);
                                             }
                                         } else {
                                             setTankNameInput(`My Tank ${s.width}x${s.height}x${s.depth}`);
@@ -426,8 +522,95 @@ export default function Aquarium3D() {
                     </div>
                 </div>
 
-                <button className="apply-btn" onClick={() => handleApplySize(customSize)}>{t("AQUARIUM3D.APPLY_SIZE")}</button>
+                <button className="apply-btn" onClick={() => {
+                    handleApplySize(customSize);
+                    
+                    // Logic to find if customSize matches a preset
+                    const matchedPreset = presets.find(p => 
+                        p.size.width === customSize.width && 
+                        p.size.height === customSize.height && 
+                        p.size.depth === customSize.depth
+                    );
+
+                    if (matchedPreset) {
+                        fetchVersions(matchedPreset.id);
+                    } else {
+                        // If custom size, maybe just clear items as we don't have versions for it yet
+                        clearItems();
+                    }
+                }}>
+                    {t("AQUARIUM3D.APPLY_SIZE")}
+                </button>
             </div>
+
+            {/* Version Selector Modal */}
+            {versionSelectorOpen && (
+                <div className="version-selector-overlay">
+                    <div className="version-selector">
+                        <div className="version-selector-header">
+                            <h2>Select Your Design Version</h2>
+                            <button 
+                                className="text-white/70 w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-all hover:rotate-90" 
+                                onClick={() => setVersionSelectorOpen(false)}
+                            >
+                                <i className="fa-solid fa-xmark text-xl"></i>
+                            </button>
+                        </div>
+                        <div className="version-selector-content">
+                            {versionsLoading ? (
+                                <div className="versions-loading">
+                                    <div className="spinner"></div>
+                                    <p>Gathering your aquatic masterpieces...</p>
+                                </div>
+                            ) : versions.length > 0 ? (
+                                <div className="versions-grid">
+                                    {versions.map((version) => (
+                                        <div 
+                                            key={version.layoutId} 
+                                            className="version-card"
+                                            onClick={() => loadLayoutVersion(version.layoutId)}
+                                        >
+                                            <div className="version-preview-container">
+                                                {version.previewImageUrl ? (
+                                                    <img src={version.previewImageUrl} alt={version.tankName} />
+                                                ) : (
+                                                    <div className="explorer-item-thumb" style={{ width: '100%', height: '100%', borderRadius: 0 }}>
+                                                        <span className="explorer-item-fallback">🐟</span>
+                                                    </div>
+                                                )}
+                                                <div className="version-preview-overlay">
+                                                    <span>Load Design</span>
+                                                </div>
+                                            </div>
+                                            <div className="version-info">
+                                                <div className="version-name">{version.tankName}</div>
+                                                <div className="version-meta">
+                                                    <span className="version-num">V{version.version}</span>
+                                                    <span className="version-date">
+                                                        {new Date(version.savedAt).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="versions-empty">
+                                    <div className="empty-icon">🌊</div>
+                                    <p>No designs found for this size yet.</p>
+                                    <button 
+                                        className="apply-btn" 
+                                        style={{ width: 'auto', padding: '10px 24px', marginTop: '20px' }}
+                                        onClick={() => setVersionSelectorOpen(false)}
+                                    >
+                                        Start with Empty Tank
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="tank-info">
                 <div className="info-item">

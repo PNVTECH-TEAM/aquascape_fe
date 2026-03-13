@@ -5,6 +5,8 @@ import type {
     TankLayout,
     UpdateTankPayload,
     UpsertTankLayoutPayload,
+    TankMetadata,
+    TankLayoutDetail,
 } from "@app/core/interface/aquarium.interface";
 import { mapUserTankToAquariumTank, mapUserTankToLayout } from "./mappers";
 import type { ListEnvelope, SaveUserTankRequest, UserTankDto } from "./types";
@@ -120,3 +122,15 @@ export const updateTankLayout = async (
     _layoutId: string,
     payload: UpsertTankLayoutPayload
 ): Promise<TankLayout | null> => saveTankLayout(tankId, payload);
+
+export const getTankVersions = async (presetId: string): Promise<TankMetadata[]> => {
+    const response = await axios.get<TankMetadata[]>("/user-tanks/versions", {
+        params: { presetId }
+    });
+    return response.data;
+};
+
+export const getTankLayoutDetail = async (layoutId: string): Promise<TankLayoutDetail> => {
+    const response = await axios.get<TankLayoutDetail>(`/user-tanks/layouts/${layoutId}`);
+    return response.data;
+};
