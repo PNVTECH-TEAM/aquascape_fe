@@ -49,9 +49,9 @@ export class FishSwimmer {
         this.state = {
             isTurning: false,
             turnStartTime: 0,
-            turnDuration: 1.5,
-            currentSpeed: 10,
-            targetSpeed: 5,
+            turnDuration: 2.5,
+            currentSpeed: 4.5,
+            targetSpeed: 3.5,
             isPaused: false,
             nextWanderUpdate: 0,
             speedMultiplier: 1
@@ -67,8 +67,6 @@ export class FishSwimmer {
     }
 
     private setupFish(_fishSize: number): void {
-        // The fishSize parameter is no longer used for scaling here.
-        // Scaling and material setup is now handled consistently in useTankSetup.
         let triangles = 0;
         this.fishGroup.traverse((child: any) => {
             if (child.isMesh) {
@@ -114,7 +112,6 @@ export class FishSwimmer {
         this.raycaster.set(this.fishGroup.position, direction);
         this.raycaster.far = this.avoidDistance;
 
-        // Filter out the fish itself from the list of obstacles
         const checkableObstacles = this.obstacles.filter(obj => obj.uuid !== this.fishGroup.uuid);
 
         if (checkableObstacles.length === 0) return;
@@ -227,9 +224,9 @@ export class FishSwimmer {
 
         this.targetRotation.lookAt(this.targetPosition, this.fishGroup.position, this.fishGroup.up);
         this.targetQuaternion.setFromRotationMatrix(this.targetRotation);
-        const turnLerpSpeed = hasForcedTarget ? 6.5 : 2.0;
-        const turningLerpSpeed = hasForcedTarget ? 8.5 : 3.0;
-        const turningMoveFactor = hasForcedTarget ? 0.95 : 0.5;
+        const turnLerpSpeed = hasForcedTarget ? 6.5 : 1.2;
+        const turningLerpSpeed = hasForcedTarget ? 8.5 : 1.8;
+        const turningMoveFactor = hasForcedTarget ? 0.95 : 0.4;
 
         if (this.state.isTurning) {
             const turnProgress = (elapsed - this.state.turnStartTime) / this.state.turnDuration;

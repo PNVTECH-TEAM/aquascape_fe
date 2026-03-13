@@ -54,7 +54,8 @@ export interface TankItemTransform {
 
 export interface TankLayoutItem {
   instanceId: string;
-  catalogItemId: string;
+  catalogItemId?: string;
+  userAssetId?: number;
   transform: TankItemTransform;
 }
 
@@ -92,6 +93,8 @@ export interface UpdateTankPayload {
 export interface UpsertTankLayoutPayload {
   size: TankSize;
   items: TankLayoutItem[];
+  name?: string;
+  previewImageUrl?: string;
 }
 
 export interface SizePresets {

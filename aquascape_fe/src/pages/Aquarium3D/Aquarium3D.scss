@@ -55,9 +55,19 @@
     }
 
     .tank-info {
-        padding: 3px 10px !important;
-        gap: 10px !important;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: #000 !important;
+        padding-bottom: env(safe-area-inset-bottom);
+        display: flex;
+        justify-content: space-around;
+        padding-top: 8px;
+        z-index: 1003;
+        border-top: 1px solid rgba(64, 164, 255, 0.2);
     }
+
 
     .info-value {
         font-size: 13px !important;
@@ -70,7 +80,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    touch-action: pan-x pan-y;
+    touch-action: none; // Tránh nhiễu loạn với OrbitControls trên màn hình cảm ứng
 
     canvas {
         width: 100%;
@@ -215,12 +225,13 @@
 .explorer-selector {
     height: 100%;
     display: flex;
+    gap: 5px;
     flex-direction: column;
 }
 
-.explorer-top {
-    margin-bottom: 10px;
-}
+// .explorer-top {
+//     margin-bottom: 10px;
+// }
 
 .explorer-tabs {
     display: grid;
@@ -252,6 +263,36 @@
     box-shadow: 0 6px 14px rgba(18, 121, 211, 0.35);
 }
 
+.explorer-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+
+    &:hover {
+        background: rgba(59, 130, 246, 0.25);
+        color: #fff;
+        border-color: #60a5fa;
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    .anticon {
+        font-size: 14px;
+    }
+}
+
 .explorer-grid {
     flex: 1;
     overflow-y: auto;
@@ -260,6 +301,7 @@
     gap: 10px;
     align-content: start;
     padding-right: 2px;
+    margin-top: 15px;
 }
 
 .explorer-item-card {
@@ -298,12 +340,15 @@
     align-items: center;
     justify-content: center;
     box-shadow: inset 0 0 0 1px rgba(16, 55, 92, 0.18);
+    overflow: hidden;
+    /* Cắt ảnh nếu vượt quá khung tròn */
 }
 
 .explorer-item-image {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Đảm bảo ảnh lấp đầy vòng tròn mà không bị biến dạng */
     pointer-events: none;
 }
 
@@ -387,7 +432,7 @@
     background: rgba(0, 10, 20, 0.95);
     backdrop-filter: blur(20px);
     z-index: 1000;
-    padding: 60px 15px 20px 15px;
+    padding: 20px 15px 20px 15px;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
@@ -599,7 +644,6 @@
     right: 10px;
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.1);
     border: none;
     border-radius: 50%;
     color: #fff;
@@ -639,10 +683,17 @@
     inset: 0;
     background: #000;
     display: flex;
+    flex-direction: column;
+    gap: 15px;
     align-items: center;
     justify-content: center;
     z-index: 9998;
-    transition: opacity 0.3s;
+    transition: all 0.4s ease;
+
+    &.items-loading {
+        background: rgba(0, 10, 20, 0.7);
+        backdrop-filter: blur(4px);
+    }
 }
 
 .loading.hidden {
@@ -656,7 +707,22 @@
     border: 3px solid rgba(64, 164, 255, 0.3);
     border-top-color: #40a4ff;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    box-shadow: 0 0 15px rgba(64, 164, 255, 0.2);
+}
+
+.loading-text {
+    color: #40a4ff;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
 }
 
 @keyframes spin {
