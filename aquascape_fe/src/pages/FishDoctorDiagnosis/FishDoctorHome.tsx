@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./FishDoctorDiagnosis.scss";
 
 export default function FishDoctorHome() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleStartDiagnosis = () => {
         navigate("/fish-doctor/diagnosis");
@@ -16,34 +18,13 @@ export default function FishDoctorHome() {
 
             <main className="relative h-full overflow-y-auto hide-scrollbar">
                 <div className="dashboard-screen px-6 pt-5 pb-24">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <p className="text-gray-500 text-sm flex items-center gap-1">
-                                <i className="fa-regular fa-hand-peace text-[#4db6ac]"></i>
-                                Xin chào,
-                            </p>
-                            <h1 className="text-2xl font-bold text-[#003f5c] flex items-center gap-2">
-                                Người yêu cá
-                                <span className="animate-bounce">🐠</span>
-                            </h1>
-                        </div>
-                        <div className="relative">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4db6ac] to-[#009688] p-0.5">
-                                <div className="w-full h-full rounded-full bg-white overflow-hidden border-2 border-white">
-                                    <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" className="w-full h-full object-cover" />
-                                </div>
-                            </div>
-                            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
-                        </div>
-                    </div>
-
                     <div className="glass-card health-overview-card rounded-3xl p-6 relative overflow-hidden mb-6 text-center">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#4db6ac] opacity-5 rounded-full -mr-8 -mt-8"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#009688] opacity-5 rounded-full -ml-6 -mb-6"></div>
 
                         <h2 className="text-[#003f5c] font-bold text-lg mb-4 flex items-center justify-center gap-2">
                             <i className="fa-solid fa-heart-pulse text-[#4db6ac]"></i>
-                            Sức khỏe bể cá
+                            {t("FISH_DOCTOR.HOME.TITLE")}
                         </h2>
 
                         <div className="flex justify-center mb-4">
@@ -56,9 +37,9 @@ export default function FishDoctorHome() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-center gap-2 text-[#009688] font-bold bg-teal-50 inline-block px-4 py-2 rounded-full text-sm border border-teal-100">
+                        <div className="items-center justify-center gap-2 text-[#009688] font-bold bg-teal-50 inline-block px-4 py-2 rounded-full text-sm border border-teal-100">
                             <i className="fa-regular fa-face-smile text-base"></i>
-                            <span>Trạng thái: Ổn định</span>
+                            <span>{t("FISH_DOCTOR.HOME.STATUS_STABLE")}</span>
                         </div>
                     </div>
 
@@ -67,7 +48,7 @@ export default function FishDoctorHome() {
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <i className="fa-solid fa-temperature-high"></i>
                             </div>
-                            <span className="text-gray-500 text-xs">Nhiệt độ</span>
+                            <span className="text-gray-500 text-xs">{t("FISH_DOCTOR.HOME.METRICS.TEMP")}</span>
                             <span className="text-[#003f5c] font-bold text-lg">28°C</span>
                         </div>
 
@@ -75,7 +56,7 @@ export default function FishDoctorHome() {
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <i className="fa-solid fa-flask"></i>
                             </div>
-                            <span className="text-gray-500 text-xs">pH</span>
+                            <span className="text-gray-500 text-xs">{t("FISH_DOCTOR.HOME.METRICS.PH")}</span>
                             <span className="text-[#003f5c] font-bold text-lg">6.5</span>
                         </div>
 
@@ -83,7 +64,7 @@ export default function FishDoctorHome() {
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-500 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <i className="fa-solid fa-droplet"></i>
                             </div>
-                            <span className="text-gray-500 text-xs">NO3</span>
+                            <span className="text-gray-500 text-xs">{t("FISH_DOCTOR.HOME.METRICS.NO3")}</span>
                             <span className="text-[#003f5c] font-bold text-lg">0mg</span>
                         </div>
                     </div>
@@ -99,17 +80,17 @@ export default function FishDoctorHome() {
                             </div>
                             <div className="text-left">
                                 <p className="font-bold text-lg flex items-center gap-2">
-                                    AI Bác sĩ cá
+                                    {t("FISH_DOCTOR.HOME.CTA.TITLE")}
                                     <i className="fa-solid fa-stethoscope text-sm opacity-75"></i>
                                 </p>
                                 <p className="text-blue-100 text-sm flex items-center gap-1">
                                     <i className="fa-regular fa-eye"></i>
-                                    Quét & Chẩn đoán ngay
+                                    {t("FISH_DOCTOR.HOME.CTA.SUBTITLE")}
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-sm opacity-75 group-hover:opacity-100 transition-opacity">Bắt đầu</span>
+                            <span className="text-sm opacity-75 group-hover:opacity-100 transition-opacity">{t("FISH_DOCTOR.HOME.CTA.START")}</span>
                             <i className="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
                         </div>
                     </button>
@@ -117,19 +98,19 @@ export default function FishDoctorHome() {
                     <div className="mt-6 grid grid-cols-4 gap-2">
                         <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
                             <i className="fa-solid fa-water text-[#4db6ac] text-xl mb-1"></i>
-                            <span className="text-[10px] text-gray-600">Chất lượng</span>
+                            <span className="text-[10px] text-gray-600">{t("FISH_DOCTOR.HOME.SHORTCUTS.QUALITY")}</span>
                         </button>
                         <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
                             <i className="fa-solid fa-clock text-[#ff7c43] text-xl mb-1"></i>
-                            <span className="text-[10px] text-gray-600">Nhắc nhở</span>
+                            <span className="text-[10px] text-gray-600">{t("FISH_DOCTOR.HOME.SHORTCUTS.REMINDER")}</span>
                         </button>
                         <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
                             <i className="fa-solid fa-book-open text-[#003f5c] text-xl mb-1"></i>
-                            <span className="text-[10px] text-gray-600">Nhật ký</span>
+                            <span className="text-[10px] text-gray-600">{t("FISH_DOCTOR.HOME.SHORTCUTS.LOG")}</span>
                         </button>
                         <button className="flex flex-col items-center p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 transition-all">
                             <i className="fa-solid fa-chart-line text-[#009688] text-xl mb-1"></i>
-                            <span className="text-[10px] text-gray-600">Thống kê</span>
+                            <span className="text-[10px] text-gray-600">{t("FISH_DOCTOR.HOME.SHORTCUTS.STATS")}</span>
                         </button>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
     diagnoseFishDiseaseFromImage,
     FishDoctorDiagnosisResult,
@@ -8,6 +9,7 @@ import "./FishDoctorDiagnosis.scss";
 
 export default function FishDoctorDiagnosis() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [userPrompt, setUserPrompt] = useState<string>("");
     const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -77,8 +79,7 @@ export default function FishDoctorDiagnosis() {
             }, 0);
         } catch (error) {
             cameraInputRef.current?.click();
-            setErrorMessage("Không mở được camera. Vui lòng cấp quyền hoặc chọn ảnh từ thư viện.");
-            console.error("Failed to open camera stream:", error);
+            setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.CAMERA_UNAVAILABLE"));
         }
     };
 
@@ -99,7 +100,7 @@ export default function FishDoctorDiagnosis() {
         const width = videoElement.videoWidth;
         const height = videoElement.videoHeight;
         if (!width || !height) {
-            setErrorMessage("Không đọc được khung hình camera. Thử lại giúp mình.");
+            setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.FRAME_UNAVAILABLE"));
             return;
         }
 
@@ -114,7 +115,7 @@ export default function FishDoctorDiagnosis() {
         });
 
         if (!blob) {
-            setErrorMessage("Không tạo được ảnh từ camera. Thử lại giúp mình.");
+            setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.CAPTURE_FAILED"));
             return;
         }
 
@@ -130,7 +131,7 @@ export default function FishDoctorDiagnosis() {
     const handleDiagnose = async (event: FormEvent) => {
         event.preventDefault();
         if (!imageFile) {
-            setErrorMessage("Vui lòng chọn ảnh cá trước khi chẩn đoán.");
+            setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.SELECT_IMAGE"));
             return;
         }
 
@@ -142,8 +143,7 @@ export default function FishDoctorDiagnosis() {
             setResult(diagnosisResult);
             setActiveScreen('result');
         } catch (error) {
-            console.error("Failed to diagnose fish disease:", error);
-            setErrorMessage(error instanceof Error ? error.message : "Không thể chẩn đoán lúc này. Vui lòng thử lại sau.");
+            setErrorMessage(error instanceof Error ? error.message : t("FISH_DOCTOR.DIAGNOSIS.ERRORS.DIAGNOSE_FAILED"));
         } finally {
             setLoading(false);
         }
@@ -154,7 +154,7 @@ export default function FishDoctorDiagnosis() {
             <img
                 src="https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                 className="scan-bg-image absolute inset-0 w-full h-full object-cover opacity-80"
-                alt="Fish Camera"
+                alt={t("FISH_DOCTOR.DIAGNOSIS.ALT.FISH_CAMERA")}
             />
 
             <div className="scan-overlay absolute inset-0 z-10 flex flex-col p-5 pt-8 pb-8">
@@ -168,7 +168,7 @@ export default function FishDoctorDiagnosis() {
 
                     <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
                         <i className="fa-solid fa-microchip text-[#4db6ac] animate-pulse"></i>
-                        <span className="font-semibold text-sm">AI Vision</span>
+                        <span className="font-semibold text-sm">{t("FISH_DOCTOR.DIAGNOSIS.AI_VISION")}</span>
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                     </div>
 
@@ -188,11 +188,9 @@ export default function FishDoctorDiagnosis() {
                         <div className="absolute bottom-3 right-3 w-8 h-8 border-b-3 border-r-3 border-[#4db6ac] rounded-br-xl"></div>
 
                         {previewUrl ? (
-                            <img src={previewUrl} alt="Fish preview" className="w-full h-full object-cover" />
+                            <img src={previewUrl} alt={t("FISH_DOCTOR.DIAGNOSIS.ALT.FISH_PREVIEW")} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 text-white">
-                                <i className="fa-solid fa-fish text-5xl mb-2 opacity-50"></i>
-                                <span className="text-sm opacity-70">Chưa có ảnh</span>
                             </div>
                         )}
 
@@ -200,21 +198,13 @@ export default function FishDoctorDiagnosis() {
                             <>
                                 <div className="laser-line"></div>
                                 <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center">
-                                    <div className="bg-black/50 rounded-full px-4 py-2 flex items-center gap-2">
-                                        <i className="fa-solid fa-spinner fa-spin-pulse text-[#4db6ac]"></i>
-                                        <span className="text-white text-sm">Đang phân tích...</span>
+                                        <div className="bg-black/50 rounded-full px-4 py-2 flex items-center gap-2">
+                                            <i className="fa-solid fa-spinner fa-spin-pulse text-[#4db6ac]"></i>
+                                            <span className="text-white text-sm">{t("FISH_DOCTOR.DIAGNOSIS.SCAN.LOADING")}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            </>
-                        )}
-
-                        <label
-                            htmlFor="fish-photo-camera-input"
-                            className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-md text-white text-xs font-bold py-2 px-4 rounded-full border border-white/30 cursor-pointer hover:bg-black/70 transition-all flex items-center gap-2"
-                        >
-                            <i className="fa-regular fa-images"></i>
-                            Chọn ảnh
-                        </label>
+                                </>
+                            )}
                     </div>
 
                     <input
@@ -238,7 +228,7 @@ export default function FishDoctorDiagnosis() {
                     <div className="w-72 relative">
                         <textarea
                             className="scan-note-input w-full bg-black/30 backdrop-blur-md text-white placeholder-white/60 rounded-2xl p-4 text-sm border border-white/20 focus:border-[#4db6ac] focus:ring-1 focus:ring-[#4db6ac] transition-all"
-                            placeholder="Mô tả thêm triệu chứng... (VD: Cá bơi lờ đờ, có đốm trắng)"
+                            placeholder={t("FISH_DOCTOR.DIAGNOSIS.SCAN.NOTE_PLACEHOLDER")}
                             value={userPrompt}
                             onChange={(event) => setUserPrompt(event.target.value)}
                             rows={2}
@@ -259,7 +249,7 @@ export default function FishDoctorDiagnosis() {
                             type="button"
                             onClick={handleOpenCamera}
                             className="text-white text-xl w-14 h-14 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/20 hover:bg-black/40 hover:scale-110 transition-all"
-                            aria-label="Chụp ảnh trực tiếp"
+                            aria-label={t("FISH_DOCTOR.DIAGNOSIS.SCAN.CAMERA_LABEL")}
                         >
                             <i className="fa-solid fa-camera-retro"></i>
                         </button>
@@ -283,7 +273,7 @@ export default function FishDoctorDiagnosis() {
                             type="button"
                             onClick={handleOpenGallery}
                             className="text-white text-xl w-14 h-14 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/20 hover:bg-black/40 hover:scale-110 transition-all"
-                            aria-label="Chọn ảnh từ thư viện"
+                            aria-label={t("FISH_DOCTOR.DIAGNOSIS.SCAN.GALLERY_LABEL")}
                         >
                             <i className="fa-regular fa-images"></i>
                         </button>
@@ -296,13 +286,13 @@ export default function FishDoctorDiagnosis() {
                             <div className="camera-modal__header flex items-center justify-between px-5 py-4 border-b border-white/10">
                                 <div className="flex items-center gap-2">
                                     <i className="fa-solid fa-camera text-[#4db6ac]"></i>
-                                    <p className="font-bold text-white">Chụp ảnh trực tiếp</p>
+                                    <p className="font-bold text-white">{t("FISH_DOCTOR.DIAGNOSIS.CAMERA_MODAL.TITLE")}</p>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={handleCloseCameraModal}
                                     className="text-white/70 w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-all hover:rotate-90"
-                                    aria-label="Đóng camera"
+                                    aria-label={t("FISH_DOCTOR.DIAGNOSIS.CAMERA_MODAL.CLOSE")}
                                 >
                                     <i className="fa-solid fa-xmark text-xl"></i>
                                 </button>
@@ -313,7 +303,7 @@ export default function FishDoctorDiagnosis() {
                                 <div className="absolute inset-0 border-3 border-[#4db6ac] border-opacity-50 m-4 rounded-2xl pointer-events-none"></div>
                                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs flex items-center gap-2">
                                     <i className="fa-regular fa-circle-dot text-red-500 animate-pulse"></i>
-                                    <span>Đang tìm cá...</span>
+                                    <span>{t("FISH_DOCTOR.DIAGNOSIS.CAMERA_MODAL.SEARCHING")}</span>
                                 </div>
                                 <canvas ref={canvasRef} className="hidden" />
                             </div>
@@ -325,7 +315,7 @@ export default function FishDoctorDiagnosis() {
                                     className="w-full bg-gradient-to-r from-[#4db6ac] to-[#009688] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 hover:shadow-lg hover:shadow-[#4db6ac]/30 transition-all active:scale-[0.98]"
                                 >
                                     <i className="fa-regular fa-circle-dot"></i>
-                                    Chụp ảnh ngay
+                                    {t("FISH_DOCTOR.DIAGNOSIS.CAMERA_MODAL.CAPTURE")}
                                 </button>
                             </div>
                         </div>
@@ -355,7 +345,7 @@ export default function FishDoctorDiagnosis() {
 
                     <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
                         <i className="fa-solid fa-file-waveform text-[#4db6ac]"></i>
-                        Kết quả chẩn đoán
+                        {t("FISH_DOCTOR.DIAGNOSIS.RESULT.TITLE")}
                     </h1>
 
                     <button
@@ -376,11 +366,11 @@ export default function FishDoctorDiagnosis() {
                         <div className="flex items-center gap-3 mb-3">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md flex items-center gap-1 ${isHighRisk ? 'bg-red-500/30' : 'bg-green-500/30'}`}>
                                 <i className={`fa-solid ${isHighRisk ? 'fa-triangle-exclamation' : 'fa-circle-check'}`}></i>
-                                {isHighRisk ? 'Nguy cơ cao' : 'Nguy cơ thấp'}
+                                {isHighRisk ? t("FISH_DOCTOR.DIAGNOSIS.RESULT.HIGH_RISK") : t("FISH_DOCTOR.DIAGNOSIS.RESULT.LOW_RISK")}
                             </span>
                             <span className="text-sm opacity-90 flex items-center gap-1">
                                 <i className="fa-regular fa-chart-line"></i>
-                                Độ chính xác: {confidencePercent}%
+                                {t("FISH_DOCTOR.DIAGNOSIS.RESULT.ACCURACY", { percent: confidencePercent })}
                             </span>
                         </div>
 
@@ -403,12 +393,12 @@ export default function FishDoctorDiagnosis() {
                     <div className="mb-6">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                             <i className="fa-solid fa-images text-[#4db6ac]"></i>
-                            Hình ảnh tham khảo
+                            {t("FISH_DOCTOR.DIAGNOSIS.RESULT.VISUAL_REFERENCE")}
                         </h3>
                         <div className="flex gap-3">
                             <div className="flex-1 rounded-2xl bg-gray-100 overflow-hidden relative aspect-square shadow-md group">
                                 {previewUrl ? (
-                                    <img src={previewUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="Your fish" />
+                                    <img src={previewUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt={t("FISH_DOCTOR.DIAGNOSIS.ALT.YOUR_FISH")} />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-gray-200">
                                         <i className="fa-regular fa-image text-gray-400 text-3xl"></i>
@@ -417,14 +407,14 @@ export default function FishDoctorDiagnosis() {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <span className="absolute bottom-2 left-2 text-white text-xs font-bold backdrop-blur-md bg-black/40 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1">
                                     <i className="fa-regular fa-user"></i>
-                                    Cá của bạn
+                                    {t("FISH_DOCTOR.DIAGNOSIS.RESULT.YOUR_FISH")}
                                 </span>
                             </div>
                             <div className="flex-1 rounded-2xl bg-gray-100 overflow-hidden relative aspect-square shadow-md group">
                                 <img
                                     src={visualRef.image_url}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                    alt="Disease sample"
+                                    alt={t("FISH_DOCTOR.DIAGNOSIS.ALT.DISEASE_SAMPLE")}
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300?text=No+Image';
                                     }}
@@ -432,7 +422,7 @@ export default function FishDoctorDiagnosis() {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <span className="absolute bottom-2 left-2 text-white text-xs font-bold backdrop-blur-md bg-red-600/80 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1">
                                     <i className="fa-regular fa-hospital"></i>
-                                    Mẫu bệnh
+                                    {t("FISH_DOCTOR.DIAGNOSIS.RESULT.DISEASE_SAMPLE")}
                                 </span>
                             </div>
                         </div>
@@ -449,20 +439,20 @@ export default function FishDoctorDiagnosis() {
                 <div className="glass-card detail-card rounded-2xl p-5 mb-4">
                     <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                         <i className="fa-solid fa-clipboard-list text-[#4db6ac]"></i>
-                        Thông tin chẩn đoán
+                        {t("FISH_DOCTOR.DIAGNOSIS.RESULT.DIAGNOSIS_INFO")}
                     </h3>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                             <span className="text-gray-600 flex items-center gap-2">
                                 <i className="fa-regular fa-hashtag text-[#4db6ac]"></i>
-                                Mã bệnh:
+                                {t("FISH_DOCTOR.DIAGNOSIS.RESULT.DISEASE_CODE")}
                             </span>
                             <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg">{result.diagnosis.label_code}</strong>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                             <span className="text-gray-600 flex items-center gap-2">
                                 <i className="fa-regular fa-id-card text-[#4db6ac]"></i>
-                                ID phân tích:
+                                {t("FISH_DOCTOR.DIAGNOSIS.RESULT.ANALYSIS_ID")}
                             </span>
                             <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg text-sm font-mono">{result.diagnosis.inference_id.slice(0, 8)}...</strong>
                         </div>
@@ -470,7 +460,7 @@ export default function FishDoctorDiagnosis() {
                             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                                 <span className="text-gray-600 flex items-center gap-2">
                                     <i className="fa-regular fa-database text-[#4db6ac]"></i>
-                                    Nguồn dữ liệu:
+                                    {t("FISH_DOCTOR.DIAGNOSIS.RESULT.DATA_SOURCE")}
                                 </span>
                                 <strong className="text-[#003f5c] bg-white px-3 py-1 rounded-lg">{result.diagnosis.source}</strong>
                             </div>
@@ -483,7 +473,7 @@ export default function FishDoctorDiagnosis() {
                     <div className="glass-card detail-card rounded-2xl p-5 mb-6">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                             <i className="fa-solid fa-user-doctor text-[#4db6ac]"></i>
-                            Chẩn đoán chi tiết
+                            {t("FISH_DOCTOR.DIAGNOSIS.RESULT.DETAIL_TITLE")}
                         </h3>
 
                         {diagnosisDetail.summary && (
@@ -498,7 +488,7 @@ export default function FishDoctorDiagnosis() {
                             <div className="mb-4">
                                 <h4 className="text-sm font-semibold text-[#003f5c] mb-2 flex items-center gap-2">
                                     <i className="fa-solid fa-list-check text-[#4db6ac]"></i>
-                                    Dấu hiệu nhận biết:
+                                    {t("FISH_DOCTOR.DIAGNOSIS.RESULT.KEY_SIGNS")}
                                 </h4>
                                 <ul className="space-y-2">
                                     {diagnosisDetail.key_signs.map((sign, index) => (
@@ -527,7 +517,7 @@ export default function FishDoctorDiagnosis() {
                     className="w-full bg-gradient-to-r from-[#003f5c] to-[#005b96] text-white font-bold rounded-2xl py-4 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
                 >
                     <i className="fa-solid fa-kit-medical group-hover:rotate-12 transition-transform"></i>
-                    Xem phác đồ điều trị
+                    {t("FISH_DOCTOR.DIAGNOSIS.RESULT.VIEW_TREATMENT")}
                     <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </button>
             </div>
@@ -557,7 +547,7 @@ export default function FishDoctorDiagnosis() {
 
                     <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
                         <i className="fa-solid fa-prescription-bottle text-[#4db6ac]"></i>
-                        Phác đồ điều trị
+                        {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.TITLE")}
                     </h1>
 
                     <button
@@ -572,7 +562,7 @@ export default function FishDoctorDiagnosis() {
                     <div className="glass-card detail-card rounded-2xl p-5 mb-6">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                             <i className="fa-solid fa-clipboard-check text-[#4db6ac]"></i>
-                            Hướng dẫn xử lý
+                            {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.GUIDE_TITLE")}
                         </h3>
                         <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                             <div className="guidance-block">
@@ -595,13 +585,13 @@ export default function FishDoctorDiagnosis() {
 
                             <div className="timeline-date">
                                 <span className="day">{stage.stage}</span>
-                                <span className="sub">{stage.duration || "Theo dõi"}</span>
+                                <span className="sub">{stage.duration || t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.TIMELINE_FOLLOW")}</span>
                             </div>
 
                             <div className="treatment-card">
                                 <div className="card-header">
                                     <i className="fa-solid fa-syringe"></i>
-                                    <span>{stage.goal || `Giai đoạn ${index + 1}`}</span>
+                                    <span>{stage.goal || t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.STAGE_FALLBACK_GOAL", { index: index + 1 })}</span>
                                 </div>
 
                                 <div className="treatment-content">
@@ -628,15 +618,15 @@ export default function FishDoctorDiagnosis() {
                         <div className="timeline-item relative">
                             <div className="timeline-dot future"></div>
                             <div className="timeline-date">
-                                <span className="day">Giai đoạn 1</span>
-                                <span className="sub">Khuyến nghị</span>
+                                <span className="day">{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.STAGE_LABEL", { index: 1 })}</span>
+                                <span className="sub">{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.RECOMMENDATION")}</span>
                             </div>
                             <div className="bg-gradient-to-br from-blue-50 to-white p-5 rounded-2xl border border-blue-100">
                                 <div className="flex items-start gap-3">
                                     <i className="fa-regular fa-face-smile text-[#4db6ac] text-2xl"></i>
                                     <div>
-                                        <p className="text-gray-700 font-medium mb-1">Theo dõi và quan sát</p>
-                                        <p className="text-gray-500 text-sm">Quan sát cá thường xuyên. Đảm bảo chất lượng nước tốt.</p>
+                                        <p className="text-gray-700 font-medium mb-1">{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.OBSERVE_TITLE")}</p>
+                                        <p className="text-gray-500 text-sm">{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.OBSERVE_DESC")}</p>
                                     </div>
                                 </div>
                             </div>
@@ -648,14 +638,14 @@ export default function FishDoctorDiagnosis() {
                     <div className="mt-8">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
                             <i className="fa-solid fa-basket-shopping text-[#4db6ac]"></i>
-                            Gợi ý sản phẩm
+                            {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.PRODUCT_SUGGESTIONS")}
                         </h3>
                         <div className="space-y-4">
                             {result.suggested_treatments.map((treatment, index) => (
                                 <div key={`${index}-${treatment.name}`} className="treatment-card">
                                     <div className="card-header">
                                         <i className="fa-solid fa-bottle-droplet"></i>
-                                        <span>{`Sản phẩm ${index + 1}`}</span>
+                                        <span>{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.PRODUCT_LABEL", { index: index + 1 })}</span>
                                     </div>
 
                                     <div className="treatment-content">
@@ -690,7 +680,7 @@ export default function FishDoctorDiagnosis() {
                                             className="buy-btn"
                                         >
                                             <i className="fa-solid fa-cart-shopping"></i>
-                                            Mua ngay
+                                            {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.BUY_NOW")}
                                             <i className="fa-solid fa-arrow-up-right-from-squares"></i>
                                         </a>
                                     )}
@@ -704,8 +694,8 @@ export default function FishDoctorDiagnosis() {
                     <div className="flex items-start gap-3">
                         <i className="fa-regular fa-lightbulb text-amber-500 text-xl mt-1"></i>
                         <div>
-                            <p className="text-sm font-medium text-amber-800 mb-1">Lưu ý quan trọng</p>
-                            <p className="text-xs text-amber-700">Tuân thủ liều lượng và theo dõi phản ứng của cá trong quá trình điều trị.</p>
+                            <p className="text-sm font-medium text-amber-800 mb-1">{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.IMPORTANT_NOTE")}</p>
+                            <p className="text-xs text-amber-700">{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.IMPORTANT_DESC")}</p>
                         </div>
                     </div>
                 </div>
