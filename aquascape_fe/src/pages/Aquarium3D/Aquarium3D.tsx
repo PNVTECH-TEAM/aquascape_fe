@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankSize, TankPreset } from "@app/core/interface";
-import type { TankAnalysisSnapshot, TankLightingMode } from "@app/core/hooks/useTankSetup.types";
+import type {
+  TankAnalysisSnapshot,
+  TankLightingMode,
+} from "@app/core/hooks/useTankSetup.types";
 import { useTankSetup, calculateTankInfo } from "@app/core/hooks/useTankSetup";
 import {
     getAquariumCatalog,
@@ -28,15 +31,24 @@ export default function Aquarium3D() {
     const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
     const [tankNameInput, setTankNameInput] = useState<string>("");
 
-    const [size, setSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
-    const [customSize, setCustomSize] = useState<TankSize>({ width: 90, height: 45, depth: 45 });
-    const [analysisSnapshot, setAnalysisSnapshot] = useState<TankAnalysisSnapshot>({
-        tank: {
-            size: { width: 90, height: 45, depth: 45 },
-            volumeLiters: calculateTankInfo(90, 45, 45).volume,
-            glassThicknessMm: calculateTankInfo(90, 45, 45).thickness,
-        },
-        items: [],
+  const [size, setSize] = useState<TankSize>({
+    width: 90,
+    height: 45,
+    depth: 45,
+  });
+  const [customSize, setCustomSize] = useState<TankSize>({
+    width: 90,
+    height: 45,
+    depth: 45,
+  });
+  const [analysisSnapshot, setAnalysisSnapshot] =
+    useState<TankAnalysisSnapshot>({
+      tank: {
+        size: { width: 90, height: 45, depth: 45 },
+        volumeLiters: calculateTankInfo(90, 45, 45).volume,
+        glassThicknessMm: calculateTankInfo(90, 45, 45).thickness,
+      },
+      items: [],
     });
     
     const [presets, setPresets] = useState<TankPreset[]>([]);
@@ -47,6 +59,8 @@ export default function Aquarium3D() {
     const [versions, setVersions] = useState<TankMetadata[]>([]);
     const [versionsLoading, setVersionsLoading] = useState<boolean>(false);
     const [versionSelectorOpen, setVersionSelectorOpen] = useState<boolean>(false);
+    const [activePresetId, setActivePresetId] = useState<string>("");
+    const [activeLayoutId, setActiveLayoutId] = useState<string>("");
     
     // Flag to ensure initial restoration only happens once
     const initialRestorationDoneRef = useRef<boolean>(false);
@@ -54,15 +68,15 @@ export default function Aquarium3D() {
     const sizeKey = `${size.width}x${size.height}x${size.depth}`;
     const tankNameKey = `My Tank ${sizeKey}`;
 
-    const game = useGameMechanics(analysisSnapshot);
+  const game = useGameMechanics(analysisSnapshot);
 
-    useEffect(() => {
-        game.resetForTank(sizeKey);
-    }, [game.resetForTank, sizeKey]);
+  useEffect(() => {
+    game.resetForTank(sizeKey);
+  }, [game.resetForTank, sizeKey]);
 
-    useEffect(() => {
-        setTankNameInput(tankNameKey);
-    }, [tankNameKey]);
+  useEffect(() => {
+    setTankNameInput(tankNameKey);
+  }, [tankNameKey]);
 
     useEffect(() => {
         const fetchPresetsAndTanks = async () => {
@@ -96,6 +110,9 @@ export default function Aquarium3D() {
                             setSize(mostRecentTank.size);
                             setCustomSize(mostRecentTank.size);
                         }
+                        if (mostRecentTank.preset?.id) {
+                            setActivePresetId(mostRecentTank.preset.id);
+                        }
                         setTankNameInput(mostRecentTank.name);
                         // Delay loading items until the scene is likely initialized for the new size
                         setItemsLoading(true);
@@ -105,6 +122,7 @@ export default function Aquarium3D() {
                     // Fallback to first preset if no user tanks
                     setSize(presetData[0].size);
                     setCustomSize(presetData[0].size);
+                    setActivePresetId(presetData[0].id);
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -116,9 +134,9 @@ export default function Aquarium3D() {
         fetchPresetsAndTanks();
     }, []);
 
-    const onLoadingComplete = useCallback(() => {
-        // Scene loaded successfully
-    }, []);
+  const onLoadingComplete = useCallback(() => {
+    // Scene loaded successfully
+  }, []);
 
     const {
         containerRef,
@@ -143,6 +161,7 @@ export default function Aquarium3D() {
     const fetchVersions = async (presetId: string) => {
         setVersionsLoading(true);
         setVersionSelectorOpen(true);
+        setActivePresetId(presetId);
         try {
             const data = await getTankVersions(presetId);
             setVersions(data);
@@ -156,6 +175,7 @@ export default function Aquarium3D() {
     const loadLayoutVersion = async (layoutId: string) => {
         setVersionSelectorOpen(false);
         setItemsLoading(true);
+        setActiveLayoutId(layoutId);
         try {
             const [catalog, userAssets, layoutDetail] = await Promise.all([
                 getAquariumCatalog().catch(() => []),
@@ -238,7 +258,12 @@ export default function Aquarium3D() {
             // Clear current items before adding new ones
             clearItems();
 
-            if (!latestLayout || latestLayout.items.length === 0) return;
+            if (!latestLayout || latestLayout.items.length === 0) {
+                setActiveLayoutId("");
+                return;
+            }
+
+            setActiveLayoutId(latestLayout.id);
 
             // Merge system catalog and user assets into one lookup map
             const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
@@ -297,11 +322,11 @@ export default function Aquarium3D() {
         }
     }, [addItem, clearItems]);
 
-    const { savingLayout, handleSaveLayout } = useLayoutSave({
-        size,
-        getLayoutSnapshot,
-        onStatusChange: game.setStatusText,
-    });
+  const { savingLayout, handleSaveLayout } = useLayoutSave({
+    size,
+    getLayoutSnapshot,
+    onStatusChange: game.setStatusText,
+  });
 
     const onOpenSaveDialog = () => {
         if (!tankNameInput.trim()) {
@@ -314,6 +339,7 @@ export default function Aquarium3D() {
         const saved = await handleSaveLayout({
             tankName: tankNameInput,
             previewImageUrl: "",
+            presetId: activePresetId,
         });
 
         if (saved) {
@@ -323,10 +349,10 @@ export default function Aquarium3D() {
         }
     };
 
-    const onFeedFish = () => {
-        game.handleFeedFish();
-        triggerFishRush(7);
-    };
+  const onFeedFish = () => {
+    game.handleFeedFish();
+    triggerFishRush(7);
+  };
 
     return (
         <div className="aquarium3d-page">
@@ -335,7 +361,7 @@ export default function Aquarium3D() {
                 {itemsLoading && !loading && <div className="loading-text">Loading items...</div>}
             </div>
 
-            <div ref={containerRef} className="canvas-container" />
+      <div ref={containerRef} className="canvas-container" />
 
             <button
                 className="hud-toggle-btn"
@@ -400,12 +426,12 @@ export default function Aquarium3D() {
                 {explorerOpen ? "<" : ">"}
             </button>
 
-            <div className={`explorer-panel ${explorerOpen ? "active" : ""}`}>
-                <div className="explorer-header">Aquatic Explorer</div>
-                <div className="explorer-content">
-                    <FishAquarium3D />
-                </div>
-            </div>
+      <div className={`explorer-panel ${explorerOpen ? "active" : ""}`}>
+        <div className="explorer-header">Aquatic Explorer</div>
+        <div className="explorer-content">
+          <FishAquarium3D />
+        </div>
+      </div>
 
             <div className={`control-panel ${panelOpen ? "active" : ""}`}>
                 <button className="text-white/70 w-8 h-8 rounded-full hover:bg-white/10 transition-all hover:rotate-90" onClick={() => setPanelOpen(false)}><i className="fa-solid fa-xmark text-xl"></i></button>
@@ -448,6 +474,7 @@ export default function Aquarium3D() {
                                         // 1. Switch size immediately using handleApplySize for 3D logic
                                         handleApplySize(s);
                                         setCustomSize(s);
+                                        setActivePresetId(preset.id);
                                         
                                         // 2. Clear current items
                                         clearItems();
@@ -567,10 +594,16 @@ export default function Aquarium3D() {
                                     {versions.map((version) => (
                                         <div 
                                             key={version.layoutId} 
-                                            className="version-card"
+                                            className={`version-card ${version.layoutId === activeLayoutId ? 'active' : ''}`}
                                             onClick={() => loadLayoutVersion(version.layoutId)}
                                         >
                                             <div className="version-preview-container">
+                                                {version.layoutId === activeLayoutId && (
+                                                    <div className="active-badge">
+                                                        <i className="fa-solid fa-circle-check"></i>
+                                                        <span>Active</span>
+                                                    </div>
+                                                )}
                                                 {version.previewImageUrl ? (
                                                     <img src={version.previewImageUrl} alt={version.tankName} />
                                                 ) : (

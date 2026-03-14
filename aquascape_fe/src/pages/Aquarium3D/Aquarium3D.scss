@@ -16,6 +16,18 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @media (max-width: 1024px) and (orientation: portrait) {
     .aquarium3d-page::before {
         content: "📱 Vui lòng xoay ngang điện thoại để trải nghiệm ứng dụng";
@@ -445,6 +457,7 @@
 .control-panel.active {
     transform: translateX(0);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
 }
 
 .control-panel h1 {
@@ -721,8 +734,15 @@
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 @keyframes spin {
@@ -758,8 +778,15 @@
 }
 
 @keyframes modalAppear {
-    from { opacity: 0; transform: scale(0.9) translateY(20px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .version-selector-header {
@@ -786,11 +813,11 @@
     flex: 1;
     padding: 30px;
     overflow-y: auto;
-    
+
     &::-webkit-scrollbar {
         width: 6px;
     }
-    
+
     &::-webkit-scrollbar-thumb {
         background: rgba(64, 164, 255, 0.3);
         border-radius: 10px;
@@ -812,6 +839,21 @@
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
 
+    &.active {
+        border-color: #40a4ff;
+        background: rgba(64, 164, 255, 0.08);
+        box-shadow: 0 0 20px rgba(64, 164, 255, 0.2);
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid #40a4ff;
+            border-radius: 18px;
+            pointer-events: none;
+        }
+    }
+
     &:hover {
         transform: translateY(-8px);
         background: rgba(255, 255, 255, 0.07);
@@ -829,6 +871,30 @@
     background: #081629;
     position: relative;
     overflow: hidden;
+
+    .active-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        background: #40a4ff;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInLeft 0.3s ease-out;
+
+        i {
+            font-size: 11px;
+        }
+    }
 
     img {
         width: 100%;
@@ -851,7 +917,7 @@
     justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
-    
+
     span {
         background: #fff;
         color: #000;
@@ -897,7 +963,7 @@
     text-align: center;
     padding: 50px 0;
     color: #8ec5ff;
-    
+
     .empty-icon {
         font-size: 48px;
         margin-bottom: 15px;
@@ -919,11 +985,11 @@
     .versions-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .version-selector-header {
         padding: 15px 20px;
     }
-    
+
     .version-selector-content {
         padding: 20px;
     }

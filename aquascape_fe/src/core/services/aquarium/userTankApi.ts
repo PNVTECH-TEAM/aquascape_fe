@@ -36,6 +36,7 @@ export const createTank = async (payload: CreateTankPayload): Promise<AquariumTa
     const body: SaveUserTankRequest = {
         name: payload.name,
         previewImageUrl: payload.previewImageUrl,
+        presetId: payload.presetId,
     };
 
     const response = await axios.post<UserTankDto>("/user-tanks", body);
@@ -96,6 +97,7 @@ export const saveTankLayout = async (
         items: payload.items,
         name: payload.name,
         previewImageUrl: payload.previewImageUrl,
+        presetId: payload.presetId,
     };
 
     const response = await axios.post<UserTankDto>("/user-tanks", body);

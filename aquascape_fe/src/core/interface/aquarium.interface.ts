@@ -64,6 +64,7 @@ export interface AquariumTank {
   name: string;
   size: TankSize;
   latestLayoutVersion: number;
+  preset?: TankPreset;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,6 +83,7 @@ export interface CreateTankPayload {
   name: string;
   size: TankSize;
   previewImageUrl?: string;
+  presetId?: string;
 }
 
 export interface UpdateTankPayload {
@@ -95,6 +97,7 @@ export interface UpsertTankLayoutPayload {
   items: TankLayoutItem[];
   name?: string;
   previewImageUrl?: string;
+  presetId?: string;
 }
 
 export interface SizePresets {

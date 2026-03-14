@@ -1,18 +1,23 @@
 import { HomePage } from "@app/pages";
 import FishAquarium3D from "@app/pages/Aquarium3D/FishAquarium3D/FishAquarium3D";
-import AquaIntro from "@app/pages/Onboarding/AquaIntro";
+import FishDoctorHome from "@app/pages/FishDoctorDiagnosis/FishDoctorHome";
+import Profile from "@app/pages/Profile/Profile";
 
 export const privateRoutes = [
-  {
-    path: 'aquaIntro',
-    element: <AquaIntro />,
-  },
   {
     path: "homePage",
     element: <HomePage />,
   },
-   {
-    path: 'fishAquarium',   
+  {
+    path: "profile",
+    element: <Profile />,
+  },
+  {
+    path: "fishAquarium",
     element: <FishAquarium3D />,
+  },
+  {
+    path: "fish-doctor",
+    element: <FishDoctorHome />,
   },
 ];

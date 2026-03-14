@@ -89,6 +89,7 @@ export const mapUserTankToAquariumTank = (
         name: tank.name ?? "Untitled Tank",
         size: tank.preset?.size ?? defaultTankSize(fallbackSize),
         latestLayoutVersion: tank.latestLayoutVersion ?? tank.layout?.version ?? 1,
+        preset: tank.preset ?? undefined,
         createdAt: tank.createdAt ?? now,
         updatedAt: tank.updatedAt ?? now,
     };
