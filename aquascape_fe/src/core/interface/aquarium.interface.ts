@@ -64,6 +64,7 @@ export interface AquariumTank {
   name: string;
   size: TankSize;
   latestLayoutVersion: number;
+  preset?: TankPreset;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,6 +83,7 @@ export interface CreateTankPayload {
   name: string;
   size: TankSize;
   previewImageUrl?: string;
+  presetId?: string;
 }
 
 export interface UpdateTankPayload {
@@ -95,6 +97,7 @@ export interface UpsertTankLayoutPayload {
   items: TankLayoutItem[];
   name?: string;
   previewImageUrl?: string;
+  presetId?: string;
 }
 
 export interface SizePresets {
@@ -138,4 +141,30 @@ export interface TankItem {
   name: string;
   image: string;
   category: Category;
+}
+
+export interface TankMetadata {
+  layoutId: string;       // ID dùng cho API tiếp theo
+  tankId: string;         // ID của dự án gốc
+  tankName: string;       // Tên dự án (VD: "Bể Iwagumi 01")
+  version: number;        // Số thứ tự phiên bản (VD: 1, 2, 5...)
+  previewImageUrl: string; // URL ảnh snapshot của bể
+  savedAt: string;        // Thời gian lưu (ISO format)
+}
+
+export interface TankLayoutDetail {
+  id: string;
+  version: number;
+  previewImageUrl: string;
+  tankLayoutItems: {
+    id: string;
+    instanceId: string;      // ID duy nhất của object trong scene
+    catalogItemId: string;   // ID để map với file .glb trong Catalog
+    userAssetId: number | null; // ID nếu là asset do user tự upload
+    transform: {
+      position: { x: number, y: number, z: number },
+      rotation: { x: number, y: number, z: number },
+      scale: { x: number, y: number, z: number }
+    }
+  }[];
 }

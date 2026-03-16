@@ -16,6 +16,18 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @media (max-width: 1024px) and (orientation: portrait) {
     .aquarium3d-page::before {
         content: "📱 Vui lòng xoay ngang điện thoại để trải nghiệm ứng dụng";
@@ -445,6 +457,7 @@
 .control-panel.active {
     transform: translateX(0);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
 }
 
 .control-panel h1 {
@@ -721,8 +734,15 @@
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 @keyframes spin {
@@ -731,11 +751,247 @@
     }
 }
 
-/* Phóng to canvas cho dễ thao tác */
-@media (max-width: 1024px) {
-    .canvas-container canvas {
-        width: 100% !important;
-        height: 100% !important;
+/* Version Selector UI */
+.version-selector-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 5, 15, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.version-selector {
+    width: min(900px, 95vw);
+    max-height: 85vh;
+    background: linear-gradient(160deg, rgba(15, 32, 59, 0.95), rgba(4, 12, 24, 0.98));
+    border: 1px solid rgba(64, 164, 255, 0.35);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.version-selector-header {
+    padding: 18px 30px;
+    border-bottom: 1px solid rgba(64, 164, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+        letter-spacing: -0.01em;
+        background: linear-gradient(90deg, #fff, #8ec5ff);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+}
+
+.version-selector-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(64, 164, 255, 0.3);
+        border-radius: 10px;
+    }
+}
+
+.versions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+.version-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+
+    &.active {
+        border-color: #40a4ff;
+        background: rgba(64, 164, 255, 0.08);
+        box-shadow: 0 0 20px rgba(64, 164, 255, 0.2);
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid #40a4ff;
+            border-radius: 18px;
+            pointer-events: none;
+        }
+    }
+
+    &:hover {
+        transform: translateY(-8px);
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(64, 164, 255, 0.5);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+
+        .version-preview-overlay {
+            opacity: 1;
+        }
+    }
+}
+
+.version-preview-container {
+    height: 140px;
+    background: #081629;
+    position: relative;
+    overflow: hidden;
+
+    .active-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        background: #40a4ff;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInLeft 0.3s ease-out;
+
+        i {
+            font-size: 11px;
+        }
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+}
+
+.version-card:hover .version-preview-container img {
+    transform: scale(1.1);
+}
+
+.version-preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 100, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    span {
+        background: #fff;
+        color: #000;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.version-info {
+    padding: 15px;
+
+    .version-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .version-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #8ec5ff;
+
+        .version-num {
+            background: rgba(64, 164, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #40a4ff;
+            font-weight: 700;
+        }
+    }
+}
+
+.versions-empty {
+    text-align: center;
+    padding: 50px 0;
+    color: #8ec5ff;
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+}
+
+.versions-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 0;
+    gap: 20px;
+    color: #40a4ff;
+}
+
+/* Responsive adjustments for version selector */
+@media (max-width: 600px) {
+    .versions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .version-selector-header {
+        padding: 15px 20px;
+    }
+
+    .version-selector-content {
+        padding: 20px;
     }
 }
 

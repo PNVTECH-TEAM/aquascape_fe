@@ -1,156 +1,120 @@
-import { MenuItem } from "../Shared/components/MenuItem";
 import { videoFish1 } from "@app/assets/video";
 import { background1, background2, background4 } from "@app/assets/images";
-import { Bot, ChevronRight, Layers, MessageCircle, Search } from "lucide-react";
+import { Bot, Layers, MessageCircle, Search, Star, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import "./HomePage.scss";
 
 export default function HomePage() {
   const navigate = useNavigate();
   return (
-    <div className="max-w-sm mx-auto min-h-screen rounded-3xl overflow-hidden shadow-lg pb-24">
-      <div className="p-4">
-        <div className="relative h-48 rounded-2xl overflow-hidden shadow-xl">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="flex w-max h-full animate-slideLeft">
-              <img src={background1} className="w-full h-full object-contain" />
-              <img src={background2} className="w-full h-full object-contain" />
-              <img src={background4} className="w-full h-full object-contain" />
+    <div className="homepage-redesign pb-28">
 
-              <img src={background1} className="w-full h-full object-contain" />
-              <img src={background2} className="w-full h-full object-contain" />
-              <img src={background4} className="w-full h-full object-contain" />
-            </div>
+      {/* Banner Section */}
+      <div className="p-5">
+        <div className="relative h-56 rounded-[2.5rem] overflow-hidden shadow-2xl banner-cta group">
+          <div className="absolute inset-0 overflow-hidden opacity-40">
+            <video className="w-full h-full object-cover" autoPlay loop muted playsInline>
+              <source src={videoFish1} type="video/mp4" />
+            </video>
           </div>
 
-          <div className="relative z-10 flex items-center justify-between h-full p-6 text-white">
-            <div className="max-w-[60%]">
-              <h2 className="text-xl font-bold">YOUR SOLUTION,</h2>
-              <h2 className="text-xl font-bold mb-3">ONE TAP AWAY!</h2>
+          <div className="relative z-10 flex flex-col justify-center h-full p-8 text-white">
+            <h2 className="text-2xl font-black leading-tight mb-2 tracking-tight">
+              AQUASCAPE<br />REVOLUTION
+            </h2>
+            <p className="text-blue-100 text-sm mb-6 max-w-[180px] font-medium opacity-90">
+              One tap away from your perfect aquarium.
+            </p>
 
-              <button className="bg-white text-blue-700 px-4 py-2 text-sm font-semibold shadow-md hover:scale-105 transition">
-                Explore
-              </button>
+            <button
+              onClick={() => navigate("/aquarium3d")}
+              className="bg-white text-[#0f4c81] px-6 py-2.5 rounded-2xl text-sm font-bold shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 w-max"
+            >
+              Explore Now
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="absolute right-[-20px] bottom-[-20px] w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+        </div>
+      </div>
+
+      {/* Service Categories */}
+      <div className="px-5 mb-8 relative overflow-hidden py-4">
+        {/* Background Bubbles inside Services */}
+        <div className="bubble bubble-1"></div>
+        <div className="bubble bubble-2"></div>
+        <div className="bubble bubble-3"></div>
+
+        <div className="flex items-center justify-between mb-4 px-1 relative z-10">
+          <h3 className="text-lg font-bold text-[#102a43]">Services</h3>
+          <span className="text-xs font-bold text-[#25c2a0] uppercase tracking-wider">Top Rated</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="glass-card service-card group" onClick={() => navigate("/aquarium3d")}>
+            <div className="icon-wrapper">
+              <Layers className="w-6 h-6" />
             </div>
+            <p>Create 3D</p>
+          </div>
 
-            <div className="relative w-28 h-28 flex items-center justify-center">
-              <div className="absolute w-24 h-24 bg-black/30 blur-2xl translate-y-3"></div>
-
-              <div className="relative w-28 h-28 bg-white p-2 shadow-2xl rotate-6 hover:rotate-3 transition">
-                <video
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                >
-                  <source src={videoFish1} type="video/mp4" />
-                </video>
-              </div>
+          <div className="glass-card service-card group" onClick={() => navigate("/fish-doctor")}>
+            <div className="icon-wrapper bg-orange-50 text-orange-500">
+              <Search className="w-6 h-6" />
             </div>
+            <p>Check Fish</p>
+          </div>
+
+          <div className="glass-card service-card group" onClick={() => navigate("/aquarium3d")}>
+            <div className="icon-wrapper bg-blue-50 text-blue-500">
+              <MessageCircle className="w-6 h-6" />
+            </div>
+            <p>Chat AI</p>
+          </div>
+
+          <div className="glass-card service-card group" onClick={() => navigate("/aquarium3d")}>
+            <div className="icon-wrapper bg-purple-50 text-purple-500">
+              <Bot className="w-6 h-6" />
+            </div>
+            <p>AI Support</p>
           </div>
         </div>
       </div>
 
-      <div className="px-4">
-        <div className="flex justify-between mb-3">
-          <h3 className="font-semibold text-gray-800">Service Categories</h3>
+      {/* Popular Services Section */}
+      <div className="px-5">
+        <div className="flex justify-between items-center mb-4 px-1">
+          <h3 className="text-lg font-bold text-[#102a43]">Featured Designs</h3>
+          <button className="text-sm font-semibold text-gray-400 hover:text-[#0f4c81] transition-colors">View all</button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div
-              className="flex items-center gap-3"
-              onClick={() => navigate("/aquarium3d")}
-            >
-              <Layers className="w-5 h-5 text-blue-500" />
-              <p className="text-sm font-medium text-gray-700 m-0">Create 3D</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </div>
-
-          <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div
-              className="flex items-center gap-3"
-              onClick={() => navigate("/fish-doctor")}
-            >
-              <Search className="w-5 h-5 text-blue-500" />
-              <p className="text-sm font-medium text-gray-700 m-0">
-                Check Fish
-              </p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </div>
-
-          <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div
-              className="flex items-center gap-3"
-              onClick={() => navigate("/aquarium3d")}
-            >
-              <MessageCircle className="w-5 h-5 text-blue-500" />
-              <p className="text-sm font-medium text-gray-700 m-0">Chat</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </div>
-
-          <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
-            <div
-              className="flex items-center gap-3"
-              onClick={() => navigate("/aquarium3d")}
-            >
-              <Bot className="w-5 h-5 text-blue-500" />
-              <p className="text-sm font-medium text-gray-700 m-0">
-                AI Support
-              </p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4">
-        <div className="flex justify-between mb-3">
-          <h3 className="font-semibold text-gray-800">Popular Services</h3>
-          <span className="text-sm text-gray-400">View all ›</span>
-        </div>
-
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          <div className="min-w-[220px] bg-white rounded-2xl shadow-lg overflow-hidden">
-            <img src={background1} className="h-28 w-full object-cover" />
-
-            <div className="p-3">
-              <div className="flex items-center text-xs text-gray-400 mb-1">
-                <span className="text-yellow-400 mr-1">★</span>
-                <span>4.5 (30 Reviews)</span>
+        <div className="flex gap-4 overflow-x-auto pb-6 hide-scrollbar">
+          {[
+            { img: background1, name: "Amazon Rainforest", price: "$25.00", rating: "4.9", reviews: "128" },
+            { img: background2, name: "Zen Minimalist", price: "$32.00", rating: "4.8", reviews: "95" },
+            { img: background4, name: "Deep Sea Abyss", price: "$45.00", rating: "5.0", reviews: "210" }
+          ].map((item, idx) => (
+            <div key={idx} className="min-w-[240px] popular-card">
+              <div className="relative h-32 overflow-hidden">
+                <img src={item.img} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                  <span className="text-[10px] font-bold text-gray-800">{item.rating}</span>
+                </div>
               </div>
 
-              <p className="text-sm font-semibold text-gray-800">
-                3D Aquarium Design
-              </p>
-
-              <p className="text-xs text-gray-400">$25 - $30</p>
-            </div>
-          </div>
-
-          <div className="min-w-[220px] bg-white rounded-2xl shadow-lg overflow-hidden">
-            <img src={background2} className="h-28 w-full object-cover" />
-
-            <div className="p-3">
-              <div className="flex items-center text-xs text-gray-400 mb-1">
-                <span className="text-yellow-400 mr-1">★</span>
-                <span>4.8 (28 Reviews)</span>
+              <div className="p-4">
+                <p className="text-sm font-bold text-[#102a43] mb-1">{item.name}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-400">{item.reviews} Reviews</span>
+                  <span className="text-sm font-black text-[#25c2a0]">{item.price}</span>
+                </div>
               </div>
-
-              <p className="text-sm font-semibold text-gray-800">
-                3D Aquarium Design
-              </p>
-
-              <p className="text-xs text-gray-400">$35 - $50</p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
-
-      <MenuItem />
     </div>
   );
 }

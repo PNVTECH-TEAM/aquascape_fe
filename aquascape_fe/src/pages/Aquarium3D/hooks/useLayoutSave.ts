@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TankLayoutItem, TankSize } from "@app/core/interface";
-import { createTank, getTanks, saveTankLayout, updateTank } from "@app/core/services/aquariumAPI";
+import { createTank, getTanks, saveTankLayout } from "@app/core/services/aquariumAPI";
 
 interface UseLayoutSaveParams {
     size: TankSize;
@@ -12,6 +12,7 @@ interface UseLayoutSaveParams {
 interface SaveTankMetadata {
     tankName: string;
     previewImageUrl?: string;
+    presetId?: string;
 }
 
 export const useLayoutSave = ({
@@ -27,7 +28,7 @@ export const useLayoutSave = ({
     const isSameSize = (a: TankSize, b: TankSize) =>
         a.width === b.width && a.height === b.height && a.depth === b.depth;
 
-    const ensureActiveTankId = useCallback(async (tankName: string): Promise<string> => {
+    const ensureActiveTankId = useCallback(async (tankName: string, presetId?: string): Promise<string> => {
         if (activeTankId) {
             const existingTanks = await getTanks();
             const currentTank = existingTanks.find((tank) => tank.id === activeTankId);
@@ -52,6 +53,7 @@ export const useLayoutSave = ({
         const createdTank = await createTank({
             name: tankName,
             size,
+            presetId,
         });
         setActiveTankId(createdTank.id);
         return createdTank.id;
@@ -66,7 +68,8 @@ export const useLayoutSave = ({
 
             const normalizedName = metadata?.tankName?.trim() || tankNameKey;
             const normalizedPreviewImage = metadata?.previewImageUrl?.trim() || undefined;
-            const tankId = await ensureActiveTankId(normalizedName);
+            const presetId = metadata?.presetId;
+            const tankId = await ensureActiveTankId(normalizedName, presetId);
 
             const items = getLayoutSnapshot();
 
@@ -75,6 +78,7 @@ export const useLayoutSave = ({
                 items,
                 name: normalizedName,
                 previewImageUrl: normalizedPreviewImage,
+                presetId,
             });
 
             onStatusChange(t("AQUARIUM3D.SAVE_SUCCESS"));

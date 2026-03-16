@@ -11,7 +11,7 @@ const leftMenu: MenuItemType[] = [
   },
   {
     id: "create3D",
-    label: "create3D",
+    label: "Create3D",
     icon: <Box className="w-6 h-6" />,
     path: "/aquarium3d",
   },

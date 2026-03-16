@@ -37,7 +37,7 @@ export default function FishDoctorHome() {
                             </div>
                         </div>
 
-                        <div className="items-center justify-center gap-2 text-[#009688] font-bold bg-teal-50 inline-block px-4 py-2 rounded-full text-sm border border-teal-100">
+                        <div className="items-center justify-center text-[#009688] font-bold bg-teal-50 px-4 py-2 inline-flex rounded-full text-sm border border-teal-100 gap-4">
                             <i className="fa-regular fa-face-smile text-base"></i>
                             <span>{t("FISH_DOCTOR.HOME.STATUS_STABLE")}</span>
                         </div>
