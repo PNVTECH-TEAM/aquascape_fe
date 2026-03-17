@@ -11,7 +11,7 @@ const Sidebar = () => {
   return (
     <div className='w-full h-full bg-white rounded-2xl shadow-md p-4'>
       <nav className='flex flex-col w-full text-sm md:text-base'>
-        {menuItems.map((item, idx) => {
+        {menuItems.map((item: any, idx: number) => {
           const isActive = currentPath === item.path;
           const Icon = item.icon;
 

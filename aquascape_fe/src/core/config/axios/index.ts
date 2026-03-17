@@ -32,8 +32,8 @@ axios.interceptors.response.use(
     if (
       response?.status === 401 ||
       response?.status === 403 ||
-      response?.data?.message === "Unauthorized" ||
-      response?.data?.message === "TOKEN_EXPIRED"
+      (response?.data as any)?.message === "Unauthorized" ||
+      (response?.data as any)?.message === "TOKEN_EXPIRED"
     ) {
       removeToken();
       // Only redirect if not already on the login page or register page to avoid redirect loops

@@ -46,10 +46,10 @@ const extractUserIdFromProfile = (profile: unknown): number | null => {
         normalizeUserId(candidate.id) ??
         normalizeUserId(candidate.email) ??
         normalizeUserId(candidate.username) ??
-        normalizeUserId(candidate.user?.["id"]) ??
-        normalizeUserId(candidate.user?.["userId"]) ??
-        normalizeUserId(candidate.user?.["email"]) ??
-        normalizeUserId(candidate.user?.["username"])
+        normalizeUserId((candidate.user as any)?.id) ??
+        normalizeUserId((candidate.user as any)?.userId) ??
+        normalizeUserId((candidate.user as any)?.email) ??
+        normalizeUserId((candidate.user as any)?.username)
     );
 };
 
