@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL_API;
+const API_BASE_URL = import.meta.env.VITE_BASE_URL_API || "http://localhost:8080/api/v1";
 
 export const registerApi = (payload: {
   fullName: string;
