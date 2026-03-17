@@ -1,4 +1,4 @@
-import { AquaForestSplash, AquaIntro, TripoGeneratorPage, LoginForm, RegisterForm } from "@app/pages";
+import { AquaForestSplash, AquaIntro, LoginForm, RegisterForm } from "@app/pages";
 export const publicRoutes = [
   {
     path: "",
@@ -10,10 +10,6 @@ export const publicRoutes = [
     element: <AquaIntro />,
   },
   {
-    path: "generator-glb",
-    element: <TripoGeneratorPage />,
-  },
-  {
     path: "register",
     element: <RegisterForm />,
   },
@@ -23,4 +19,3 @@ export const publicRoutes = [
     element: <LoginForm />,
   },
 ];
-
