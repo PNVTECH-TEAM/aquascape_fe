@@ -3,7 +3,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "ax
 import { getStorageData, removeStorageData } from "../storage";
 import { ACCESS_TOKEN, USER_PROFILE } from "@app/core/constants";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL_API || "http://35.238.139.81:8080/api/v1";
+const BASE_URL = import.meta.env.VITE_BASE_URL_API || "https://api.aquascape-pnv.shop/api/v1";
 axios.defaults.baseURL = BASE_URL;
 
 axios.interceptors.request.use(
