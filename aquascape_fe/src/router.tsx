@@ -1,8 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { privateRoutes, publicRoutes } from "./core/routes";
 import MainLayout from "./layouts/MainLayout";
-import Aquarium3D from "@app/pages/Aquarium3D/Aquarium3D";
 import FishDoctorDiagnosis from "./pages/FishDoctorDiagnosis/FishDoctorDiagnosis";
+
+const Aquarium3D = lazy(() => import("@app/pages/Aquarium3D/Aquarium3D"));
 
 const router = createBrowserRouter([
   ...publicRoutes,
@@ -14,7 +16,17 @@ const router = createBrowserRouter([
   },
   {
     path: "/aquarium3d",
-    element: <Aquarium3D />,
+    element: (
+      <Suspense
+        fallback={(
+          <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+            Loading 3D scene...
+          </div>
+        )}
+      >
+        <Aquarium3D />
+      </Suspense>
+    ),
   },
   {
     path: "fish-doctor/diagnosis",

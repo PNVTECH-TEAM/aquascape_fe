@@ -6,7 +6,7 @@ import { Outlet, useLocation } from "react-router-dom";
 const MainLayout: React.FC = () => {
   const location = useLocation();
 
-  const hideHeader = ["/fish-doctor"].includes(location.pathname);
+  const hideHeader = ["/fish-doctor", "/generator-glb"].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col">

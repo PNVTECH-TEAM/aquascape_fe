@@ -145,5 +145,78 @@
         "YOUR_FISH": "C? c?a b?n"
       }
     }
+  },
+  "TRIPO_GENERATOR": {
+    "BRAND": "TripoSR",
+    "HEADER_TITLE": "Tạo 3D",
+    "HEADER_FORMAT": "GLB/OBJ",
+    "PANEL_TITLE": "TripoSR 3D Gen",
+    "RESET": "Đặt lại",
+    "ALT": {
+      "PREVIEW": "Xem trước"
+    },
+    "DRAG_DROP_HINT": "Kéo thả hoặc bấm để chọn ảnh",
+    "REMOVE_BG": "Tự động xoá phông",
+    "FOREGROUND_RATIO": "Tỷ lệ chủ thể",
+    "OUTPUT_DIR": {
+      "LABEL": "Output dir",
+      "PLACEHOLDER": "output"
+    },
+    "FORMAT": {
+      "LABEL": "Định dạng",
+      "GLB_STANDARD": "GLB",
+      "OBJ_MESH": "OBJ"
+    },
+    "QUALITY": {
+      "LABEL": "Chất lượng",
+      "FAST": "Nhanh",
+      "BALANCED": "Cân bằng",
+      "HIGH": "Chất lượng cao"
+    },
+    "ADVANCED": {
+      "SHOW": "Tuỳ chọn nâng cao",
+      "HIDE": "Ẩn nâng cao",
+      "AUTO_PLACEHOLDER": "(tự động)",
+      "MC_RESOLUTION": "MC resolution",
+      "THRESHOLD": "Ngưỡng",
+      "BAKE_TEXTURE": {
+        "LABEL": "Bake texture",
+        "AUTO": "Tự động",
+        "ON": "Bật",
+        "OFF": "Tắt"
+      },
+      "TEXTURE_RESOLUTION": "Texture resolution",
+      "CHUNK_SIZE": "Chunk size"
+    },
+    "ACTIONS": {
+      "TAKE_PHOTO": "Chụp ảnh",
+      "CHOOSE_IMAGE": "Chọn ảnh",
+      "GENERATE": "Tạo model 3D",
+      "GENERATING": "Đang tạo...",
+      "DOWNLOAD_MODEL": "Tải model",
+      "OPEN_DOWNLOAD_LINK": "Mở link tải"
+    },
+    "STATUS": {
+      "EMPTY": "Chưa có dữ liệu",
+      "LOADING_TITLE": "AI đang xử lý...",
+      "LOADING_SUBTITLE": "Đang khởi tạo mesh và texture",
+      "SUCCESS": "Tạo thành công!"
+    },
+    "CAMERA": {
+      "TITLE": "Camera",
+      "CLOSE": "Đóng",
+      "CANCEL": "Huỷ",
+      "CAPTURE": "Chụp"
+    },
+    "ERRORS": {
+      "FALLBACK": "Có lỗi xảy ra.",
+      "INVALID_FILE": "File không hợp lệ. Vui lòng chọn ảnh (png/jpg/webp...).",
+      "CAMERA_OPEN_FAILED": "Không thể mở camera trong trình duyệt. Hãy thử chụp từ thiết bị.",
+      "FRAME_UNAVAILABLE": "Chưa đọc được khung hình camera. Vui lòng thử lại.",
+      "CAPTURE_FAILED": "Chụp ảnh thất bại. Vui lòng thử lại.",
+      "MISSING_IMAGE": "Vui lòng chọn/chụp ảnh trước khi tạo.",
+      "GENERATE_FAILED": "Không thể tạo model. Vui lòng thử lại.",
+      "DOWNLOAD_FAILED": "Tải xuống thất bại. Vui lòng thử lại."
+    }
   }
 }

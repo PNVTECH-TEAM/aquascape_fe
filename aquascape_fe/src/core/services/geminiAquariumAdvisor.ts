@@ -3,6 +3,7 @@ import axios from "axios";
 import type { TankAnalysisSnapshot } from "@app/core/hooks/useTankSetup.types";
 
 export interface AquariumAdviceRequest {
+    userPrompt?: string;
     fish: number;
     plants: number;
     rocks: number;
