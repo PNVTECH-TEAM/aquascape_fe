@@ -3,11 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - dev
+      - release/PNVTECH-azure-static-web-app
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - dev
+      - release/PNVTECH-azure-static-web-app
 
 jobs:
   build_and_deploy_job:
@@ -23,7 +23,7 @@ jobs:
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_RIVER_09F4EED00 }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_SAND_0A58B9000 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
@@ -32,6 +32,13 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+        env: # Add environment variables here
+          VITE_BASE_URL_API: "https://api.aquascape-pnv.shop/api/v1"
+          VITE_BACKEND_URL: "https://api.aquascape-pnv.shop"
+          VITE_APP_NAME: "AICP"
+          VITE_SHORT_APP_NAME: "PNVTECH"
+          VITE_NAME: "Aquascape AI Platform"
+          VITE_AQUARIUM_AI_API_URL: "https://ai-aquarium.onrender.com"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -42,5 +49,5 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_RIVER_09F4EED00 }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_SAND_0A58B9000 }}
           action: "close"
