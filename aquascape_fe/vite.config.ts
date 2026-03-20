@@ -5,11 +5,12 @@ import { loadEnv, defineConfig } from "vite";
 export default async ({ mode }: { mode: string }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
+
   const resolveTripoProxyTarget = () => {
     const rawTarget =
-      process.env.VITE_TRIPO_API_URL ||
       process.env.VITE_AQUARIUM_AI_API_URL ||
       "http://localhost:8000";
+
 
     try {
       return new URL(rawTarget).origin;
@@ -17,6 +18,7 @@ export default async ({ mode }: { mode: string }) => {
       return rawTarget;
     }
   };
+
 
   return defineConfig({
     plugins: [react()],
@@ -58,3 +60,6 @@ export default async ({ mode }: { mode: string }) => {
     },
   });
 };
+
+
+

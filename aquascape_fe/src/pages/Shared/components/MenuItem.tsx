@@ -46,16 +46,20 @@ export function MenuItem() {
         className="flex flex-col items-center text-xs font-medium"
       >
         <div
-          className={`transition ${
-            isActive ? "text-blue-500 scale-110" : "text-gray-500"
-          }`}
-        >
-          {item.icon}
-        </div>
+  className={`transition ${
+    isActive
+      ? "text-[#007a91] bg-clip-text text-transparent"
+      : "text-gray-600"
+  }`}
+>
+  {item.icon}
+</div>
 
         <span
           className={`mt-1 transition ${
-            isActive ? "text-blue-500" : "text-gray-600"
+            isActive
+              ? "bg-gradient-to-r from-[#002f4b] via-[#005b96] to-[#00a8cc] bg-clip-text text-transparent"
+              : "text-gray-600"
           }`}
         >
           {item.label}
@@ -72,10 +76,10 @@ export function MenuItem() {
 
         <div className="flex justify-center">
           <button
-            onClick={() => navigate("/fishAquarium")}
+            onClick={() => navigate("/generator-glb")}
             className="absolute left-1/2 -translate-x-1/2 -top-6"
           >
-            <div className="w-14 h-14 bg-[#2563eb] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+            <div className="w-14 h-14 bg-gradient-to-br from-[#002f4b] via-[#005b96] to-[#00a8cc] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
               <Camera className="w-6 h-6 text-white" />
             </div>
           </button>

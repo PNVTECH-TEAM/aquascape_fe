@@ -10,8 +10,10 @@ import {
   type TripoQuality,
 } from "@app/core/services/glbAPI";
 
+
 export type GenerationStatus = "idle" | "loading" | "ready" | "error";
 export type OptionalBool = "auto" | "true" | "false";
+
 
 const formatFileBaseName = (fileName: string): string => {
   const trimmed = fileName.trim();
@@ -20,6 +22,7 @@ const formatFileBaseName = (fileName: string): string => {
   return lastDot > 0 ? trimmed.slice(0, lastDot) : trimmed;
 };
 
+
 const parseOptionalNumber = (raw: string): number | undefined => {
   const normalized = raw.trim();
   if (!normalized) return undefined;
@@ -27,13 +30,16 @@ const parseOptionalNumber = (raw: string): number | undefined => {
   return Number.isFinite(value) ? value : undefined;
 };
 
+
 const parseOptionalBool = (raw: OptionalBool): boolean | undefined => {
   if (raw === "auto") return undefined;
   return raw === "true";
 };
 
+
 export function useTripoGenerator() {
   const { t } = useTranslation();
+
 
   const texts = {
     brand: t("TRIPO_GENERATOR.BRAND"),
@@ -82,10 +88,12 @@ export function useTripoGenerator() {
     cameraCapture: t("TRIPO_GENERATOR.CAMERA.CAPTURE"),
   };
 
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [status, setStatus] = useState<GenerationStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [generation, setGeneration] = useState<GenerateTripoAssetResponse | null>(null);
+
 
   const [modelSaveFormat, setModelSaveFormat] = useState<Extract<TripoModelSaveFormat, "glb" | "obj">>("glb");
   const [quality, setQuality] = useState<TripoQuality>("balanced");
@@ -99,6 +107,7 @@ export function useTripoGenerator() {
   const [chunkSize, setChunkSize] = useState<string>("");
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -106,9 +115,11 @@ export function useTripoGenerator() {
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
 
+
   const previewUrl = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : ""), [imageFile]);
   const baseName = useMemo(() => (imageFile ? formatFileBaseName(imageFile.name) : "tripo-model"), [imageFile]);
   const canGenerate = useMemo(() => Boolean(imageFile) && status !== "loading", [imageFile, status]);
+
 
   const stopCameraStream = () => {
     if (!cameraStreamRef.current) return;
@@ -119,12 +130,40 @@ export function useTripoGenerator() {
     }
   };
 
+
   useEffect(() => {
     if (!previewUrl) return;
     return () => URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
 
+
   useEffect(() => () => stopCameraStream(), []);
+
+
+  useEffect(() => {
+    if (!isCameraOpen) return;
+    const stream = cameraStreamRef.current;
+    const videoElement = videoRef.current;
+    if (!stream || !videoElement) return;
+
+
+    if (videoElement.srcObject !== stream) {
+      videoElement.srcObject = stream;
+    }
+
+
+    const playPromise = videoElement.play();
+    if (!playPromise) return;
+
+
+    void playPromise.catch(() => {
+      setIsCameraOpen(false);
+      stopCameraStream();
+      cameraInputRef.current?.click();
+      setErrorMessage(t("TRIPO_GENERATOR.ERRORS.CAMERA_OPEN_FAILED"));
+    });
+  }, [isCameraOpen, t]);
+
 
   const resetGenerationState = () => {
     setGeneration(null);
@@ -132,7 +171,9 @@ export function useTripoGenerator() {
     setStatus("idle");
   };
 
+
   const handleChooseFile = () => fileInputRef.current?.click();
+
 
   const handleFileSelected = (file: File | null) => {
     setImageFile(file);
@@ -141,11 +182,13 @@ export function useTripoGenerator() {
     setStatus("idle");
   };
 
+
   const handleSelectImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     handleFileSelected(file);
     event.target.value = "";
   };
+
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -158,11 +201,13 @@ export function useTripoGenerator() {
     handleFileSelected(file);
   };
 
+
   const handleOpenCamera = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       cameraInputRef.current?.click();
       return;
     }
+
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -172,28 +217,24 @@ export function useTripoGenerator() {
       cameraStreamRef.current = stream;
       setIsCameraOpen(true);
       setErrorMessage("");
-
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          void videoRef.current.play();
-        }
-      }, 0);
     } catch {
       cameraInputRef.current?.click();
       setErrorMessage(t("TRIPO_GENERATOR.ERRORS.CAMERA_OPEN_FAILED"));
     }
   };
 
+
   const handleCloseCamera = () => {
     setIsCameraOpen(false);
     stopCameraStream();
   };
 
+
   const handleCaptureFromWebcam = async () => {
     const videoElement = videoRef.current;
     const canvasElement = canvasRef.current;
     if (!videoElement || !canvasElement) return;
+
 
     const width = videoElement.videoWidth;
     const height = videoElement.videoHeight;
@@ -202,31 +243,38 @@ export function useTripoGenerator() {
       return;
     }
 
+
     canvasElement.width = width;
     canvasElement.height = height;
     const context = canvasElement.getContext("2d");
     if (!context) return;
     context.drawImage(videoElement, 0, 0, width, height);
 
+
     const blob = await new Promise<Blob | null>((resolve) => {
       canvasElement.toBlob((value) => resolve(value), "image/jpeg", 0.92);
     });
+
 
     if (!blob) {
       setErrorMessage(t("TRIPO_GENERATOR.ERRORS.CAPTURE_FAILED"));
       return;
     }
 
+
     const capturedFile = new File([blob], `tripo-capture-${Date.now()}.jpg`, {
       type: "image/jpeg",
     });
+
 
     handleFileSelected(capturedFile);
     handleCloseCamera();
   };
 
+
   const downloadHref = useMemo(() => {
     if (!generation) return "";
+
 
     const downloadUrlOrJobId = generation.download_url || generation.job_id;
     return resolveTripoDownloadHref(downloadUrlOrJobId, {
@@ -236,6 +284,7 @@ export function useTripoGenerator() {
     });
   }, [baseName, generation, modelSaveFormat, outputDir]);
 
+
   const handleGenerate = async (event: FormEvent) => {
     event.preventDefault();
     if (!imageFile) {
@@ -243,9 +292,11 @@ export function useTripoGenerator() {
       return;
     }
 
+
     setStatus("loading");
     setErrorMessage("");
     setGeneration(null);
+
 
     try {
       const response = await generateTripoAsset({
@@ -262,6 +313,7 @@ export function useTripoGenerator() {
         chunkSize: parseOptionalNumber(chunkSize),
       });
 
+
       setGeneration(response);
       setStatus("ready");
     } catch (error) {
@@ -274,8 +326,10 @@ export function useTripoGenerator() {
     }
   };
 
+
   const handleDownload = async () => {
     if (!generation) return;
+
 
     try {
       const downloadUrlOrJobId = generation.download_url || generation.job_id;
@@ -284,6 +338,7 @@ export function useTripoGenerator() {
         name: baseName,
         outputDir: outputDir.trim() || undefined,
       });
+
 
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
@@ -302,6 +357,7 @@ export function useTripoGenerator() {
       setStatus("error");
     }
   };
+
 
   return {
     texts,
@@ -351,4 +407,5 @@ export function useTripoGenerator() {
     handleDownload,
   };
 }
+
 
