@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import type { Vector3 } from "three";
 
 export interface TankSize {
   width: number;
@@ -19,7 +19,7 @@ export interface TankBounds {
     maxY: number;
     minZ: number;
     maxZ: number;
-    center: THREE.Vector3;
+    center: Vector3;
     innerWidth: number;
     innerHeight: number;
     innerDepth: number;

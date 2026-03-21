@@ -22,9 +22,13 @@ import { useLayoutSave } from "./hooks/useLayoutSave";
 import "./Aquarium3D.scss";
 import FishAquarium3D from "./FishAquarium3D/FishAquarium3D";
 
+import { useNavigate } from "react-router-dom";
+
 export default function Aquarium3D() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [panelOpen, setPanelOpen] = useState<boolean>(false);
+    // ... rest of the state
     const [explorerOpen, setExplorerOpen] = useState<boolean>(false);
     const [scoreHudOpen, setScoreHudOpen] = useState<boolean>(false);
     const [lightingMode, setLightingMode] = useState<TankLightingMode>("day");
@@ -140,7 +144,6 @@ export default function Aquarium3D() {
 
     const {
         containerRef,
-        tankInfo,
         loading,
         handleApplySize,
         handleResetView,
@@ -356,6 +359,9 @@ export default function Aquarium3D() {
 
     return (
         <div className="aquarium3d-page">
+            <button className="back-btn" onClick={() => navigate("/homePage")}>
+                <i className="fa-solid fa-arrow-left"></i>
+            </button>
             <div className={`loading ${(loading || itemsLoading) ? "" : "hidden"} ${!loading && itemsLoading ? "items-loading" : ""}`}>
                 <div className="spinner"></div>
                 {itemsLoading && !loading && <div className="loading-text">Loading items...</div>}
@@ -644,17 +650,6 @@ export default function Aquarium3D() {
                     </div>
                 </div>
             )}
-
-            <div className="tank-info">
-                <div className="info-item">
-                    <div className="info-value">{size.width}x{size.height}x{size.depth}</div>
-                    <div className="info-label">{t("AQUARIUM3D.TANK_DIMENSION")}</div>
-                </div>
-                <div className="info-item">
-                    <div className="info-value">{tankInfo.volume}</div>
-                    <div className="info-label">{t("AQUARIUM3D.WATER_VOLUME")}</div>
-                </div>
-            </div>
 
             {saveDialogOpen && (
                 <div className="save-dialog-overlay" onClick={() => !savingLayout && setSaveDialogOpen(false)}>

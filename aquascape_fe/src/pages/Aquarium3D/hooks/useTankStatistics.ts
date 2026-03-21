@@ -155,6 +155,7 @@ export const useGameMechanics = (layoutSnapshot: TankAnalysisSnapshot = EMPTY_AN
         };
 
         return {
+            userPrompt: "Hồ của tôi trông có vẻ hơi đơn điệu, tôi có thể thêm những loại cá nào để hợp với bầy neon xanh hiện tại?",
             fish: stats.fish,
             plants: stats.plants,
             rocks: stats.rocks,

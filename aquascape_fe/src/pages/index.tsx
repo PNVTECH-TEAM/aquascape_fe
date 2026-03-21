@@ -7,3 +7,4 @@ export { default as HomePage } from '@app/pages/HomePage';
 export { default as Profile } from '@app/pages/Profile/Profile';
 export { default as Aquarium3D } from "@app/pages/Aquarium3D/Aquarium3D";
 export { default as MenuItem } from "@app/pages/Shared/components/MenuItem";
+export { default as TripoGeneratorPage } from '@app/pages/TripoGenerator/TripoGeneratorPage';

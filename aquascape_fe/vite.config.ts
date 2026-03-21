@@ -3,11 +3,25 @@ import { default as react } from "@vitejs/plugin-react";
 import path from "path";
 import { loadEnv, defineConfig } from "vite";
 export default async ({ mode }: { mode: string }) => {
-  const pluginRewriteAll = (await import("vite-plugin-rewrite-all")).default;
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
+
+  const resolveTripoProxyTarget = () => {
+    const rawTarget =
+      process.env.VITE_AQUARIUM_AI_API_URL ||
+      "http://localhost:8000";
+
+
+    try {
+      return new URL(rawTarget).origin;
+    } catch {
+      return rawTarget;
+    }
+  };
+
+
   return defineConfig({
-    plugins: [pluginRewriteAll(), react()],
+    plugins: [react()],
     resolve: {
       alias: { "@app": path.resolve("./src") },
     },
@@ -33,6 +47,10 @@ export default async ({ mode }: { mode: string }) => {
           target: "http://localhost:8080",
           changeOrigin: true,
         },
+        "/tripo": {
+          target: resolveTripoProxyTarget(),
+          changeOrigin: true,
+        },
         "/ai-aquarium": {
           target: "https://ai-aquarium.onrender.com",
           changeOrigin: true,
@@ -42,3 +60,6 @@ export default async ({ mode }: { mode: string }) => {
     },
   });
 };
+
+
+

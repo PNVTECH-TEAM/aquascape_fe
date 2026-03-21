@@ -104,7 +104,7 @@ export default function PlantSelector() {
     : items;
 
   return (
-    <div className="explorer-selector mt-5 p-4">
+    <div className="explorer-selector p-4">
       <div className="explorer-top">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <div style={{ fontSize: '13px', fontWeight: '700', color: '#b8deff', letterSpacing: '0.05em' }}>

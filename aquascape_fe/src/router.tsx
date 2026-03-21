@@ -1,24 +1,47 @@
 import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { privateRoutes, publicRoutes } from "./core/routes";
 import MainLayout from "./layouts/MainLayout";
-import Aquarium3D from "@app/pages/Aquarium3D/Aquarium3D";
 import FishDoctorDiagnosis from "./pages/FishDoctorDiagnosis/FishDoctorDiagnosis";
+import ProtectedRoute from "./core/components/ProtectedRoute";
+
+const Aquarium3D = lazy(() => import("@app/pages/Aquarium3D/Aquarium3D"));
 
 const router = createBrowserRouter([
   ...publicRoutes,
 
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: privateRoutes,
   },
   {
     path: "/aquarium3d",
-    element: <Aquarium3D />,
+    element: (
+      <ProtectedRoute>
+        <Suspense
+          fallback={(
+            <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+              Loading 3D scene...
+            </div>
+          )}
+        >
+          <Aquarium3D />
+        </Suspense>
+      </ProtectedRoute>
+    ),
   },
   {
     path: "fish-doctor/diagnosis",
-    element: <FishDoctorDiagnosis />,
+    element: (
+      <ProtectedRoute>
+        <FishDoctorDiagnosis />
+      </ProtectedRoute>
+    ),
   },
 ]);
 

@@ -9,6 +9,8 @@ import type { RegisterPayload, LoginPayload } from "@app/core/interface";
 import type { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 import { ACCESS_TOKEN, USER_PROFILE } from "../constants";
+import { useDispatch } from "react-redux";
+import { login } from "../redux/features/auth/authSlice";
 
 export const useRegister = () => {
   const navigate = useNavigate();
@@ -54,6 +56,7 @@ export const useRegister = () => {
 export const useLogin = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   return useMutation({
     mutationFn: async (payload: LoginPayload) => {
@@ -78,6 +81,7 @@ export const useLogin = () => {
         localStorage.setItem(USER_PROFILE, JSON.stringify(user));
       }
 
+      dispatch(login());
       navigate("/homePage");
     },
     onError: (error: AxiosError<{ code?: number; message?: string }>) => {

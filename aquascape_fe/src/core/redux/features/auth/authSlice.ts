@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { ACCESS_TOKEN } from '@app/core/constants';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -6,7 +7,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem(ACCESS_TOKEN),
   user: null,
 };
 
@@ -17,8 +18,14 @@ const authSlice = createSlice({
     login: (state) => {
       state.isAuthenticated = true;
     },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.user = null;
+      localStorage.removeItem(ACCESS_TOKEN);
+      localStorage.removeItem('user'); // Also remove user profile if it exists
+    },
   },
 });
 
-export const { login } = authSlice.actions;
+export const { login, logout } = authSlice.actions;
 export default authSlice.reducer;

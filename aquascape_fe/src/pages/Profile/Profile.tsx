@@ -47,35 +47,6 @@ const Profile: React.FC = () => {
 
   return (
     <div className="p-6 max-w-md mx-auto pb-20">
-      {/* Banner */}
-      <div className="relative h-48 rounded-2xl overflow-hidden shadow-lg mb-6">
-        <div className="absolute inset-0">
-          <div className="flex w-max h-full animate-slideLeft">
-            {[
-              background1,
-              background2,
-              background4,
-              background1,
-              background2,
-              background4,
-            ].map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                className="w-full h-full object-cover"
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10 flex items-center h-full p-6 text-white bg-black/30">
-          <div>
-            <h2 className="text-xl font-bold">Welcome back</h2>
-            <h2 className="text-xl font-bold">Kim Thanh 👋</h2>
-          </div>
-        </div>
-      </div>
-
       {/* Top Breeds */}
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-lg font-semibold">Top Breeds</h2>

@@ -227,5 +227,78 @@
         "YOUR_FISH": "Your fish"
       }
     }
+  },
+  "TRIPO_GENERATOR": {
+    "BRAND": "TripoSR",
+    "HEADER_TITLE": "3D Generator",
+    "HEADER_FORMAT": "GLB/OBJ",
+    "PANEL_TITLE": "AQUASCAPE",
+    "RESET": "Reset",
+    "ALT": {
+      "PREVIEW": "Preview"
+    },
+    "DRAG_DROP_HINT": "Drag & drop or click to choose an image",
+    "REMOVE_BG": "Auto remove background",
+    "FOREGROUND_RATIO": "Foreground ratio",
+    "OUTPUT_DIR": {
+      "LABEL": "Output dir",
+      "PLACEHOLDER": "output"
+    },
+    "FORMAT": {
+      "LABEL": "Format",
+      "GLB_STANDARD": "GLB",
+      "OBJ_MESH": "OBJ"
+    },
+    "QUALITY": {
+      "LABEL": "Quality",
+      "FAST": "Fast",
+      "BALANCED": "Balanced",
+      "HIGH": "High Quality"
+    },
+    "ADVANCED": {
+      "SHOW": "Advanced options",
+      "HIDE": "Hide advanced",
+      "AUTO_PLACEHOLDER": "(auto)",
+      "MC_RESOLUTION": "MC resolution",
+      "THRESHOLD": "Threshold",
+      "BAKE_TEXTURE": {
+        "LABEL": "Bake texture",
+        "AUTO": "Auto",
+        "ON": "On",
+        "OFF": "Off"
+      },
+      "TEXTURE_RESOLUTION": "Texture resolution",
+      "CHUNK_SIZE": "Chunk size"
+    },
+    "ACTIONS": {
+      "TAKE_PHOTO": "Take photo",
+      "CHOOSE_IMAGE": "Choose image",
+      "GENERATE": "Generate 3D model",
+      "GENERATING": "Generating...",
+      "DOWNLOAD_MODEL": "Download model",
+      "OPEN_DOWNLOAD_LINK": "Open download link"
+    },
+    "STATUS": {
+      "EMPTY": "No data yet",
+      "LOADING_TITLE": "AI is thinking...",
+      "LOADING_SUBTITLE": "Initializing mesh and texture",
+      "SUCCESS": "Created successfully!"
+    },
+    "CAMERA": {
+      "TITLE": "Camera",
+      "CLOSE": "Close",
+      "CANCEL": "Cancel",
+      "CAPTURE": "Capture"
+    },
+    "ERRORS": {
+      "FALLBACK": "Something went wrong.",
+      "INVALID_FILE": "Invalid file. Please select an image (png/jpg/webp...).",
+      "CAMERA_OPEN_FAILED": "Cannot open the camera in the browser. Please take a photo from your device.",
+      "FRAME_UNAVAILABLE": "Unable to read the camera frame. Please try again.",
+      "CAPTURE_FAILED": "Capture failed. Please try again.",
+      "MISSING_IMAGE": "Please select/take an image before generating.",
+      "GENERATE_FAILED": "Could not generate the model. Please try again.",
+      "DOWNLOAD_FAILED": "Download failed. Please try again."
+    }
   }
 }
