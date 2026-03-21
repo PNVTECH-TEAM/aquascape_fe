@@ -7,6 +7,7 @@ import {
 } from "@app/core/services/fishDoctorDiagnosis";
 import "./FishDoctorDiagnosis.scss";
 
+
 export default function FishDoctorDiagnosis() {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -24,6 +25,7 @@ export default function FishDoctorDiagnosis() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const cameraStreamRef = useRef<MediaStream | null>(null);
 
+
     const stopCameraStream = () => {
         if (!cameraStreamRef.current) return;
         cameraStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -33,21 +35,52 @@ export default function FishDoctorDiagnosis() {
         }
     };
 
+
     useEffect(() => {
         if (!imageFile) {
             setPreviewUrl("");
             return;
         }
 
+
         const url = URL.createObjectURL(imageFile);
         setPreviewUrl(url);
+
 
         return () => URL.revokeObjectURL(url);
     }, [imageFile]);
 
+
     useEffect(() => () => stopCameraStream(), []);
 
+
+    useEffect(() => {
+        if (!isCameraModalOpen) return;
+        const stream = cameraStreamRef.current;
+        const videoElement = videoRef.current;
+        if (!stream || !videoElement) return;
+
+
+        if (videoElement.srcObject !== stream) {
+            videoElement.srcObject = stream;
+        }
+
+
+        const playPromise = videoElement.play();
+        if (!playPromise) return;
+
+
+        void playPromise.catch(() => {
+            setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.CAMERA_UNAVAILABLE"));
+            setIsCameraModalOpen(false);
+            stopCameraStream();
+            cameraInputRef.current?.click();
+        });
+    }, [isCameraModalOpen, t]);
+
+
     const canSubmit = useMemo(() => Boolean(imageFile) && !loading, [imageFile, loading]);
+
 
     const handleSelectImage = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0] ?? null;
@@ -56,11 +89,13 @@ export default function FishDoctorDiagnosis() {
         event.target.value = "";
     };
 
+
     const handleOpenCamera = async () => {
         if (!navigator.mediaDevices?.getUserMedia) {
             cameraInputRef.current?.click();
             return;
         }
+
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -70,32 +105,29 @@ export default function FishDoctorDiagnosis() {
             cameraStreamRef.current = stream;
             setIsCameraModalOpen(true);
             setErrorMessage("");
-
-            setTimeout(() => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    void videoRef.current.play();
-                }
-            }, 0);
-        } catch (error) {
+        } catch {
             cameraInputRef.current?.click();
             setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.CAMERA_UNAVAILABLE"));
         }
     };
 
+
     const handleOpenGallery = () => {
         galleryInputRef.current?.click();
     };
+
 
     const handleCloseCameraModal = () => {
         setIsCameraModalOpen(false);
         stopCameraStream();
     };
 
+
     const handleCaptureFromWebcam = async () => {
         const videoElement = videoRef.current;
         const canvasElement = canvasRef.current;
         if (!videoElement || !canvasElement) return;
+
 
         const width = videoElement.videoWidth;
         const height = videoElement.videoHeight;
@@ -104,29 +136,35 @@ export default function FishDoctorDiagnosis() {
             return;
         }
 
+
         canvasElement.width = width;
         canvasElement.height = height;
         const context = canvasElement.getContext("2d");
         if (!context) return;
         context.drawImage(videoElement, 0, 0, width, height);
 
+
         const blob = await new Promise<Blob | null>((resolve) => {
             canvasElement.toBlob((value) => resolve(value), "image/jpeg", 0.92);
         });
+
 
         if (!blob) {
             setErrorMessage(t("FISH_DOCTOR.DIAGNOSIS.ERRORS.CAPTURE_FAILED"));
             return;
         }
 
+
         const capturedFile = new File([blob], `fish-capture-${Date.now()}.jpg`, {
             type: "image/jpeg",
         });
+
 
         setImageFile(capturedFile);
         setErrorMessage("");
         handleCloseCameraModal();
     };
+
 
     const handleDiagnose = async (event: FormEvent) => {
         event.preventDefault();
@@ -135,8 +173,10 @@ export default function FishDoctorDiagnosis() {
             return;
         }
 
+
         setLoading(true);
         setErrorMessage("");
+
 
         try {
             const diagnosisResult = await diagnoseFishDiseaseFromImage(imageFile, userPrompt);
@@ -149,6 +189,7 @@ export default function FishDoctorDiagnosis() {
         }
     };
 
+
     const renderScan = () => (
         <div className="scan-screen relative h-full">
             <img
@@ -156,6 +197,7 @@ export default function FishDoctorDiagnosis() {
                 className="scan-bg-image absolute inset-0 w-full h-full object-cover opacity-80"
                 alt={t("FISH_DOCTOR.DIAGNOSIS.ALT.FISH_CAMERA")}
             />
+
 
             <div className="scan-overlay absolute inset-0 z-10 flex flex-col p-5 pt-8 pb-8">
                 <div className="flex justify-between items-center text-white mb-6">
@@ -166,20 +208,24 @@ export default function FishDoctorDiagnosis() {
                         <i className="fa-solid fa-arrow-left text-lg"></i>
                     </button>
 
+
                     <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
                         <i className="fa-solid fa-microchip text-[#4db6ac] animate-pulse"></i>
                         <span className="font-semibold text-sm">{t("FISH_DOCTOR.DIAGNOSIS.AI_VISION")}</span>
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                     </div>
 
+
                     <button className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/20 hover:scale-110 transition-transform">
                         <i className="fa-regular fa-circle-question text-lg"></i>
                     </button>
                 </div>
 
+
                 <form onSubmit={handleDiagnose} className="scan-diagnose-form flex flex-1 flex-col items-center gap-4">
                     <div className="scan-frame relative w-72 h-72 mx-auto rounded-3xl overflow-hidden shadow-2xl">
                         <div className="absolute inset-0 border-2 border-white/30 rounded-3xl"></div>
+
 
                         {/* Corner decorations */}
                         <div className="absolute top-3 left-3 w-8 h-8 border-t-3 border-l-3 border-[#4db6ac] rounded-tl-xl"></div>
@@ -187,12 +233,14 @@ export default function FishDoctorDiagnosis() {
                         <div className="absolute bottom-3 left-3 w-8 h-8 border-b-3 border-l-3 border-[#4db6ac] rounded-bl-xl"></div>
                         <div className="absolute bottom-3 right-3 w-8 h-8 border-b-3 border-r-3 border-[#4db6ac] rounded-br-xl"></div>
 
+
                         {previewUrl ? (
                             <img src={previewUrl} alt={t("FISH_DOCTOR.DIAGNOSIS.ALT.FISH_PREVIEW")} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 text-white">
                             </div>
                         )}
+
 
                         {loading && (
                             <>
@@ -206,6 +254,7 @@ export default function FishDoctorDiagnosis() {
                                 </>
                             )}
                     </div>
+
 
                     <input
                         ref={cameraInputRef}
@@ -224,6 +273,7 @@ export default function FishDoctorDiagnosis() {
                         accept="image/*"
                         onChange={handleSelectImage}
                     />
+
 
                     <div className="w-72 relative">
                         <textarea
@@ -244,6 +294,7 @@ export default function FishDoctorDiagnosis() {
                         )}
                     </div>
 
+
                     <div className="scan-action-bar mt-auto flex justify-center items-center gap-6 w-full">
                         <button
                             type="button"
@@ -253,6 +304,7 @@ export default function FishDoctorDiagnosis() {
                         >
                             <i className="fa-solid fa-camera-retro"></i>
                         </button>
+
 
                         <button
                             type="submit"
@@ -269,6 +321,7 @@ export default function FishDoctorDiagnosis() {
                             </div>
                         </button>
 
+
                         <button
                             type="button"
                             onClick={handleOpenGallery}
@@ -279,6 +332,7 @@ export default function FishDoctorDiagnosis() {
                         </button>
                     </div>
                 </form>
+
 
                 {isCameraModalOpen && (
                     <div className="camera-modal absolute inset-0 z-30 flex items-center justify-center p-4">
@@ -298,6 +352,7 @@ export default function FishDoctorDiagnosis() {
                                 </button>
                             </div>
 
+
                             <div className="camera-modal__preview relative aspect-[3/4] bg-black">
                                 <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay />
                                 <div className="absolute inset-0 border-3 border-[#4db6ac] border-opacity-50 m-4 rounded-2xl pointer-events-none"></div>
@@ -307,6 +362,7 @@ export default function FishDoctorDiagnosis() {
                                 </div>
                                 <canvas ref={canvasRef} className="hidden" />
                             </div>
+
 
                             <div className="camera-modal__actions p-5">
                                 <button
@@ -325,13 +381,16 @@ export default function FishDoctorDiagnosis() {
         </div>
     );
 
+
     const renderResult = () => {
         if (!result) return null;
+
 
         const confidencePercent = (result.diagnosis.confidence * 100).toFixed(1);
         const isHighRisk = result.diagnosis.confidence > 0.7;
         const diagnosisDetail = result.diagnosis_detail;
         const visualRef = result.visual_reference;
+
 
         return (
             <div className="result-screen px-6 pt-5 pb-24">
@@ -343,10 +402,12 @@ export default function FishDoctorDiagnosis() {
                         <i className="fa-solid fa-arrow-left text-gray-600"></i>
                     </button>
 
+
                     <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
                         <i className="fa-solid fa-file-waveform text-[#4db6ac]"></i>
                         {t("FISH_DOCTOR.DIAGNOSIS.RESULT.TITLE")}
                     </h1>
+
 
                     <button
                         onClick={() => navigate("/fish-doctor")}
@@ -356,11 +417,13 @@ export default function FishDoctorDiagnosis() {
                     </button>
                 </div>
 
+
                 {/* Diagnosis Hero Section */}
                 <div className={`diagnosis-hero bg-gradient-to-br ${isHighRisk ? 'from-[#ff7c43] to-[#f55a42]' : 'from-[#4db6ac] to-[#009688]'} text-white rounded-3xl p-6 mb-6 shadow-lg relative overflow-hidden`}>
                     <div className="absolute -right-6 -top-6 text-white opacity-10 text-9xl">
                         <i className={`fa-solid ${isHighRisk ? 'fa-biohazard' : 'fa-shield-heart'}`}></i>
                     </div>
+
 
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-3">
@@ -374,10 +437,12 @@ export default function FishDoctorDiagnosis() {
                             </span>
                         </div>
 
+
                         <h2 className="text-3xl font-black mb-2 flex items-center gap-2">
                             <i className="fa-solid fa-disease text-2xl opacity-75"></i>
                             {result.diagnosis.disease_name}
                         </h2>
+
 
                         {result.diagnosis.vision_note && (
                             <p className="bg-white/20 p-3 rounded-xl text-sm backdrop-blur-sm flex items-start gap-2">
@@ -387,6 +452,7 @@ export default function FishDoctorDiagnosis() {
                         )}
                     </div>
                 </div>
+
 
                 {/* Visual Reference */}
                 {visualRef && (
@@ -435,6 +501,7 @@ export default function FishDoctorDiagnosis() {
                     </div>
                 )}
 
+
                 {/* Diagnosis Details */}
                 <div className="glass-card detail-card rounded-2xl p-5 mb-4">
                     <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
@@ -468,6 +535,7 @@ export default function FishDoctorDiagnosis() {
                     </div>
                 </div>
 
+
                 {/* Diagnosis Summary */}
                 {diagnosisDetail && (
                     <div className="glass-card detail-card rounded-2xl p-5 mb-6">
@@ -476,6 +544,7 @@ export default function FishDoctorDiagnosis() {
                             {t("FISH_DOCTOR.DIAGNOSIS.RESULT.DETAIL_TITLE")}
                         </h3>
 
+
                         {diagnosisDetail.summary && (
                             <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
                                 <p className="text-gray-700 text-sm leading-relaxed">
@@ -483,6 +552,7 @@ export default function FishDoctorDiagnosis() {
                                 </p>
                             </div>
                         )}
+
 
                         {diagnosisDetail.key_signs && diagnosisDetail.key_signs.length > 0 && (
                             <div className="mb-4">
@@ -501,6 +571,7 @@ export default function FishDoctorDiagnosis() {
                             </div>
                         )}
 
+
                         {diagnosisDetail.confidence_note && (
                             <div className="bg-amber-50 p-3 rounded-xl border border-amber-100">
                                 <p className="text-xs text-amber-800 flex items-start gap-2">
@@ -511,6 +582,7 @@ export default function FishDoctorDiagnosis() {
                         )}
                     </div>
                 )}
+
 
                 <button
                     onClick={() => setActiveScreen('treatment')}
@@ -524,8 +596,10 @@ export default function FishDoctorDiagnosis() {
         );
     };
 
+
     const renderTreatment = () => {
         if (!result) return null;
+
 
         const overviewText = result.treatment_guide?.overview || result.treatment_guide?.text || result.doctor_advice;
         const overviewBlocks = (overviewText || "")
@@ -534,6 +608,7 @@ export default function FishDoctorDiagnosis() {
             .map((block) => block.trim())
             .filter(Boolean);
         const stages = result.treatment_guide?.stages ?? [];
+
 
         return (
             <div className="treatment-screen px-6 pt-5 pb-24">
@@ -545,10 +620,12 @@ export default function FishDoctorDiagnosis() {
                         <i className="fa-solid fa-arrow-left text-gray-600"></i>
                     </button>
 
+
                     <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
                         <i className="fa-solid fa-prescription-bottle text-[#4db6ac]"></i>
                         {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.TITLE")}
                     </h1>
+
 
                     <button
                         onClick={() => navigate("/fish-doctor")}
@@ -557,6 +634,7 @@ export default function FishDoctorDiagnosis() {
                         <i className="fa-solid fa-house text-gray-600"></i>
                     </button>
                 </div>
+
 
                 {overviewBlocks.length > 0 && (
                     <div className="glass-card detail-card rounded-2xl p-5 mb-6">
@@ -576,6 +654,7 @@ export default function FishDoctorDiagnosis() {
                     </div>
                 )}
 
+
                 <div className="timeline relative ml-4 space-y-8 mb-10">
                     {stages.map((stage, index) => (
                         <div key={`${index}-${stage.stage}`} className="timeline-item relative">
@@ -583,16 +662,19 @@ export default function FishDoctorDiagnosis() {
                                 <i className={`fa-solid ${index === 0 ? 'fa-play' : index === 1 ? 'fa-clock' : 'fa-calendar'} text-white text-[8px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`}></i>
                             </div>
 
+
                             <div className="timeline-date">
                                 <span className="day">{stage.stage}</span>
                                 <span className="sub">{stage.duration || t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.TIMELINE_FOLLOW")}</span>
                             </div>
+
 
                             <div className="treatment-card">
                                 <div className="card-header">
                                     <i className="fa-solid fa-syringe"></i>
                                     <span>{stage.goal || t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.STAGE_FALLBACK_GOAL", { index: index + 1 })}</span>
                                 </div>
+
 
                                 <div className="treatment-content">
                                     <div className="treatment-info">
@@ -614,6 +696,7 @@ export default function FishDoctorDiagnosis() {
                         </div>
                     ))}
 
+
                     {stages.length === 0 && (
                         <div className="timeline-item relative">
                             <div className="timeline-dot future"></div>
@@ -634,6 +717,7 @@ export default function FishDoctorDiagnosis() {
                     )}
                 </div>
 
+
                 {result.suggested_treatments && result.suggested_treatments.length > 0 && (
                     <div className="mt-8">
                         <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
@@ -648,6 +732,7 @@ export default function FishDoctorDiagnosis() {
                                         <span>{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.PRODUCT_LABEL", { index: index + 1 })}</span>
                                     </div>
 
+
                                     <div className="treatment-content">
                                         <div className="treatment-image">
                                             {treatment.image ? (
@@ -658,6 +743,7 @@ export default function FishDoctorDiagnosis() {
                                                 </div>
                                             )}
                                         </div>
+
 
                                         <div className="treatment-info">
                                             <h4>{treatment.name}</h4>
@@ -671,6 +757,7 @@ export default function FishDoctorDiagnosis() {
                                             )}
                                         </div>
                                     </div>
+
 
                                     {treatment.link && (
                                         <a
@@ -690,6 +777,7 @@ export default function FishDoctorDiagnosis() {
                     </div>
                 )}
 
+
                 <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200">
                     <div className="flex items-start gap-3">
                         <i className="fa-regular fa-lightbulb text-amber-500 text-xl mt-1"></i>
@@ -703,6 +791,7 @@ export default function FishDoctorDiagnosis() {
         );
     };
 
+
     return (
         <div className="fish-doctor-page h-screen overflow-hidden bg-gradient-to-b from-[#f0fdfa] to-white">
             {/* Background decorations */}
@@ -710,19 +799,23 @@ export default function FishDoctorDiagnosis() {
             <div className="bubble bubble-2"></div>
             <div className="bubble bubble-3"></div>
 
+
             <main className="relative h-full overflow-y-auto hide-scrollbar">
                 {/* Screens */}
                 <div className={`screen scan-screen-wrapper ${activeScreen === 'scan' ? 'active' : ''}`}>
                     {renderScan()}
                 </div>
 
+
                 <div className={`screen ${activeScreen === 'result' ? 'active' : ''}`}>
                     {renderResult()}
                 </div>
 
+
                 <div className={`screen ${activeScreen === 'treatment' ? 'active' : ''}`}>
                     {renderTreatment()}
                 </div>
+
 
                 {/* Error Message */}
                 {errorMessage && (
