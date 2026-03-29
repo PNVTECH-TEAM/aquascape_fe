@@ -67,10 +67,10 @@ const RegisterForm = () => {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col flex-1"
+            className="flex flex-col flex-1 gap-4"
           >
             <div className="space-y-4">
-              <div>
+              <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-900">
                   {t("REGISTER.REQUIREMENT.FULL_NAME")}
                 </label>
@@ -88,7 +88,7 @@ const RegisterForm = () => {
                 )}
               </div>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-900">
                   {t("REGISTER.REQUIREMENT.EMAIL")}
                 </label>
@@ -106,7 +106,7 @@ const RegisterForm = () => {
                 )}
               </div>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-900">
                   {t("REGISTER.REQUIREMENT.PASSWORD")}
                 </label>

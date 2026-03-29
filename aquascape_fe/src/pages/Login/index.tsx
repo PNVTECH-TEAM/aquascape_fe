@@ -69,10 +69,10 @@ const LoginForm = () => {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col flex-1"
+            className="flex flex-col flex-1 gap-4"
           >
             <div className="space-y-4">
-              <div>
+              <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-900">
                   {t("LOGIN.REQUIREMENT.EMAIL")}
                 </label>
@@ -90,7 +90,7 @@ const LoginForm = () => {
                 )}
               </div>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-900">
                   {t("LOGIN.REQUIREMENT.PASSWORD")}
                 </label>

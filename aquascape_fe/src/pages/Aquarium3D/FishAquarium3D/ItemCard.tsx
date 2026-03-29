@@ -45,6 +45,7 @@ export default function ItemCard({ plant, onDelete }: ItemCardProps) {
             okText="Yes"
             cancelText="No"
             placement="topRight"
+            zIndex={2300}
           >
             <button 
               className="w-6 h-6 flex items-center justify-center bg-red-500/80 hover:bg-red-600 text-white rounded-md transition-colors"

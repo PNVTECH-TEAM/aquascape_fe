@@ -230,7 +230,7 @@
     top: 0;
     left: 0;
     width: 320px;
-    height: calc(100vh - 48px);
+    height: 100vh;
     background: linear-gradient(180deg, rgba(5, 25, 45, 0.96) 0%, rgba(2, 11, 22, 0.96) 100%);
     border-right: 1px solid rgba(64, 164, 255, 0.32);
     backdrop-filter: blur(14px);
@@ -258,9 +258,7 @@
 }
 
 .explorer-content {
-    flex: 1;
     padding: 10px 12px 12px;
-    overflow: hidden;
 }
 
 .explorer-selector {

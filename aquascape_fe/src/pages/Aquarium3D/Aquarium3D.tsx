@@ -23,6 +23,7 @@ import "./Aquarium3D.scss";
 import FishAquarium3D from "./FishAquarium3D/FishAquarium3D";
 
 import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
 export default function Aquarium3D() {
     const { t } = useTranslation();
@@ -34,6 +35,7 @@ export default function Aquarium3D() {
     const [lightingMode, setLightingMode] = useState<TankLightingMode>("day");
     const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
     const [tankNameInput, setTankNameInput] = useState<string>("");
+    const [previewImageUrlInput, setPreviewImageUrlInput] = useState<string>("");
 
   const [size, setSize] = useState<TankSize>({
     width: 90,
@@ -335,13 +337,14 @@ export default function Aquarium3D() {
         if (!tankNameInput.trim()) {
             setTankNameInput(tankNameKey);
         }
+        setPreviewImageUrlInput("");
         setSaveDialogOpen(true);
     };
 
     const onConfirmSave = async () => {
         const saved = await handleSaveLayout({
             tankName: tankNameInput,
-            previewImageUrl: "",
+            previewImageUrl: previewImageUrlInput,
             presetId: activePresetId,
         });
 
@@ -349,6 +352,9 @@ export default function Aquarium3D() {
             setSaveDialogOpen(false);
             // Update local state with fresh tank list
             getTanks().then(setUserTanks);
+            message.success(t("AQUARIUM3D.SAVE_SUCCESS") || "Save aquarium successfully!");
+        } else {
+            message.error(t("AQUARIUM3D.SAVE_ERROR") || "Failed to save aquarium!");
         }
     };
 
@@ -611,12 +617,29 @@ export default function Aquarium3D() {
                                                     </div>
                                                 )}
                                                 {version.previewImageUrl ? (
-                                                    <img src={version.previewImageUrl} alt={version.tankName} />
-                                                ) : (
-                                                    <div className="explorer-item-thumb" style={{ width: '100%', height: '100%', borderRadius: 0 }}>
-                                                        <span className="explorer-item-fallback">🐟</span>
-                                                    </div>
-                                                )}
+                                                    <img 
+                                                        src={decodeURIComponent(version.previewImageUrl)} 
+                                                        alt={version.tankName} 
+                                                        onError={(e) => {
+                                                            const target = e.currentTarget;
+                                                            target.style.display = 'none';
+                                                            if (target.nextElementSibling) {
+                                                                (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <div 
+                                                    className="explorer-item-thumb" 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        height: '100%', 
+                                                        borderRadius: 0,
+                                                        display: version.previewImageUrl ? 'none' : 'flex'
+                                                    }}
+                                                >
+                                                    <span className="explorer-item-fallback">🐟</span>
+                                                </div>
                                                 <div className="version-preview-overlay">
                                                     <span>Load Design</span>
                                                 </div>
@@ -661,6 +684,30 @@ export default function Aquarium3D() {
                             onChange={(event) => setTankNameInput(event.target.value)}
                             placeholder="Tank name"
                         />
+                        <div style={{ marginTop: '15px', textAlign: 'left' }}>
+                            <label style={{ fontSize: '14px', marginBottom: '8px', display: 'block', color: 'rgba(255, 255, 255, 0.7)' }}>Preview Image (Optional)</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="save-dialog-input"
+                                onChange={(event) => {
+                                    const file = event.target.files?.[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setPreviewImageUrlInput(reader.result as string);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    } else {
+                                        setPreviewImageUrlInput("");
+                                    }
+                                }}
+                                style={{ padding: '8px', fontSize: '14px' }}
+                            />
+                            {previewImageUrlInput && (
+                                <img src={previewImageUrlInput} alt="Preview" style={{ width: '100%', height: '120px', objectFit: 'cover', marginTop: '10px', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.2)' }} />
+                            )}
+                        </div>
                         <div className="save-dialog-actions">
                             <button onClick={() => setSaveDialogOpen(false)}>Cancel</button>
                             <button onClick={onConfirmSave} disabled={savingLayout}>
