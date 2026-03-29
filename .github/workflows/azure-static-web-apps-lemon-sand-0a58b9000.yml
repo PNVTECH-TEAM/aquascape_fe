@@ -38,7 +38,7 @@ jobs:
           VITE_APP_NAME: "AICP"
           VITE_SHORT_APP_NAME: "PNVTECH"
           VITE_NAME: "Aquascape AI Platform"
-          VITE_AQUARIUM_AI_API_URL: "https://ai-aquarium.onrender.com"
+          VITE_AQUARIUM_AI_API_URL: "https://aquascape-ai-api.loca.lt"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

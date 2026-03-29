@@ -54,7 +54,11 @@ const mapUserAssetToPlant = (asset: any): Plant => {
   };
 };
 
-export default function PlantSelector() {
+interface PlantSelectorProps {
+  onUploadModalOpen?: () => void;
+}
+
+export default function PlantSelector({ onUploadModalOpen }: PlantSelectorProps) {
   const [selectedCategory, setSelectedCategory] = useState<Category>("");
   const [items, setItems] = useState<Plant[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -112,7 +116,10 @@ export default function PlantSelector() {
           </div>
           <button 
             className="explorer-upload-btn"
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={() => {
+              setIsUploadModalOpen(true);
+              if (onUploadModalOpen) onUploadModalOpen();
+            }}
             title="Upload your own 3D model"
           >
             <CloudUploadOutlined /> Upload

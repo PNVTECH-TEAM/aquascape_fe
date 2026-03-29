@@ -441,7 +441,7 @@ export default function Aquarium3D() {
       <div className={`explorer-panel ${explorerOpen ? "active" : ""}`}>
         <div className="explorer-header">Aquatic Explorer</div>
         <div className="explorer-content">
-          <FishAquarium3D />
+          <FishAquarium3D onUploadModalOpen={() => setExplorerOpen(false)} />
         </div>
       </div>
 

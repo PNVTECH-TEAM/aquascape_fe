@@ -9,7 +9,7 @@ export default async ({ mode }: { mode: string }) => {
   const resolveTripoProxyTarget = () => {
     const rawTarget =
       process.env.VITE_AQUARIUM_AI_API_URL ||
-      "http://localhost:8000";
+      "https://aquascape-ai-api.loca.lt";
 
 
     try {

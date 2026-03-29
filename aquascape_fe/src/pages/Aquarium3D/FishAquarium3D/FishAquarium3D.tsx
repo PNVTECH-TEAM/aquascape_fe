@@ -1,7 +1,11 @@
 import PlantSelector from "./PlantSelector";
 
-export default function FishAquarium3D() {
+interface Props {
+  onUploadModalOpen?: () => void;
+}
+
+export default function FishAquarium3D({ onUploadModalOpen }: Props) {
   return (
-        <PlantSelector />
+        <PlantSelector onUploadModalOpen={onUploadModalOpen} />
   );
 }
