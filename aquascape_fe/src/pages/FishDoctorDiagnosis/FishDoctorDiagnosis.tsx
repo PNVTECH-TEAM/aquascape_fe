@@ -200,7 +200,7 @@ export default function FishDoctorDiagnosis() {
 
 
             <div className="scan-overlay absolute inset-0 z-10 flex flex-col p-5 pt-8 pb-8">
-                <div className="flex justify-between items-center text-white mb-6">
+                <div className="flex justify-between items-center text-white mb-6 mt-2">
                     <button
                         onClick={() => navigate("/fish-doctor")}
                         className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center active:bg-black/50 border border-white/20 hover:scale-110 transition-transform"
@@ -404,7 +404,6 @@ export default function FishDoctorDiagnosis() {
 
 
                     <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
-                        <i className="fa-solid fa-file-waveform text-[#4db6ac]"></i>
                         {t("FISH_DOCTOR.DIAGNOSIS.RESULT.TITLE")}
                     </h1>
 
@@ -611,7 +610,7 @@ export default function FishDoctorDiagnosis() {
 
 
         return (
-            <div className="treatment-screen px-6 pt-5 pb-24">
+            <div className="treatment-screen px-6 pt-5 pb-24 mt-6">
                 <div className="flex justify-between items-center mb-6">
                     <button
                         onClick={() => setActiveScreen('result')}
@@ -622,10 +621,8 @@ export default function FishDoctorDiagnosis() {
 
 
                     <h1 className="text-lg font-bold text-[#003f5c] flex items-center gap-2">
-                        <i className="fa-solid fa-prescription-bottle text-[#4db6ac]"></i>
                         {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.TITLE")}
                     </h1>
-
 
                     <button
                         onClick={() => navigate("/fish-doctor")}
@@ -671,7 +668,6 @@ export default function FishDoctorDiagnosis() {
 
                             <div className="treatment-card">
                                 <div className="card-header">
-                                    <i className="fa-solid fa-syringe"></i>
                                     <span>{stage.goal || t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.STAGE_FALLBACK_GOAL", { index: index + 1 })}</span>
                                 </div>
 
@@ -719,19 +715,17 @@ export default function FishDoctorDiagnosis() {
 
 
                 {result.suggested_treatments && result.suggested_treatments.length > 0 && (
-                    <div className="mt-8">
-                        <h3 className="text-[#003f5c] font-bold mb-3 flex items-center gap-2">
-                            <i className="fa-solid fa-basket-shopping text-[#4db6ac]"></i>
+                    <div className="mt-10 suggested-products-section">
+                        <h3 className="text-[#003f5c] font-bold mb-4 flex items-center gap-2 text-xl">
+                            <i className="fa-solid fa-cart-plus text-[#4db6ac] text-2xl"></i>
                             {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.PRODUCT_SUGGESTIONS")}
                         </h3>
-                        <div className="space-y-4">
+                        <div className="suggested-products-list space-y-6">
                             {result.suggested_treatments.map((treatment, index) => (
-                                <div key={`${index}-${treatment.name}`} className="treatment-card">
+                                <div key={`${index}-${treatment.name}`} className="treatment-card suggested-product-card">
                                     <div className="card-header">
-                                        <i className="fa-solid fa-bottle-droplet"></i>
                                         <span>{t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.PRODUCT_LABEL", { index: index + 1 })}</span>
                                     </div>
-
 
                                     <div className="treatment-content">
                                         <div className="treatment-image">
@@ -744,12 +738,11 @@ export default function FishDoctorDiagnosis() {
                                             )}
                                         </div>
 
-
                                         <div className="treatment-info">
                                             <h4>{treatment.name}</h4>
                                             {treatment.price && (
                                                 <div className="price">
-                                                    <i className="fa-regular fa-tag"></i> {treatment.price}
+                                                    <p>{treatment.price}</p>
                                                 </div>
                                             )}
                                             {treatment.description && (
@@ -758,18 +751,17 @@ export default function FishDoctorDiagnosis() {
                                         </div>
                                     </div>
 
-
                                     {treatment.link && (
+                                        <div className="buy-btn-container">
                                         <a
                                             href={treatment.link}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="buy-btn"
                                         >
-                                            <i className="fa-solid fa-cart-shopping"></i>
                                             {t("FISH_DOCTOR.DIAGNOSIS.TREATMENT.BUY_NOW")}
-                                            <i className="fa-solid fa-arrow-up-right-from-squares"></i>
                                         </a>
+                                        </div>
                                     )}
                                 </div>
                             ))}

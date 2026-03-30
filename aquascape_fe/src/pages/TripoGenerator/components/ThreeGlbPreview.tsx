@@ -57,6 +57,9 @@ export default function ThreeGlbPreview({ url, className }: Props) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearAlpha(0);
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
 
     container.appendChild(renderer.domElement);
 
@@ -85,25 +88,26 @@ export default function ThreeGlbPreview({ url, className }: Props) {
     const loader = new GLTFLoader();
 
     const fitCameraToCenteredObject = (object: THREE.Object3D) => {
-      object.updateMatrixWorld(true);
+object.updateMatrixWorld(true);
 
       const box = new THREE.Box3().setFromObject(object);
       const size = box.getSize(new THREE.Vector3());
-      const sphere = box.getBoundingSphere(new THREE.Sphere());
+      const center = box.getCenter(new THREE.Vector3());
 
-      if (!Number.isFinite(size.x + size.y + size.z) || !Number.isFinite(sphere.radius)) return;
+      if (!Number.isFinite(size.x + size.y + size.z)) return;
 
       const fov = THREE.MathUtils.degToRad(camera.fov);
-      const distance = (sphere.radius / Math.sin(fov / 2)) * 1.15;
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const distance = (maxDim / 2) / Math.tan(fov / 2) * 1.35;
 
       camera.near = Math.max(distance / 100, 0.01);
       camera.far = Math.max(distance * 50, 50);
       camera.updateProjectionMatrix();
 
-      const direction = new THREE.Vector3(1, 0.65, 1).normalize();
-      camera.position.copy(sphere.center).addScaledVector(direction, distance);
-      camera.lookAt(sphere.center);
-      controls.target.copy(sphere.center);
+      const direction = new THREE.Vector3(0.15, 0.7, 1).normalize();
+      camera.position.copy(center).addScaledVector(direction, distance);
+      camera.lookAt(center);
+      controls.target.copy(center);
       controls.update();
     };
 
@@ -127,7 +131,7 @@ export default function ThreeGlbPreview({ url, className }: Props) {
 
         rootGroup.add(model);
 
-        fitCameraToCenteredObject(model);
+        fitCameraToCenteredObject(rootGroup);
         shouldSpinRef.current = true;
         setPreviewState("ready");
       },
@@ -175,7 +179,6 @@ export default function ThreeGlbPreview({ url, className }: Props) {
           if (obj instanceof THREE.Object3D) return;
         });
       } catch {
-        // ignore
       }
 
       rootGroup.children.forEach((child) => disposeObject3D(child));
@@ -189,7 +192,7 @@ export default function ThreeGlbPreview({ url, className }: Props) {
   }, [url]);
 
   return (
-    <div className={className}>
+<div className={className}>
       <div ref={containerRef} className="relative h-full w-full">
         {overlayText ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

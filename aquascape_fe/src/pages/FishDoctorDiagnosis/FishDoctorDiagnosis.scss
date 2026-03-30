@@ -4,40 +4,22 @@
     isolation: isolate;
     background: linear-gradient(145deg, #f8ffff 0%, #f0f7fa 100%);
 
-    /* Background decorations - Giữ lại nhưng đơn giản hóa */
-    &::before,
-    &::after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        border-radius: 9999px;
-        filter: blur(60px);
-        opacity: 0.4;
-        pointer-events: none;
+    /* Utility: Hide Scrollbar */
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+            display: none;
+        }
     }
 
-    &::before {
-        width: 280px;
-        height: 280px;
-        top: -100px;
-        left: -80px;
-        background: linear-gradient(145deg, #7ff0e0, #4db6ac);
-    }
-
-    &::after {
-        width: 320px;
-        height: 320px;
-        right: -100px;
-        bottom: 80px;
-        background: linear-gradient(145deg, #90caf9, #60a5fa);
-    }
-
-    /* Glassmorphism Card - Tối ưu */
+    /* Shared Card Style */
     .glass-card {
-        background: rgba(255, 255, 255, 0.75);
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 25px 40px -12px rgba(0, 63, 92, 0.15);
+        box-shadow: 0 20px 40px -12px rgba(0, 63, 92, 0.1);
+        border-radius: 24px;
         transition: transform 0.3s ease;
 
         &:hover {
@@ -45,64 +27,25 @@
         }
     }
 
-    /* Liquid Animation - Giữ lại */
-    .liquid-container {
-        position: relative;
-        width: 160px;
-        height: 160px;
-        background: radial-gradient(circle at 30% 30%, #e0f7fa, #b2ebf2 60%, #80deea 100%);
-        border-radius: 50%;
-        overflow: hidden;
-        border: 4px solid rgba(255, 255, 255, 0.95);
-        box-shadow: 0 20px 30px -8px rgba(0, 96, 100, 0.3);
-
-        .liquid {
-            position: absolute;
-            top: 15%;
-            left: 0;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(145deg, #4db6ac, #00897b, #00695c);
-            border-radius: 35%;
-            animation: wave 8s infinite linear;
-            opacity: 0.95;
-        }
-    }
-
-    /* Scanner Laser - Đơn giản hóa */
-    .laser-line {
-        position: absolute;
-        width: 100%;
-        height: 3px;
-        background: linear-gradient(90deg, transparent, #4db6ac, #80deea, #4db6ac, transparent);
-        box-shadow: 0 0 20px #4db6ac;
-        animation: scan 2.5s infinite ease-in-out;
-        z-index: 20;
-    }
-
-    /* Screen Logic */
+    /* Screen Transition */
     .screen {
         display: none;
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        bottom: calc(80px + env(safe-area-inset-bottom));
+        bottom: 0;
         overflow-y: auto;
-        background: transparent;
-
+        
         &.active {
             display: block;
-            animation: fadeInUp 0.4s ease;
-        }
-
-        &.scan-screen-wrapper {
-            bottom: 0;
-            padding-bottom: 0;
+            animation: fadeInUp 0.4s ease forwards;
         }
     }
 
-    /* Dashboard Screen - Tối ưu */
+    /* -------------------------------------------------------------------------- */
+    /* Dashboard / Home Screen                                                    */
+    /* -------------------------------------------------------------------------- */
     .dashboard-screen {
         padding: 20px 20px 100px;
 
@@ -112,89 +55,56 @@
             margin-bottom: 24px;
         }
 
+        .liquid-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle at 30% 30%, #e0f7fa, #b2ebf2 60%, #80deea 100%);
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 15px 25px -8px rgba(0, 96, 100, 0.2);
+
+            .liquid {
+                position: absolute;
+                top: 20%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(145deg, #4db6ac, #00897b, #00695c);
+                border-radius: 38%;
+                animation: wave 8s infinite linear;
+                opacity: 0.9;
+            }
+        }
+
         .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 28px;
-
             .metric-card {
-                background: rgba(255, 255, 255, 0.8);
-                padding: 16px 8px;
-                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.7);
                 text-align: center;
-                border: 1px solid rgba(255, 255, 255, 0.5);
-                transition: all 0.3s ease;
-
+                
                 &:hover {
-                    transform: translateY(-4px);
                     background: white;
-                }
-
-                .metric-icon {
-                    width: 44px;
-                    height: 44px;
-                    margin: 0 auto 10px;
-                    border-radius: 22px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 1.3rem;
-                }
-
-                .metric-label {
-                    font-size: 0.75rem;
-                    color: #6b7f8c;
-                    margin-bottom: 4px;
-                }
-
-                .metric-value {
-                    font-size: 1.25rem;
-                    font-weight: 800;
-                    color: #003f5c;
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
                 }
             }
         }
 
         .primary-diagnose-cta {
-            background: linear-gradient(145deg, #003f5c, #005b96, #0077be);
+            background: linear-gradient(145deg, #0f4c81 0%, #1277b5 100%);
             border: none;
-            border-radius: 28px;
-            padding: 18px 24px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            width: 100%;
-            cursor: pointer;
-
-            .cta-icon {
-                width: 56px;
-                height: 56px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 28px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.8rem;
-            }
-
-            .cta-text {
-                .main-text {
-                    font-size: 1.25rem;
-                    font-weight: 700;
-                    margin-bottom: 4px;
-                }
-
-                .sub-text {
-                    font-size: 0.85rem;
-                    opacity: 0.9;
-                }
+            box-shadow: 0 15px 35px rgba(15, 76, 129, 0.3);
+            
+            &:active {
+                transform: scale(0.98);
             }
         }
     }
 
-    /* Scan Screen - Tối ưu */
+    /* -------------------------------------------------------------------------- */
+    /* Scan Screen                                                                */
+    /* -------------------------------------------------------------------------- */
     .scan-screen {
         .scan-overlay {
             background: linear-gradient(180deg,
@@ -212,26 +122,14 @@
             position: relative;
             background: rgba(0, 0, 0, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 
-            .preview-image {
+            img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
                 border-radius: 30px;
-            }
-
-            .image-label {
-                position: absolute;
-                bottom: 12px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.4);
-                backdrop-filter: blur(8px);
-                padding: 6px 16px;
-                border-radius: 30px;
-                color: white;
-                font-size: 0.8rem;
-                cursor: pointer;
             }
         }
 
@@ -246,14 +144,8 @@
             color: white;
             resize: none;
 
-            &::placeholder {
-                color: rgba(255, 255, 255, 0.6);
-            }
-
-            &:focus {
-                border-color: #4db6ac;
-                outline: none;
-            }
+            &::placeholder { color: rgba(255, 255, 255, 0.5); }
+            &:focus { border-color: #4db6ac; outline: none; }
         }
 
         .scan-action-bar {
@@ -261,7 +153,7 @@
             justify-content: center;
             align-items: center;
             gap: 24px;
-            padding: 20px;
+            padding: 24px;
 
             .action-btn {
                 width: 56px;
@@ -274,384 +166,367 @@
                 justify-content: center;
                 color: white;
                 font-size: 1.4rem;
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
                 cursor: pointer;
             }
+        }
+    }
 
-            .shutter-btn {
-                width: 80px;
-                height: 80px;
-                background: transparent;
-                border: 4px solid rgba(255, 255, 255, 0.5);
-                border-radius: 40px;
+    /* Camera Modal */
+    .camera-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+
+        &__card {
+            width: 90%;
+            max-width: 400px;
+            background: #1a2f3a;
+            border-radius: 32px;
+            overflow: hidden;
+
+            .modal-header {
+                padding: 18px 24px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .video-container {
+                aspect-ratio: 3/4;
+                background: black;
+                video { width: 100%; height: 100%; object-fit: cover; }
+            }
+
+            .modal-actions {
+                padding: 20px;
+                .capture-btn {
+                    width: 100%;
+                    background: linear-gradient(135deg, #4db6ac, #009688);
+                    border-radius: 16px;
+                    padding: 16px;
+                    color: white;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 10px 20px rgba(77, 182, 172, 0.2);
+                }
+            }
+        }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Result & Treatment Screen                                                  */
+    /* -------------------------------------------------------------------------- */
+    .result-screen, .treatment-screen {
+        padding: 20px 20px 100px;
+        margin-top: 20px;
+    }
+
+    /* Diagnosis Hero Styles */
+    .diagnosis-hero {
+        border-radius: 32px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    /* Treatment Card Main Style (Flattened & Premium) */
+    .treatment-card {
+        background: white;
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 15px 40px rgba(0, 63, 92, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+        margin-bottom: 24px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 63, 92, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+
+            i {
+                width: 42px;
+                height: 42px;
+                background: linear-gradient(135deg, #4db6ac, #009688);
+                color: white;
+                border-radius: 14px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                cursor: pointer;
+                font-size: 1.2rem;
+                box-shadow: 0 5px 15px rgba(77, 182, 172, 0.35);
+            }
 
-                .shutter-core {
-                    width: 60px;
-                    height: 60px;
-                    background: white;
-                    border-radius: 30px;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            span {
+                font-weight: 800;
+                color: #003f5c;
+                font-size: 1.05rem;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+        }
 
-                    &.loading {
-                        background: transparent;
-                        border: 4px solid #4db6ac;
-                        border-top-color: transparent;
-                        animation: spin 1s linear infinite;
-                    }
+        .treatment-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+
+            .treatment-image {
+                width: 100%;
+                max-width: 320px;
+                aspect-ratio: 1;
+                background: #f8fafb;
+                border-radius: 24px;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto;
+                border: 1px solid #f1f5f9;
+                box-shadow: inset 0 2px 15px rgba(0,0,0,0.03);
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    padding: 20px;
+                    transition: transform 0.6s ease;
+                }
+
+                &:hover img {
+                    transform: scale(1.1);
+                }
+
+                .placeholder-icon {
+                    color: #cbd5e1;
+                    font-size: 3.5rem;
+                }
+            }
+
+            .treatment-info {
+                width: 100%;
+                text-align: center;
+
+                h4 {
+                    font-size: 1.4rem;
+                    font-weight: 800;
+                    color: #1e293b;
+                    margin-bottom: 12px;
+                    line-height: 1.3;
+                    font-family: 'Fraunces', serif;
+                }
+
+                .price {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    color: #ff7a59;
+                    font-weight: 800;
+                    font-size: 1.6rem;
+                    margin-bottom: 15px;
+
+                    i { font-size: 1.2rem; }
+                }
+
+                .description {
+                    font-size: 1rem;
+                    color: #334e68;
+                    line-height: 1.7;
+                    max-width: 450px;
+                    margin: 0 auto;
                 }
             }
         }
 
-        /* Camera Modal - Tối ưu */
-        .camera-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
+        .buy-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
-
-            &__card {
-                width: 90%;
-                max-width: 400px;
-                background: #1a2f3a;
-                border-radius: 32px;
-                overflow: hidden;
-
-                .modal-header {
-                    padding: 20px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
-                    h3 {
-                        color: white;
-                        font-size: 1.1rem;
-                        font-weight: 600;
-                    }
-
-                    .close-btn {
-                        width: 36px;
-                        height: 36px;
-                        background: rgba(255, 255, 255, 0.1);
-                        border: none;
-                        border-radius: 18px;
-                        color: white;
-                        cursor: pointer;
-                    }
-                }
-
-                .video-container {
-                    aspect-ratio: 3/4;
-                    background: black;
-
-                    video {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-                .modal-actions {
-                    padding: 20px;
-
-                    .capture-btn {
-                        width: 100%;
-                        background: linear-gradient(145deg, #4db6ac, #009688);
-                        border: none;
-                        border-radius: 16px;
-                        padding: 16px;
-                        color: white;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                    }
-                }
-            }
-        }
-    }
-
-    /* Result Screen - Tối ưu */
-    .result-screen {
-        padding: 20px 20px 100px;
-
-        .diagnosis-hero {
-            border-radius: 28px;
-            padding: 24px;
-            margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
-
-            .badge-container {
-                display: flex;
-                gap: 12px;
-                margin-bottom: 12px;
-
-                .risk-badge {
-                    padding: 6px 14px;
-                    border-radius: 30px;
-                    font-size: 0.75rem;
-                    background: rgba(255, 255, 255, 0.2);
-                    color: white;
-                }
-
-                .confidence-badge {
-                    padding: 6px 14px;
-                    border-radius: 30px;
-                    font-size: 0.75rem;
-                    background: rgba(0, 0, 0, 0.2);
-                    color: white;
-                }
-            }
-
-            h2 {
-                font-size: 2rem;
-                font-weight: 800;
-                color: white;
-                margin-bottom: 8px;
-            }
-
-            .vision-note {
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 1rem;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-        }
-
-        .detail-card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-
-            h3 {
-                color: #003f5c;
-                font-size: 1rem;
-                font-weight: 700;
-                margin-bottom: 16px;
-            }
-
-            .detail-item {
-                display: flex;
-                justify-content: space-between;
-                padding: 12px 0;
-                border-bottom: 1px solid #eef2f4;
-
-                &:last-child {
-                    border-bottom: none;
-                }
-
-                .label {
-                    color: #6b7f8c;
-                }
-
-                .value {
-                    color: #003f5c;
-                    font-weight: 700;
-                }
-            }
-        }
-
-        .treatment-btn {
-            background: linear-gradient(145deg, #003f5c, #005b96);
-            border: none;
-            border-radius: 28px;
-            padding: 18px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 700;
+            gap: 12px;
             width: 100%;
+            margin-top: 30px;
+            background: linear-gradient(135deg, #ff7a59 0%, #ff5d3b 100%);
+            border-radius: 20px;
+            padding: 20px;
+            color: white !important;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 12px 30px rgba(255, 122, 89, 0.35);
+            transition: all 0.3s ease;
             cursor: pointer;
-        }
-    }
-
-    /* Treatment Screen - Tối ưu */
-    .treatment-screen {
-        padding: 20px 20px 100px;
-
-        .timeline {
-            position: relative;
-            margin-left: 20px;
-
-            &::before {
-                content: '';
-                position: absolute;
-                left: 7px;
-                top: 10px;
-                bottom: 10px;
-                width: 2px;
-                background: linear-gradient(to bottom, #4db6ac, #cbd5e0);
-            }
-
-            .timeline-item {
-                position: relative;
-                padding-left: 40px;
-                margin-bottom: 32px;
-
-                .timeline-dot {
-                    position: absolute;
-                    left: 0;
-                    top: 4px;
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    border: 3px solid white;
-
-                    &.today {
-                        background: #4db6ac;
-                    }
-
-                    &.tomorrow {
-                        background: #ff7c43;
-                    }
-
-                    &.future {
-                        background: #94a3b8;
-                    }
-                }
-
-                .timeline-date {
-                    margin-bottom: 8px;
-
-                    .day {
-                        font-size: 1.1rem;
-                        font-weight: 700;
-                        color: #003f5c;
-                    }
-
-                    .sub {
-                        font-size: 0.75rem;
-                        color: #6b7f8c;
-                    }
-                }
-
-                .treatment-card {
-                    background: white;
-                    border-radius: 20px;
-                    padding: 16px;
-
-                    .treatment-content {
-                        display: flex;
-                        gap: 16px;
-
-                        .treatment-image {
-                            width: 64px;
-                            height: 64px;
-                            background: #f0f9fa;
-                            border-radius: 16px;
-                            overflow: hidden;
-
-                            img {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                            }
-                        }
-
-                        .treatment-info {
-                            flex: 1;
-
-                            h4 {
-                                font-size: 1rem;
-                                font-weight: 700;
-                                color: #1e293b;
-                                margin-bottom: 4px;
-                            }
-
-                            .price {
-                                color: #ff7c43;
-                                font-weight: 700;
-                            }
-                        }
-                    }
-
-                    .buy-btn {
-                        display: block;
-                        width: 100%;
-                        margin-top: 16px;
-                        background: linear-gradient(145deg, #ff7c43, #ff6b4a);
-                        border: none;
-                        border-radius: 16px;
-                        padding: 14px;
-                        color: white;
-                        text-align: center;
-                        text-decoration: none;
-                        cursor: pointer;
-                    }
-                }
-            }
-        }
-    }
-
-    /* Error Message - Tối ưu */
-    .error-message {
-        position: fixed;
-        bottom: 100px;
-        left: 20px;
-        right: 20px;
-        background: #ef4444;
-        color: white;
-        padding: 16px 20px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        z-index: 60;
-
-        .close-btn {
-            margin-left: auto;
-            background: none;
             border: none;
-            color: white;
-            cursor: pointer;
+
+            &:hover {
+                box-shadow: 0 15px 40px rgba(255, 122, 89, 0.5);
+                transform: translateY(-2px);
+                filter: brightness(1.05);
+            }
+
+            &:active { transform: translateY(0); }
+            i { font-size: 1.3rem; }
         }
     }
 
-    /* Animations - Giữ lại những animation cần thiết */
+    /* Special handling for timeline vs suggestions */
+    .timeline .treatment-card {
+        .treatment-content {
+            flex-direction: row;
+            align-items: flex-start;
+            text-align: left;
+            
+            .treatment-image {
+                width: 100px;
+                height: 100px;
+                max-width: 100px;
+                margin: 0;
+                border-radius: 20px;
+                img { padding: 10px; }
+            }
+            
+            .treatment-info {
+                text-align: left;
+                h4 { font-size: 1.2rem; margin-bottom: 8px; }
+                .price { justify-content: flex-start; font-size: 1.3rem; }
+            }
+        }
+        .buy-btn { padding: 16px; margin-top: 20px; }
+    }
+
+    /* Suggested Products Layout */
+    .suggested-products-section {
+        margin-top: 50px;
+        .section-title { margin-bottom: 30px; }
+        
+        .suggested-products-list {
+            display: grid;
+            gap: 30px;
+            grid-template-columns: 1fr;
+            
+            @media (min-width: 768px) {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    }
+
+    /* Timeline Section Styles */
+    .timeline {
+        position: relative;
+        margin-left: 20px;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: linear-gradient(to bottom, #4db6ac, #cbd5e0);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 45px;
+            margin-bottom: 40px;
+
+            .timeline-dot {
+                position: absolute;
+                left: 0;
+                top: 5px;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                border: 3px solid white;
+                z-index: 2;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+                &.today { background: #4db6ac; }
+                &.tomorrow { background: #ff7c43; }
+                &.future { background: #94a3b8; }
+            }
+
+            .timeline-date {
+                margin-bottom: 15px;
+                .day {
+                    font-size: 1.05rem;
+                    font-weight: 800;
+                    color: #003f5c;
+                    background: rgba(16, 42, 67, 0.05);
+                    padding: 6px 18px;
+                    border-radius: 24px;
+                }
+                .sub {
+                    font-size: 0.85rem;
+                    color: #64748b;
+                    margin-left: 12px;
+                }
+            }
+        }
+    }
+
+    /* Background Decorations */
+    .bubble {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+        border-radius: 50%;
+        filter: blur(1px);
+        box-shadow: inset -5px -5px 10px rgba(0,0,0,0.05);
+        z-index: -1;
+        opacity: 0.3;
+        
+        &-1 { top: 10%; left: 5%; width: 60px; height: 60px; animation: bounce 10s infinite ease-in-out; }
+        &-2 { top: 40%; right: 10%; width: 120px; height: 120px; animation: bounce 15s infinite ease-in-out reverse; }
+        &-3 { bottom: 20%; left: 15%; width: 80px; height: 80px; animation: bounce 12s infinite ease-in-out 2s; }
+    }
+
+    /* Animations */
     @keyframes wave {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
 
-    @keyframes scan {
-        0% { top: 0; opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { top: 100%; opacity: 0; }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-30px); }
     }
 
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(15px); }
+        from { opacity: 0; transform: translateY(30px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Responsive */
-    @media (max-width: 400px) {
-        .scan-frame {
-            width: 260px;
-            height: 260px;
-        }
-
-        .scan-note-input {
-            width: 260px;
-        }
+    .laser-line {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #4db6ac, #ffffff, #4db6ac, transparent);
+        box-shadow: 0 0 20px #4db6ac;
+        animation: scan 3s infinite ease-in-out;
+        z-index: 20;
     }
 }
 
-/* Fish Doctor Redesign - Tối ưu */
+/* -------------------------------------------------------------------------- */
+/* Global Overrides & Fonts                                                   */
+/* -------------------------------------------------------------------------- */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700;800&family=Manrope:wght@400;600;700&display=swap');
 
 .fish-doctor-page {
@@ -659,89 +534,7 @@
     --fd-ink-soft: #334e68;
     --fd-mint: #25c2a0;
     --fd-coral: #ff7a59;
-    --fd-shadow: 0 24px 60px rgba(16, 42, 67, 0.12);
     --fd-shadow-soft: 0 16px 36px rgba(16, 42, 67, 0.1);
 
     font-family: 'Manrope', 'Nunito', sans-serif;
-    background:
-        radial-gradient(1200px 600px at 10% -10%, #e9fff7 0%, transparent 60%),
-        radial-gradient(900px 500px at 110% 10%, #e6f5ff 0%, transparent 60%),
-        linear-gradient(170deg, #fef6ec 0%, #f7fbff 45%, #eef8ff 100%);
-}
-
-.fish-doctor-page h1,
-.fish-doctor-page h2,
-.fish-doctor-page h3,
-.fish-doctor-page h4 {
-    font-family: 'Fraunces', 'Nunito', serif;
-}
-
-.fish-doctor-page .glass-card {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(16, 42, 67, 0.08);
-    box-shadow: var(--fd-shadow-soft);
-}
-
-.fish-doctor-page .primary-diagnose-cta {
-    background: linear-gradient(135deg, #0f4c81 0%, #1277b5 50%, #19a7ce 100%);
-    box-shadow: 0 18px 40px rgba(15, 76, 129, 0.35);
-}
-
-.fish-doctor-page .treatment-screen .buy-btn {
-    background: linear-gradient(135deg, #ff7a59 0%, #ffb259 100%);
-    box-shadow: 0 12px 24px rgba(255, 122, 89, 0.35);
-}
-
-.fish-doctor-page .guidance-block {
-    display: grid;
-    gap: 10px;
-}
-
-.fish-doctor-page .guidance-line {
-    margin: 0;
-    color: #243b53;
-    line-height: 1.6;
-    font-size: 0.92rem;
-}
-
-.fish-doctor-page .treatment-screen .guidance-line {
-    position: relative;
-    padding: 12px 16px 12px 46px;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 16px;
-    border: 1px solid rgba(16, 42, 67, 0.08);
-}
-
-.fish-doctor-page .treatment-screen .guidance-line::before {
-    counter-increment: guidance-step;
-    content: counter(guidance-step);
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #19a7ce, #25c2a0);
-    color: white;
-    font-size: 0.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.fish-doctor-page .treatment-screen .timeline-item .timeline-date .day {
-    background: rgba(16, 42, 67, 0.06);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.95rem;
-}
-
-.fish-doctor-page .error-message {
-    background: linear-gradient(135deg, #e11d48 0%, #ef4444 100%);
-}
-
-.fish-doctor-page .bottom-nav {
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 -12px 30px rgba(16, 42, 67, 0.15);
 }

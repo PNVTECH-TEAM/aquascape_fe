@@ -721,9 +721,6 @@ export default function TripoGeneratorPage() {
                 {status === "loading" ? (
                   <div className="flex flex-col items-center gap-4 text-center">
                     <div className="tg-spinner" />
-                    <div className="tg-loading-text uppercase tracking-widest">
-                      AI is thinking...
-                    </div>
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-gray-800">
                         {texts.loadingTitle}
@@ -785,7 +782,7 @@ export default function TripoGeneratorPage() {
                       ) : null}
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4 mb-12">
                       <button
                         type="button"
                         onClick={() => void handleDownload()}
@@ -812,7 +809,7 @@ export default function TripoGeneratorPage() {
                           href={downloadHref}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-block text-sm text-blue-400 underline decoration-blue-400/30 underline-offset-4 transition-all hover:text-blue-300 hover:decoration-blue-400"
+                          className="inline-block text-sm text-blue-400 underline decoration-blue-400/30 underline-offset-4 transition-all hover:text-blue-300 hover:decoration-blue-400 mb-6"
                         >
                           {texts.openDownloadLink} →
                         </a>

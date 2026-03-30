@@ -148,7 +148,6 @@ export default function Aquarium3D() {
         containerRef,
         loading,
         handleApplySize,
-        handleResetView,
         addItem,
         clearItems,
         triggerFishRush,
@@ -365,9 +364,6 @@ export default function Aquarium3D() {
 
     return (
         <div className="aquarium3d-page">
-            <button className="back-btn" onClick={() => navigate("/homePage")}>
-                <i className="fa-solid fa-arrow-left"></i>
-            </button>
             <div className={`loading ${(loading || itemsLoading) ? "" : "hidden"} ${!loading && itemsLoading ? "items-loading" : ""}`}>
                 <div className="spinner"></div>
                 {itemsLoading && !loading && <div className="loading-text">Loading items...</div>}
@@ -420,14 +416,23 @@ export default function Aquarium3D() {
             )}
 
             <div className="control-buttons">
-                <button className="control-btn" onClick={() => setPanelOpen(true)}>S</button>
-                <button className="control-btn" onClick={handleResetView}>R</button>
+                <button className="control-btn" onClick={() => setPanelOpen(true)}>
+                    <i className="fa-solid fa-gear"></i>
+                </button>
+                <button className="control-btn" onClick={() => navigate("/homePage")}>
+                    <i className="fa-solid fa-house"></i>
+                </button>
                 <button
                     className={`control-btn save-control-btn ${savingLayout ? "disabled" : ""}`}
                     onClick={onOpenSaveDialog}
                     disabled={savingLayout}
+                    title="Save Aquarium"
                 >
-                    {savingLayout ? "..." : "Save"}
+                    {savingLayout ? (
+                        <i className="fa-solid fa-spinner fa-spin-fast"></i>
+                    ) : (
+                        <i className="fa-solid fa-floppy-disk"></i>
+                    )}
                 </button>
             </div>
 
